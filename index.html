@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14243c">
+  <title>いえねこクエスト II | まちを歩いて、問いに出会う</title>
+  <meta name="description" content="100匹の家猫と、問いに出会う地域RPG。自分の歩みをカードにして、みんなの冒険マップへ。">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="appearance.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="いえねこクエスト ホーム"><span class="brand-paw">🐾</span><span>いえねこクエスト <small>II</small></span></a>
+    <nav class="topnav" aria-label="メニュー">
+      <button data-screen="world">みんなの世界</button>
+      <button data-screen="cats">100匹の家猫</button>
+      <button class="mode-chip" id="kidsMode" aria-pressed="true">Kids版　ON</button>
+    </nav>
+  </header>
+  <main>
+    <section id="home" class="screen hero-screen">
+      <div class="hero-copy">
+        <p class="eyebrow">A WALKING STORY RPG</p>
+        <h1>歩いていると、<br><em>問いに出会う。</em></h1>
+        <p class="hero-lead">まちの道を進むと、目の前に小さな問いが現れる。選ぶたびに、あなたの家猫が少しずつ姿を変えていく。</p>
+        <div class="hero-buttons"><button class="button primary" id="startJourney">冒険をはじめる <span>↗</span></button><button class="button ghost" data-screen="world">みんなの世界を見る</button></div>
+        <div class="privacy-note"><span>◉</span> 名前や現在地を集めずに遊べます。マップ参加は自分で選べます。</div>
+      </div>
+      <div class="hero-art">
+        <div class="sun-disc"></div><span class="orbit orbit-one">✦</span><span class="orbit orbit-two">✧</span>
+        <div class="hero-cat-frame"><img src="dist/mike-main-visual.png" alt="家猫クエストの主人公。片手を上げた白黒の猫"></div>
+        <div class="hero-tag"><small>きょうの旅ねこ</small><b id="heroCatName">ミケ</b><span>NO. 01</span></div>
+        <div class="hero-stamp">100<br><small>家猫</small></div>
+        <div class="hero-caption">この子と、まちへ。</div>
+      </div>
+      <div class="hero-bottom"><span><b>01</b> 問いを見つける</span><span><b>02</b> 自分の答えで歩く</span><span><b>03</b> 家猫カードを持ち帰る</span></div>
+    </section>
+
+    <section id="journey" class="screen hidden">
+      <div class="section-heading"><div><p class="eyebrow">YOUR JOURNEY</p><h2>問いのある道</h2></div><button class="button small ghost" data-screen="home">冒険をしまう</button></div>
+      <div class="journey-layout">
+        <article class="question-panel">
+          <div class="chapter-line"><span id="chapterLabel">第1地点</span><span id="stepCount">1 / 5</span></div>
+          <div class="progress-track"><i id="progressFill"></i></div>
+          <div class="location-label"><span class="location-pin">●</span><span id="placeName">ひだまりの広場</span></div>
+          <h2 id="questionTitle">はじめての道で、猫が立ち止まった。</h2>
+          <p id="questionBody" class="question-body"></p>
+          <p id="questionPrompt" class="question-prompt">あなたなら、どうする？</p>
+          <div id="answerList" class="answer-list"></div>
+          <div class="question-footer"><span id="questHint">答えに正解はありません</span><button id="readQuestion" class="text-button">🔊 おはなしを聞く</button></div>
+        </article>
+        <aside class="journey-side">
+          <div class="mini-map-card"><div class="mini-map-title"><span>STORY MAP</span><b id="mapPosition">地点 1 / 5</b></div><div id="storyMap" class="story-map"></div><div class="map-legend"><span><i class="legend-you"></i>あなた</span><span><i class="legend-path"></i>これからの道</span></div></div>
+          <div class="companion-card"><div class="companion-top"><span>いまの相棒</span><span id="companionNo">NO. 01</span></div><div class="companion-image"><img id="companionImage" src="dist/mike-main-visual.png" alt="あなたの家猫"></div><div class="companion-info"><b id="companionName">ミケ</b><span id="companionMood">どんな猫になるかは、旅の途中。</span></div><div class="traits"><span id="trait1">やさしさ 0</span><span id="trait2">ゆうき 0</span><span id="trait3">ひらめき 0</span></div></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="complete" class="screen hidden">
+      <div class="complete-head"><p class="eyebrow">JOURNEY COMPLETE</p><h2>あなたの歩みが、<br><em>一匹の家猫になった。</em></h2><p>答えに合わせて、毛色や目の色、表情とポーズが変わりました。</p></div>
+      <div class="complete-layout">
+        <article class="finished-card" id="finishedCard"><div class="finished-top"><span>IENEKО QUEST II</span><span id="finishedNo">NO. 01</span></div><div class="finished-cat"><img id="finishedCatImage" src="dist/mike-main-visual.png" alt="旅の答えから生まれた家猫"></div><div class="finished-copy"><small>あなたの旅ねこ</small><h3 id="finishedName">ひだまりミケ</h3><p id="finishedType"></p><div class="finished-traits" id="finishedTraits"></div></div><div class="finished-bottom"><span>問いを歩いた記録</span><span id="finishedDate"></span></div></article>
+        <div class="complete-actions"><div class="result-summary"><span class="summary-icon">✦</span><h3 id="resultTitle">ひらめきの旅人</h3><p id="resultText"></p></div><button id="downloadCard" class="button primary">家猫カードをダウンロード</button><button data-screen="world" class="button ghost">みんなの世界を見る</button><button id="again" class="text-button">もう一度歩く</button><div class="join-box"><label class="join-toggle"><input id="joinWorld" type="checkbox"><span><b>みんなのマップに参加する</b><small>冒険者名と今いる地点だけを共有します。正確な位置情報は使いません。</small></span></label><div class="join-fields"><label>マップでの名前 <input id="playerName" maxlength="16" placeholder="たびねこ"></label><button class="button small primary" id="joinButton">マップに登場</button></div><p id="joinStatus" class="status-text">参加はいつでも切り替えられます。</p></div></div>
+      </div>
+    </section>
+
+    <section id="world" class="screen hidden">
+      <div class="section-heading"><div><p class="eyebrow">A WORLD WE WALK TOGETHER</p><h2>みんなの冒険マップ</h2><p class="section-lead">いま、どの道を歩いている？ 世界の中の現在地が、灯りになって見える。</p></div><button class="button small ghost" data-screen="home">ホームへ</button></div>
+      <div class="world-layout"><div class="world-map-wrap"><div class="world-map-head"><span>STORY WORLD</span><span id="worldStatus" class="live-status"><i></i>近くの冒険者を読み込み中</span></div><svg id="worldMap" class="world-map" viewBox="0 0 1000 560" role="img" aria-label="5つの地点を結んだ物語の世界地図"><defs><pattern id="mapGrid" width="44" height="44" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#ffffff" opacity=".12"/></pattern></defs><rect width="1000" height="560" rx="28" fill="#203959"/><rect width="1000" height="560" rx="28" fill="url(#mapGrid)"/><path d="M0 360 C120 315 170 410 275 365 S430 285 520 350 S685 430 780 350 S920 320 1000 360 V560 H0Z" fill="#315a55" opacity=".78"/><path d="M80 410 C190 375 240 220 370 275 S520 430 610 260 S760 170 900 240" fill="none" stroke="#f3cf83" stroke-width="7" stroke-linecap="round" stroke-dasharray="3 18"/><g class="map-location" data-loc="0" transform="translate(105 390)"><circle r="34"/><text y="8">☀</text><text class="loc-name" y="65">ひだまり広場</text></g><g class="map-location" data-loc="1" transform="translate(290 285)"><circle r="34"/><text y="8">✿</text><text class="loc-name" y="65">毛糸の森</text></g><g class="map-location" data-loc="2" transform="translate(480 345)"><circle r="34"/><text y="8">⌁</text><text class="loc-name" y="65">しずくの庭</text></g><g class="map-location" data-loc="3" transform="translate(665 225)"><circle r="34"/><text y="8">☾</text><text class="loc-name" y="65">月あかり坂</text></g><g class="map-location" data-loc="4" transform="translate(865 250)"><circle r="34"/><text y="8">♜</text><text class="loc-name" y="65">鈴の城下町</text></g><g id="playerMarkers"></g></svg><div class="world-map-legend"><span><i class="legend-you"></i>あなたの足あと</span><span><i class="legend-others"></i>冒険中の人</span><span>表示は物語上の地点です</span></div></div><aside class="world-side"><div class="world-count"><small>いま世界を歩いている人</small><b id="worldCount">0</b><span>人</span></div><h3>冒険者たち</h3><div id="playerList" class="player-list"><p class="empty-state">世界はまだ静かです。あなたが最初の灯りになる？</p></div><button class="button small ghost" id="refreshWorld">マップを更新</button><div class="world-privacy"><b>位置情報について</b><p>地図上に出るのは、冒険の地点と任意の表示名です。GPSや住所は取得しません。参加しなければ端末の中だけで遊べます。</p></div></aside></div>
+      <div class="integration-note"><div><b>冒険を記録するしくみ</b><p>Google Apps Script が冒険者のいる地点を一時表示し、選んだ答えは集計用シートに記録します。Discordには個人名なしの冒険イベントだけを届けます。</p></div><span>GAS　＋　Google Sheets　＋　Discord</span></div>
+    </section>
+
+    <section id="cats" class="screen hidden"><div class="section-heading"><div><p class="eyebrow">THE 100 HOUSE CATS</p><h2>100匹の家猫図鑑</h2><p class="section-lead">CSVに記録された100匹が、旅の先で待っている。</p></div><button class="button small ghost" data-screen="home">ホームへ</button></div><div class="cat-tools"><label class="search-box">⌕ <input id="catSearch" placeholder="猫の名前やタイプを探す"></label><span id="catCount">100匹を読み込み中</span></div><div id="catGallery" class="cat-gallery"></div></section>
+  </main>
+  <footer><span>いえねこクエスト II</span><span>答えは、その日のあなたの歩み。</span><a href="README.md">連携の設定方法</a></footer>
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
