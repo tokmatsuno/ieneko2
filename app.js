@@ -72,9 +72,9 @@ function localScreen(id) {
 function selectedTrait() { return Object.keys(state.stats).sort((a,b) => state.stats[b] - state.stats[a] || ['kind','brave','wise'].indexOf(a)-['kind','brave','wise'].indexOf(b))[0]; }
 function chooseCat() {
   if (!cats.length) return null;
-  const x = 1 + (state.stats.brave / 10) * 9;
-  const y = 1 + (state.stats.kind / 10) * 9;
-  return [...cats].sort((a,b) => Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];
+  const code = { kind: 3, brave: 5, wise: 7 };
+  const seed = state.answers.reduce((value, key, index) => (value * 31 + code[key] * (index + 1)) >>> 0, 17);
+  return cats[seed % cats.length];
 }
 function appearance(trait, step = state.step) {
   const value = state.stats[trait] || 0;
