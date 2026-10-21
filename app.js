@@ -1,220 +1,1209 @@
+const POSES = {
+  hello: {
+    src: "dist/mike-main-visual.png",
+    name: "いっしょに、一歩。",
+    alt: "片手を上げて誘う猫",
+  },
+  scared: {
+    src: "dist/cat-scared.png",
+    name: "ちょっと、どきどき。",
+    alt: "耳を倒し、体を低くして様子を見る猫",
+  },
+  hungry: {
+    src: "dist/cat-hungry.png",
+    name: "ごはん、まだかにゃ？",
+    alt: "空の器の前で、ごはんを待つ猫",
+  },
+  curious: {
+    src: "dist/cat-curious.png",
+    name: "これ、なんだろう。",
+    alt: "小さな芽をのぞきこむ好奇心いっぱいの猫",
+  },
+  resting: {
+    src: "dist/cat-resting.png",
+    name: "ひと休みも、だいじ。",
+    alt: "目を閉じ、安心して丸くなる猫",
+  },
+};
+
+// Each authored answer refers to an existing CSV cat as a design anchor.
+// Its x/y values are loaded verbatim from that row, not a validated scale.
 const QUESTS = [
-  { place: 'ひだまり広場', icon: '☀', title: '知らない道で、猫が立ち止まった。', body: 'いつもと違う道の先で、小さな猫が地図を見つめています。急いでいるようにも、少し迷っているようにも見えます。', kid: 'はじめての道で、ちいさな猫が地図を見ているよ。こまっているのかな？', answers: [
-    { key: 'kind', text: 'まず声をかけて、どこへ行きたいか聞く', kid: '「どうしたの？」と、やさしく声をかける' },
-    { key: 'brave', text: '自分から地図をのぞき、いっしょに歩き出す', kid: '「いっしょに行こう！」と先に歩き出す' },
-    { key: 'wise', text: '道しるべを見比べて、行き先を探す', kid: '道しるべを見て、行き先を考える' }
-  ] },
-  { place: '毛糸の森', icon: '✿', title: '森の小道が、毛糸でふさがれている。', body: '木々のあいだに長い毛糸がからまり、向こうから「手伝って」と声がします。道をほどくには、いくつか方法がありそうです。', kid: '森の道が、けいとでいっぱい。むこうから「たすけて」と声がするよ。', answers: [
-    { key: 'kind', text: '声の主が安心できるよう、そばへ行く', kid: 'こまっている子のそばへ行く' },
-    { key: 'brave', text: 'からまった毛糸をたどって、道を切りひらく', kid: 'けいとの道をたどって進む' },
-    { key: 'wise', text: '毛糸の始まりを探して、順番にほどく', kid: 'けいとのはじまりを見つけて、ほどく' }
-  ] },
-  { place: 'しずくの庭', icon: '⌁', title: '水たまりの向こうで、友だちが待っている。', body: '雨あがりの庭に大きな水たまり。渡れずにいる友だちがこちらを見ています。足もとには丸い石と、長い枝が落ちています。', kid: '大きな水たまりのむこうで、ともだちが待っているよ。丸い石と枝があるね。', answers: [
-    { key: 'kind', text: '友だちのところまで戻り、いっしょに渡る', kid: 'ともだちをむかえに行って、いっしょに渡る' },
-    { key: 'brave', text: '先に渡って、向こうから手を差し出す', kid: '先に渡って「ここだよ」と手をふる' },
-    { key: 'wise', text: '石と枝を並べて、安全な道をつくる', kid: '石と枝で、渡る道をつくる' }
-  ] },
-  { place: '月あかり坂', icon: '☾', title: '坂の上から、ふしぎな音が聞こえる。', body: '暗くなる前に、坂の上を確かめたい。風で木の葉が揺れています。音の正体を知る方法を選んでください。', kid: '坂の上から、ふしぎな音がするよ。風で木の葉もゆれているね。', answers: [
-    { key: 'kind', text: '近くの仲間に声をかけて、いっしょに確かめる', kid: 'なかまをさそって、いっしょに行く' },
-    { key: 'brave', text: '音のする方へ、自分の足で進んでみる', kid: '音のするほうへ、自分で進んでみる' },
-    { key: 'wise', text: '風の向きと音の間隔を観察する', kid: '風と音をよく見て、考えてみる' }
-  ] },
-  { place: '鈴の城下町', icon: '♜', title: '町の時計台が、止まってしまった。', body: '待ち合わせの鈴が鳴らず、町のみんなが困っています。時計台の前には、修理道具と町の人たちが集まっています。', kid: '町の時計が止まっちゃった。みんなが困っているよ。どうする？', answers: [
-    { key: 'kind', text: '困っている人に声をかけ、役割を分ける', kid: 'みんなに声をかけて、できることを分ける' },
-    { key: 'brave', text: '時計台にのぼり、まず動かせるか試す', kid: '時計台にのぼって、まずやってみる' },
-    { key: 'wise', text: '道具を調べて、止まった理由を見つける', kid: '道具を見て、止まった理由を考える' }
-  ] }
+  {
+    place: "ひだまり広場",
+    icon: "☀",
+    topic: "安心と、はじめの接点",
+    weather: "15:00 · 木もれ日",
+    pose: "scared",
+    bubble: "知らない猫ばかり…",
+    scene: "輪のそとにも、居場所はある。",
+    title: "楽しそう。でも、入るのはちょっと怖い。",
+    body: "広場では、まちの小さなお祭りの準備中。猫は行ってみたいのに、植え込みの陰で立ち止まっています。「自分だったら」と考えると、どんな入口がうれしい？",
+    kid: "ひろばで、おまつりのじゅんび中。知らない子ばかりで、猫はどきどき。どんな入り方なら、ほっとする？",
+    refs: ["community", "ties"],
+    why: "地域活動への関わり始めや、仲介者の役割を、安心できる入口の問いに翻案しました。",
+    answers: [
+      {
+        label: "知っている人と、一緒に。",
+        kid: "知っている子と、いっしょに行く",
+        note: "顔見知りの案内があれば安心",
+        key: "kind",
+        anchorNo: 94,
+        pose: "hello",
+        reaction: "「いっしょなら、行けそう。」",
+        feedback:
+          "猫は植え込みから顔を出しました。知っている誰かが、いつもの場所と新しい場所をつないでくれることも。",
+        action: "気になる地域の催しを、顔見知りにひとつ聞いてみる。",
+      },
+      {
+        label: "10分だけ、お手伝い。",
+        kid: "10分だけ、じゅんびを手つだう",
+        note: "時間と役割が見えたら踏み出せる",
+        key: "brave",
+        anchorNo: 52,
+        pose: "curious",
+        reaction: "「10分なら、できるかも。」",
+        feedback:
+          "小さな役割が見つかって、猫は一歩。ずっと参加できなくても、その日の短い関わり方を選べます。",
+        action: "「10分だけでもいいですか？」と聞ける活動をひとつ探す。",
+      },
+      {
+        label: "まずは、端っこで見学。",
+        kid: "まずは、はしっこから見てみる",
+        note: "参加するかは、見てから決めたい",
+        key: "wise",
+        anchorNo: 72,
+        pose: "resting",
+        reaction: "「ここから見てても、いい？」",
+        feedback:
+          "猫は日陰に座って、しばらく見学。関心を持つことと、すぐに輪に入ることは別々でいいのです。",
+        action: "気になる活動の案内を見て、見学できるか確かめる。",
+      },
+    ],
+  },
+  {
+    place: "毛糸の森",
+    icon: "✿",
+    topic: "関心と、参加のきっかけ",
+    weather: "15:20 · いいにおい",
+    pose: "hungry",
+    bubble: "おなか、ぐぅ…",
+    scene: "「好き」から始まる関わり。",
+    title: "おいしい匂いの先に、まちの食堂。",
+    body: "森の入口に、一日だけのまちの食堂。猫は空っぽの器を抱えています。食べる人、手伝う人、立ち寄るだけの人。あなたなら、どんなふうに関わりたい？",
+    kid: "森の食堂から、いいにおい。猫のおなかが、ぐう。食べるだけでも、お手つだいでもいいんだって。どうしたい？",
+    refs: ["autonomy", "community"],
+    why: "自分で関わり方を選べる設計を、参加の動機と地域活動の入口という観点から考えます。",
+    answers: [
+      {
+        label: "食べながら、隣の人と話す。",
+        kid: "となりの子と、おしゃべりしてみる",
+        note: "同じテーブルから、ゆるくつながる",
+        key: "kind",
+        anchorNo: 94,
+        pose: "hello",
+        reaction: "「おすすめ、教えてにゃ。」",
+        feedback:
+          "猫は器を置いて、隣にちょこん。一緒に食べるという身近な関心が、言葉を交わすきっかけになるかもしれません。",
+        action: "お店や食堂で、気になる一品について一言聞いてみる。",
+      },
+      {
+        label: "自分の得意を、ひとつだけ。",
+        kid: "おさらをならべるの、やってみる",
+        note: "片付け、撮影、案内。できる形で",
+        key: "brave",
+        anchorNo: 100,
+        pose: "curious",
+        reaction: "「おさら運びなら、まかせて。」",
+        feedback:
+          "猫は自分で選んだ役割をひとつ。どれだけ手伝ったかを競わず、自分ができる形から考えます。",
+        action: "自分にできる「ひとつだけのお手伝い」をメモする。",
+      },
+      {
+        label: "今日は、食べて帰る。",
+        kid: "今日は、おいしく食べて帰る",
+        note: "楽しむだけの日があってもいい",
+        key: "wise",
+        anchorNo: 35,
+        pose: "resting",
+        reaction: "「今日は、ごちそうさまだけ。」",
+        feedback:
+          "猫は満足そうに一息。手伝わない選択も、自分で決めていい。次の関わり方は、次の自分に任せましょう。",
+        action:
+          "好きだった場所をひとつ覚えておく。次に行くかは、その日に決める。",
+      },
+    ],
+  },
+  {
+    place: "しずくの庭",
+    icon: "⌁",
+    topic: "小さな協力と、共用の場所",
+    weather: "15:40 · 雨あがり",
+    pose: "curious",
+    bubble: "この道、通りにくいにゃ",
+    scene: "小さな「困った」が、まちの問い。",
+    title: "水たまりで、いつもの道が遠回り。",
+    body: "庭の入口に大きな水たまり。歩く人も、車いすの猫も、少し困っています。みんなが使う場所の「困った」に、どんな関わり方を選ぶ？",
+    kid: "にわの道が、水たまりでいっぱい。車いすの猫も、こまっているよ。あなたなら、どうしたい？",
+    refs: ["efficacy", "commons"],
+    why: "近隣で協力する意志と、共用する場所を管理する仕組みを、身近な場面へ翻案しました。",
+    answers: [
+      {
+        label: "困っている人の声を聞く。",
+        kid: "「どこがこまる？」と聞いてみる",
+        note: "自分の想像だけで決めずに",
+        key: "kind",
+        anchorNo: 60,
+        pose: "hello",
+        reaction: "「一緒に、考えていい？」",
+        feedback:
+          "猫はまず、困っている相手のほうへ。何が必要かを決めつけず、声を聞くところから始めました。",
+        action: "身近な道で、誰がどんな点に困るかを一つ観察する。",
+      },
+      {
+        label: "管理する人に、場所を伝える。",
+        kid: "道をなおす人に、知らせる",
+        note: "ひとりで直さず、担当とつなぐ",
+        key: "brave",
+        anchorNo: 82,
+        pose: "curious",
+        reaction: "「ここだよ、って伝えよう。」",
+        feedback:
+          "猫は危ない作業をせず、場所を伝えることにしました。共用の場所では、管理する人との連絡も関わりのひとつです。",
+        action: "公園や道路の管理窓口を、自治体の公式サイトで調べる。",
+      },
+      {
+        label: "まず記録して、あとで考える。",
+        kid: "場所をおぼえて、あとで考える",
+        note: "今すぐ動けなくても、気づきは残せる",
+        key: "wise",
+        anchorNo: 99,
+        pose: "resting",
+        reaction: "「気づいたこと、忘れないように。」",
+        feedback:
+          "猫は少し離れて、気づきをメモ。行動を急がず、時間のある日に考え直せる形で残しました。",
+        action: "場所と困りごとを、個人が特定されない一行のメモにする。",
+      },
+    ],
+  },
+  {
+    place: "月あかり坂",
+    icon: "☾",
+    topic: "役割の見えやすさと、余白",
+    weather: "16:00 · 夕方の風",
+    pose: "resting",
+    bubble: "ずっとは、むずかしいにゃ",
+    scene: "手を挙げる前に、知りたいこと。",
+    title: "手伝いたい。でも、毎週は無理。",
+    body: "坂道の花壇を育てる仲間を募集中。「入ったら、ずっと続けないとだめ？」と猫。仕事や学校、ひと休みも大切にしながら関わるなら？",
+    kid: "坂の花だんで、なかまをぼしゅう中。でも、まいしゅうは行けない。どんなお手つだいが、できそう？",
+    refs: ["organization", "autonomy"],
+    why: "組織の参画方法を問い直す研究を背景に、時間と役割を限定できる選択肢を設計しました。",
+    answers: [
+      {
+        label: "仲間と交代できる役割。",
+        kid: "なかまと、じゅんばんにやる",
+        note: "休むときに、代われる安心",
+        key: "kind",
+        anchorNo: 82,
+        pose: "hello",
+        reaction: "「交代なら、できる日があるよ。」",
+        feedback:
+          "猫は「休む日もある」と伝えました。続け方をひとりの頑張りだけに任せず、役割の分け方を考えます。",
+        action: "活動の募集で、休める仕組みと担当範囲を確認する。",
+      },
+      {
+        label: "今日だけの、水やり係。",
+        kid: "今日だけ、水をあげる",
+        note: "終わりの見える、単発の一歩",
+        key: "brave",
+        anchorNo: 100,
+        pose: "curious",
+        reaction: "「今日の一回、やってみる。」",
+        feedback:
+          "猫は小さなじょうろを手にしました。回数と終わりが見えると、自分の予定と相談しやすくなります。",
+        action: "所要時間と完了条件が書かれた、単発の活動を探す。",
+      },
+      {
+        label: "家から、アイデアを送る。",
+        kid: "おうちから、いい考えを送る",
+        note: "現地に行かない参加も選べる",
+        key: "wise",
+        anchorNo: 99,
+        pose: "resting",
+        reaction: "「おうちからでも、いいかにゃ？」",
+        feedback:
+          "猫は家から花のアイデアをひとつ。現地に行くことだけを参加の条件にしない、別の入口を考えました。",
+        action:
+          "地域の公式な意見募集や、オンラインの参加方法をひとつ見てみる。",
+      },
+    ],
+  },
+  {
+    place: "鈴の城下町",
+    icon: "♜",
+    topic: "みんなで決める、次の一歩",
+    weather: "16:20 · 鈴の音",
+    pose: "hello",
+    bubble: "このまち、どうしたい？",
+    scene: "まちを育てるのは、いろんな声。",
+    title: "空き地がひとつ。何があったら、うれしい？",
+    body: "町の空き地の使い方を考える日。花壇、ベンチ、小さな催し。いろんな案があります。猫はあなたに、最初の一歩を聞いてきました。",
+    kid: "まちの空き地に、何をつくろう？お花？ベンチ？小さなおまつり？みんなで決めるなら、どう始めたい？",
+    refs: ["commons", "community"],
+    why: "利用者が関わるルールづくりという考え方を、まちの小さな合意形成へ翻案しています。",
+    answers: [
+      {
+        label: "まだ聞けていない声を集める。",
+        kid: "まだ話していない子にも、聞く",
+        note: "その場にいない人も思い浮かべる",
+        key: "kind",
+        anchorNo: 94,
+        pose: "hello",
+        reaction: "「来られない猫にも、聞いてみよう。」",
+        feedback:
+          "猫は集まった声だけで決めないことにしました。気持ちや生活が違う誰かにも、選べる場所を残したいから。",
+        action: "近所にあると嬉しい場所を、身近な人と一つずつ話す。",
+      },
+      {
+        label: "小さく試して、みんなで見直す。",
+        kid: "一日だけ、ためしてみる",
+        note: "最初から完成させなくても",
+        key: "brave",
+        anchorNo: 76,
+        pose: "curious",
+        reaction: "「一日だけなら、試せるね。」",
+        feedback:
+          "猫は小さな実験から始めることに。土地の管理者と相談して、使う人の声で見直す場を考えました。",
+        action:
+          "もし使えたら嬉しい場所を、所有者の許可が必要な企画メモとして描く。",
+      },
+      {
+        label: "案内を読んで、自分の考えを一票。",
+        kid: "おしらせを読んで、一つえらぶ",
+        note: "対面の集まりが苦手でも",
+        key: "wise",
+        anchorNo: 99,
+        pose: "resting",
+        reaction: "「一票にも、私の気持ちがある。」",
+        feedback:
+          "猫は案内を読み、自分の考えを残しました。声の大きさや出席時間だけで、まちへの思いは決まりません。",
+        action: "地域の計画や意見募集を、自治体の公式サイトで一つ読んでみる。",
+      },
+    ],
+  },
 ];
 
-const TRAITS = { kind: { name: 'よりそう力', hue: 8, rank: 'つながりをつくる旅人' }, brave: { name: '踏み出す力', hue: 24, rank: '一歩をひらく旅人' }, wise: { name: '見つける力', hue: 42, rank: 'ひらめきを届ける旅人' } };
-const CAT_NAMES = ['ミケ','スズ','コハク','つむぎ','あんず','よつば','まる','しらたま'];
+const $ = (s) => document.querySelector(s);
+const KID_TITLES = [
+  "行ってみたいけど、ちょっとどきどき。",
+  "いいにおい！まちの食堂へ、ようこそ。",
+  "水たまりで、いつもの道が通れない。",
+  "手つだいたい。でも、まいしゅうはむずかしい。",
+  "あきちに、何があったらうれしい？",
+];
+const KID_ACTIONS = [
+  [
+    "知っている人に、まちの楽しみを一つ聞いてみよう。",
+    "少しだけ、できるお手つだいを考えてみよう。",
+    "気になるおまつりのおしらせを、見てみよう。",
+  ],
+  [
+    "好きな食べものを、だれかと話してみよう。",
+    "自分ができるお手つだいを、一つ考えてみよう。",
+    "また行きたい場所を、一つおぼえておこう。",
+  ],
+  [
+    "道のどこがこまるか、おとなといっしょに見てみよう。",
+    "道をなおす人に、おとなといっしょに知らせよう。",
+    "気づいたことを、おとなといっしょにメモしよう。",
+  ],
+  [
+    "なかまと、じゅんばんにできることを考えよう。",
+    "今日だけできる、小さなお手つだいを探そう。",
+    "まちにあるとうれしいものを、おうちでかいてみよう。",
+  ],
+  [
+    "近くにあるとうれしい場所を、だれかと話してみよう。",
+    "一日だけの小さなあそび場を、紙にかいてみよう。",
+    "まちのおしらせを、おとなといっしょに読んでみよう。",
+  ],
+];
+const esc = (value) =>
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 const config = window.IENEKO_CONFIG || {};
-const state = { step: 0, stats: { kind: 0, brave: 0, wise: 0 }, answers: [], kids: true, cat: null, playerId: '', optedIn: false };
-let cats = [];
-let activeScreen = 'home';
-let presenceTimer = null;
-const $ = (s, root = document) => root.querySelector(s);
+const STORAGE = "ieneko2-v3";
+let cats = [],
+  selectedChoice = null,
+  feedbackOpen = false,
+  selectedPlace = 0,
+  activeScreen = "home";
+let presenceTimer = null,
+  worldTimer = null,
+  worldRequest = 0;
+const state = {
+  step: 0,
+  answers: [],
+  kids: false,
+  playerId: "",
+  optedIn: false,
+  name: "たびねこ",
+};
+const coords = [
+  [12, 54.6],
+  [35.5, 32.3],
+  [49, 59],
+  [70.5, 28.5],
+  [87, 43],
+];
 
 function parseCSV(text) {
-  const rows = []; let row = []; let cell = ''; let quoted = false;
+  const rows = [];
+  let row = [],
+    cell = "",
+    quoted = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
-    if (quoted && c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
-    else if (c === '"') quoted = !quoted;
-    else if (c === ',' && !quoted) { row.push(cell); cell = ''; }
-    else if ((c === '\n' || c === '\r') && !quoted) { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); if (row.some(v => v.trim())) rows.push(row); row = []; cell = ''; }
-    else cell += c;
+    if (quoted && c === '"' && text[i + 1] === '"') {
+      cell += '"';
+      i++;
+    } else if (c === '"') quoted = !quoted;
+    else if (c === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((c === "\n" || c === "\r") && !quoted) {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell);
+      if (row.some((v) => v.trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else cell += c;
   }
-  if (cell || row.length) { row.push(cell); rows.push(row); }
-  const headers = (rows.shift() || []).map(x => x.replace(/^\uFEFF/, '').trim());
-  return rows.map(r => Object.fromEntries(headers.map((h, i) => [h, r[i] || '']))).map((r, i) => ({
-    no: Number(r.No || r.no || i + 1), domain: r['領域'] || '', type: r['タイプ名'] || '', name: r['猫ネーム'] || `家猫 ${i + 1}`,
-    catch: r['キャッチ'] || '', x: Number(r.X) || 5, y: Number(r.Y) || 5, source: r['出典'] || '', evidence: r['根拠区分'] || ''
-  }));
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  const headers = (rows.shift() || []).map((h) =>
+    h.replace(/^\uFEFF/, "").trim(),
+  );
+  return rows
+    .map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i] || ""])))
+    .map((r) => ({
+      raw: r,
+      no: Number(r.No),
+      name: r["猫ネーム"],
+      domain: r["領域"],
+      type: r["タイプ名"],
+      catch: r["キャッチ"],
+      x: Number(r.X),
+      y: Number(r.Y),
+      source: r["出典"],
+      url: r.URL,
+      evidence: r["根拠区分"],
+      summary: r["根拠要約"],
+      level: r["根拠レベル"],
+      reason: r["座標根拠"],
+      action: r["改善策"],
+      risk: r["副作用"],
+      source2: r["出典2"],
+      url2: r.URL2,
+    }));
 }
-
+function persist() {
+  try {
+    localStorage.setItem(STORAGE, JSON.stringify(state));
+  } catch {}
+  updateResume();
+}
 function loadState() {
   try {
-    const old = JSON.parse(localStorage.getItem('ieneko2-state') || '{}');
-    if (Number.isInteger(old.step) && old.step > 0 && old.step < QUESTS.length) Object.assign(state, old);
-    state.playerId = old.playerId || (crypto.randomUUID ? crypto.randomUUID() : `p${Date.now()}${Math.random().toString(36).slice(2)}`);
-  } catch { state.playerId = `p${Date.now()}${Math.random().toString(36).slice(2)}`; }
-  saveState();
+    const saved = JSON.parse(localStorage.getItem(STORAGE) || "{}");
+    state.kids = Boolean(saved.kids);
+    state.optedIn = Boolean(saved.optedIn);
+    state.name = String(saved.name || "たびねこ").slice(0, 16);
+    if (Array.isArray(saved.answers)) {
+      for (let i = 0; i < Math.min(5, saved.answers.length); i++) {
+        const a = saved.answers[i];
+        if (!a || !Number.isInteger(a.choice) || a.choice < -1 || a.choice > 2)
+          break;
+        state.answers.push({ choice: a.choice });
+      }
+    }
+    state.step = Math.max(
+      0,
+      Math.min(state.answers.length, Number(saved.step) || 0, 4),
+    );
+    state.playerId = typeof saved.playerId === "string" ? saved.playerId : "";
+  } catch {}
+  if (!state.playerId)
+    state.playerId =
+      crypto.randomUUID?.() ||
+      `cat${Date.now()}${Math.random().toString(36).slice(2)}`;
+  persist();
 }
-function saveState() { localStorage.setItem('ieneko2-state', JSON.stringify(state)); }
-function localScreen(id) {
+function updateResume() {
+  if ($("#resumeJourney")) {
+    $("#resumeJourney").hidden = !state.answers.length;
+    $("#resumeJourney").textContent =
+      state.answers.length === 5
+        ? "前の家猫カードを見る →"
+        : "前のつづきから →";
+  }
+}
+function navigate(id) {
+  if (location.hash === `#${id}`) showScreen(id);
+  else location.hash = id;
+}
+function showScreen(id) {
+  if (
+    !["home", "journey", "complete", "world", "cats", "research"].includes(id)
+  )
+    id = "home";
+  if (id === "complete" && state.answers.length < 5) id = "journey";
+  if (id === "journey") renderQuestion();
+  if (id === "complete") renderComplete();
   activeScreen = id;
-  document.querySelectorAll('.screen').forEach(el => el.classList.toggle('hidden', el.id !== id));
-  if (id === 'world') refreshWorld();
-  if (id === 'cats') renderCats();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document
+    .querySelectorAll(".screen")
+    .forEach((s) => s.classList.toggle("hidden", s.id !== id));
+  document
+    .querySelectorAll(".topbar nav a")
+    .forEach((a) =>
+      a.setAttribute("aria-current", a.hash === `#${id}` ? "page" : "false"),
+    );
+  if (worldTimer) clearInterval(worldTimer);
+  worldTimer = null;
+  if (id === "world") {
+    renderTown();
+    renderAtlas();
+    refreshWorld();
+    worldTimer = setInterval(refreshWorld, 60000);
+  }
+  if (id === "cats") renderCats($("#catSearch").value);
+  document.title = {
+    home: "家猫クエスト | あなたのペースで、まちとつながる。",
+    journey: `第${state.step + 1}地点 | 家猫クエスト`,
+    complete: "今日の家猫カード | 家猫クエスト",
+    world: "みんなの世界 | 家猫クエスト",
+    cats: "100匹の家猫図鑑 | 家猫クエスト",
+    research: "研究とデータ | 家猫クエスト",
+  }[id];
+  window.scrollTo({ top: 0, behavior: "instant" });
+  const heading = $(`#${id} h1`);
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
 }
-function selectedTrait() { return Object.keys(state.stats).sort((a,b) => state.stats[b] - state.stats[a] || ['kind','brave','wise'].indexOf(a)-['kind','brave','wise'].indexOf(b))[0]; }
+function startJourney() {
+  state.step = 0;
+  state.answers = [];
+  feedbackOpen = false;
+  persist();
+  navigate("journey");
+  setupPresence();
+}
+function visitQuestion(index) {
+  state.step = Math.min(state.answers.length, Math.max(0, index), 4);
+  feedbackOpen = false;
+  persist();
+  navigate("journey");
+}
+function currentAnswer(i = state.step) {
+  const index = state.answers[i]?.choice;
+  return Number.isInteger(index) && index >= 0
+    ? QUESTS[i].answers[index]
+    : null;
+}
+function journeyPoint() {
+  const choices = state.answers
+    .map((a, i) => (a.choice >= 0 ? QUESTS[i].answers[a.choice] : null))
+    .filter(Boolean);
+  return choices.length
+    ? {
+        x: choices.reduce((v, a) => v + a.x, 0) / choices.length,
+        y: choices.reduce((v, a) => v + a.y, 0) / choices.length,
+      }
+    : { x: 5, y: 5 };
+}
 function chooseCat() {
-  if (!cats.length) return null;
-  const code = { kind: 3, brave: 5, wise: 7 };
-  const seed = state.answers.reduce((value, key, index) => (value * 31 + code[key] * (index + 1)) >>> 0, 17);
-  return cats[seed % cats.length];
+  const p = journeyPoint();
+  return cats.reduce((best, c) => {
+    const d = (c.x - p.x) ** 2 + (c.y - p.y) ** 2;
+    return !best ||
+      d < best.d - 1e-9 ||
+      (Math.abs(d - best.d) < 1e-9 && c.no < best.cat.no)
+      ? { cat: c, d }
+      : best;
+  }, null)?.cat;
 }
-function appearance(trait, step = state.step) {
-  const value = state.stats[trait] || 0;
-  const hue = (TRAITS[trait].hue + value * 5 + step * 3) % 360;
-  const sat = 78 + ((state.stats.wise || 0) % 4) * 9;
-  const brightness = 1 + (value % 3) * .025;
-  const flip = (state.stats.kind + state.stats.brave + step) % 2 ? -1 : 1;
-  const tilt = ((state.stats.wise % 3) - 1) * 1.5;
-  return `hue-rotate(${hue}deg) saturate(${sat}%) brightness(${brightness})`;
+function connectChoiceAnchors() {
+  QUESTS.forEach((q) =>
+    q.answers.forEach((a) => {
+      const anchor = cats.find((c) => c.no === a.anchorNo);
+      if (!anchor) throw new Error("missing_design_anchor");
+      a.x = anchor.x;
+      a.y = anchor.y;
+      a.anchorName = anchor.name;
+    }),
+  );
 }
-function refreshCat() {
-  const trait = selectedTrait();
-  const cat = state.cat || chooseCat();
-  const eyes = { kind: '#83b8a2', brave: '#bd8652', wise: '#83a9d1' };
-  const expressions = { kind: '⌣', brave: '✦', wise: '？' };
-  [$('.companion-image'), $('.finished-cat')].filter(Boolean).forEach(el => {
-    el.style.setProperty('--iris', eyes[trait]);
-    el.dataset.expression = expressions[trait];
-    el.dataset.trait = trait;
+function currentPose() {
+  return state.answers.length
+    ? currentAnswer(state.answers.length - 1)?.pose || "resting"
+    : "hello";
+}
+function coatFilter() {
+  const counts = { kind: 0, brave: 0, wise: 0 };
+  state.answers.forEach((a, i) => {
+    if (a.choice >= 0) counts[QUESTS[i].answers[a.choice].key]++;
   });
-  const name = cat?.name || CAT_NAMES[0];
-  ['#heroCatName','#companionName','#finishedName'].forEach(s => { const el=$(s); if(el) el.textContent=name; });
-  ['#companionImage','#finishedCatImage'].forEach(s => { const el=$(s); if(el) { el.style.filter=appearance(trait); el.style.transform=`scaleX(${(state.stats.brave % 2) ? -1 : 1}) rotate(${(state.stats.wise % 3)-1}deg)`; } });
-  const no = String(cat?.no || 1).padStart(2,'0');
-  ['#companionNo','#finishedNo'].forEach(s => { const el=$(s); if(el) el.textContent=`NO. ${no}`; });
-  const mood = state.stats.kind >= state.stats.brave && state.stats.kind >= state.stats.wise ? '目を細めて、あなたのそばへ。' : state.stats.brave >= state.stats.wise ? 'しっぽを立てて、先へ進む。' : '耳を立てて、道の先を見つめる。';
-  if ($('#companionMood')) $('#companionMood').textContent = mood;
-  $('#trait1').textContent=`よりそう ${state.stats.kind}`; $('#trait2').textContent=`踏み出す ${state.stats.brave}`; $('#trait3').textContent=`見つける ${state.stats.wise}`;
+  return counts.kind > counts.brave && counts.kind > counts.wise
+    ? "sepia(.1) saturate(.85)"
+    : counts.brave > counts.wise
+      ? "sepia(.22) saturate(1.12)"
+      : "saturate(.75)";
 }
-function renderStoryMap() {
-  $('#storyMap').innerHTML=QUESTS.map((q,i)=>`<div class="story-stop ${i<state.step?'passed':''} ${i===state.step?'current':''}"><i>${i<state.step?'✓':q.icon}</i><span>${q.place.replace('の','')}</span></div>`).join('');
-  $('#mapPosition').textContent=`地点 ${Math.min(state.step+1,5)} / 5`;
-  document.querySelectorAll('.map-location').forEach((node,i)=>{ node.classList.toggle('active',i===Math.min(state.step,4)); node.classList.toggle('you',state.optedIn && i===state.step); });
+function setPose(selector, key) {
+  const img = $(selector),
+    pose = POSES[key] || POSES.hello;
+  if (img.getAttribute("src") !== pose.src) img.src = pose.src;
+  img.alt = pose.alt;
+  img.dataset.pose = key;
 }
 function renderQuestion() {
-  const q=QUESTS[state.step]; if(!q) return finishJourney();
-  $('#chapterLabel').textContent=`第${state.step+1}地点`;
-  $('#stepCount').textContent=`${state.step+1} / ${QUESTS.length}`;
-  $('#progressFill').style.width=`${state.step/QUESTS.length*100}%`;
-  $('#placeName').textContent=q.place;
-  $('#questionTitle').textContent=q.title;
-  $('#questionBody').textContent=state.kids?q.kid:q.body;
-  $('#answerList').innerHTML=q.answers.map((a,i)=>`<button class="answer-button" data-trait="${a.key}"><span class="answer-key">${String.fromCharCode(65+i)}</span><span>${state.kids?a.kid:a.text}</span><span class="answer-arrow">↗</span></button>`).join('');
-  document.querySelectorAll('.answer-button').forEach(btn=>btn.addEventListener('click',()=>selectAnswer(btn.dataset.trait)));
-  renderStoryMap(); refreshCat();
+  const q = QUESTS[state.step];
+  selectedChoice = null;
+  feedbackOpen = false;
+  document.title = `第${state.step + 1}地点 | 家猫クエスト`;
+  $("#stepCount").textContent = `0${state.step + 1} / 05`;
+  $("#chapterLabel").textContent = `CHAPTER 0${state.step + 1}`;
+  $("#placeName").textContent = q.place;
+  $("#sceneWeather").textContent = q.weather;
+  $("#sceneTopic").textContent = q.topic;
+  $("#sceneTitle").textContent = q.scene;
+  $("#catBubble").textContent = q.bubble;
+  $("#companionMood").textContent = POSES[q.pose].name;
+  setPose("#companionImage", q.pose);
+  $(".scene-panel").dataset.scene = state.step;
+  $("#questionTitle").textContent = state.kids
+    ? KID_TITLES[state.step]
+    : q.title;
+  $("#questionBody").textContent = state.kids ? q.kid : q.body;
+  $("#choiceView").classList.remove("hidden");
+  $("#feedbackView").classList.add("hidden");
+  $("#questionEvidence").open = false;
+  $("#answerList").innerHTML = q.answers
+    .map(
+      (a, i) =>
+        `<button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b>${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button>`,
+    )
+    .join("");
+  $("#confirmAnswer").disabled = true;
+  $("#confirmAnswer").textContent = "気になる答えを選んでね";
+  $("#previousQuestion").hidden = state.step === 0;
+  $("#storyMap").innerHTML = QUESTS.map(
+    (s, i) =>
+      `<button class="route-stop ${i === state.step ? "current" : ""} ${state.answers[i] ? "visited" : ""}" data-visit="${i}" ${i > state.answers.length ? "disabled" : ""} ${i === state.step ? 'aria-current="step"' : ""}><i>${state.answers[i] ? "✓" : String(i + 1).padStart(2, "0")}</i><span>${s.place}</span></button>`,
+  ).join("");
 }
-function selectAnswer(trait) {
-  state.stats[trait] += 2; state.answers.push(trait); state.step += 1; state.cat=chooseCat(); saveState();
-  if(config.gasUrl && state.optedIn) sendEvent({event:'answer',step:state.step,place:QUESTS[state.step-1].place,trait,catNo:state.cat?.no||1});
-  refreshCat();
-  if(state.step >= QUESTS.length) finishJourney(); else renderQuestion();
+function previewChoice(index) {
+  selectedChoice = index;
+  document.querySelectorAll(".answer-button").forEach((b, i) => {
+    b.setAttribute("aria-pressed", String(i === index));
+    b.querySelector(".answer-check").textContent = i === index ? "✓" : "○";
+  });
+  $("#confirmAnswer").disabled = false;
+  $("#confirmAnswer").textContent = "この一歩にする →";
+  const a = QUESTS[state.step].answers[index];
+  setPose("#companionImage", a.pose);
+  $("#catBubble").textContent = a.reaction;
+  $("#companionMood").textContent = POSES[a.pose].name;
 }
-function finishJourney() {
-  state.cat=chooseCat(); saveState();
-  const trait=selectedTrait(), selected=TRAITS[trait], cat=state.cat;
-  localScreen('complete');
-  $('#resultTitle').textContent=selected.rank;
-  $('#resultText').textContent=`${selected.name}を使って、${cat?.name || '家猫'}が生まれました。${cat?.catch || 'あなたの歩みを映す家猫です。'}`;
-  $('#finishedName').textContent=cat?.name || CAT_NAMES[0];
-  $('#finishedType').textContent=cat?.type || selected.rank;
-  $('#finishedTraits').innerHTML=Object.keys(TRAITS).map(k=>`<span>${TRAITS[k].name} ${state.stats[k]}</span>`).join('');
-  $('#finishedDate').textContent=new Intl.DateTimeFormat('ja-JP',{dateStyle:'medium'}).format(new Date());
-  refreshCat(); renderStoryMap();
-  if(config.gasUrl && state.optedIn) sendEvent({event:'complete',step:5,place:QUESTS[4].place,trait,catNo:cat?.no||1});
+function confirmAnswer(index, record = true) {
+  if (feedbackOpen) return;
+  const q = QUESTS[state.step],
+    a = index >= 0 ? q.answers[index] : null;
+  state.answers[state.step] = { choice: index };
+  persist();
+  feedbackOpen = true;
+  $("#choiceView").classList.add("hidden");
+  $("#feedbackView").classList.remove("hidden");
+  $("#feedbackTitle").textContent = a
+    ? a.reaction
+    : "「まだ決めなくても、いいにゃ。」";
+  $("#feedbackText").textContent = a
+    ? state.kids
+      ? [
+          "猫は、少しほっとしたみたい。だれかといっしょの一歩も、いいね。",
+          "猫は、目をきらきらさせています。小さくためすと、何が見つかるかな。",
+          "猫は、のんびりひと休み。あせらなくていい。今日の気持ちを、大切にしよう。",
+        ][index]
+      : a.feedback
+    : "猫はひと休みして、次の場所へ。答えを保留することも、自分のペースを大切にする選択です。";
+  $("#feedbackAction").textContent = a
+    ? state.kids
+      ? KID_ACTIONS[state.step][index]
+      : a.action
+    : "今日、気になったことをひとつだけ覚えておく。";
+  $("#questionEvidenceBody").innerHTML =
+    `<p class="research-application">${esc(q.why)}</p>${a ? `<p class="quiet-note">選択肢の参照猫：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>。その猫の設計座標 X ${a.x} / Y ${a.y} を使います。選択肢との対応は制作者の解釈です。</p>` : ""}${q.refs.map((key) => sourceCard(key, true)).join("")}<p class="quiet-note">問い・選択肢・反応は本作品の創作です。研究がこの回答を正解と認定したものではありません。</p>`;
+  $("#nextQuestion").textContent =
+    state.step === 4 ? "今日の家猫に会いにいく →" : "次の場所へ →";
+  setPose("#companionImage", a?.pose || "resting");
+  $("#catBubble").textContent = a?.reaction || "ここで、ひと休み。";
+  $("#companionMood").textContent = POSES[a?.pose || "resting"].name;
+  $("#feedbackTitle").focus({ preventScroll: true });
+  if (record && state.optedIn)
+    sendEvent({
+      event: "answer",
+      step: state.step + 1,
+      place: q.place,
+      trait: a?.key || "",
+      catNo: chooseCat()?.no || 1,
+    });
 }
-function startJourney() { state.step=0; state.stats={kind:0,brave:0,wise:0}; state.answers=[]; state.cat=cats[0]||null; saveState(); localScreen('journey'); renderQuestion(); }
-function drawCard() {
-  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'); canvas.width=1080;canvas.height=1350;
-  const trait=selectedTrait(), c=state.cat||chooseCat();
-  const grad=ctx.createLinearGradient(0,0,1080,1350);grad.addColorStop(0,'#294562');grad.addColorStop(1,'#14243c');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,1350);
-  ctx.fillStyle='#f2d99f';ctx.beginPath();ctx.arc(540,515,340,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#203959';ctx.font='500 32px monospace';ctx.fillText('IENEKО QUEST II',80,95);ctx.fillText(`NO. ${String(c?.no||1).padStart(2,'0')}`,820,95);
-  const img=$('#finishedCatImage'); if(img.complete) { ctx.save(); ctx.filter=appearance(trait); ctx.translate(1080,0);ctx.scale(-1,1);ctx.drawImage(img,180,170,720,700);ctx.restore(); }
-  ctx.fillStyle=({kind:'#83b8a2',brave:'#bd8652',wise:'#83a9d1'})[trait];ctx.font='700 34px sans-serif';ctx.textAlign='center';ctx.fillText(({kind:'⌣',brave:'✦',wise:'？'})[trait],540,500);ctx.textAlign='left';
-  ctx.fillStyle='#fffdf6';ctx.font='700 28px sans-serif';ctx.fillText('あなたの旅ねこ',85,930);
-  ctx.font='900 66px sans-serif';ctx.fillText(c?.name||'家猫',85,1015);
-  ctx.font='500 30px sans-serif';ctx.fillText(c?.type||TRAITS[trait].rank,85,1075);
-  ctx.fillStyle='#ead4a7';ctx.font='700 24px sans-serif';ctx.fillText(Object.keys(TRAITS).map(k=>`${TRAITS[k].name} ${state.stats[k]}`).join('　'),85,1160);
-  ctx.fillStyle='#ffffff75';ctx.fillRect(85,1210,910,1);ctx.fillStyle='#dbe1e7';ctx.font='500 22px sans-serif';ctx.fillText('答えに正解はありません。あなたの歩みの記録です。',85,1260);
-  return canvas;
+function nextQuestion() {
+  if (!feedbackOpen) return;
+  feedbackOpen = false;
+  if (state.step === 4) {
+    navigate("complete");
+    if (state.optedIn)
+      sendEvent({
+        event: "complete",
+        step: 5,
+        place: QUESTS[4].place,
+        catNo: chooseCat()?.no || 1,
+      });
+  } else {
+    state.step++;
+    persist();
+    renderQuestion();
+    $("#questionTitle").focus({ preventScroll: true });
+  }
+  setupPresence();
 }
-function downloadCard() { const a=document.createElement('a'); a.href=drawCard().toDataURL('image/png'); a.download=`ieneko-card-${String(state.cat?.no||1).padStart(3,'0')}.png`; a.click(); }
-function renderCats(query='') {
-  const q=query.trim().toLowerCase(); const list=cats.filter(c=>`${c.name} ${c.type} ${c.domain}`.toLowerCase().includes(q));
-  $('#catCount').textContent=`${list.length} / 100匹`;
-  $('#catGallery').innerHTML=list.map(c=>`<article class="cat-tile"><div class="cat-number">NO. ${String(c.no).padStart(3,'0')}</div><div class="cat-avatar"><img src="dist/mike-main-visual.png" alt="${c.name}" style="filter:hue-rotate(${(c.no*37)%360}deg) saturate(${80+(c.no%4)*12}%);transform:scaleX(${c.no%2?-1:1})"></div><b>${c.name}</b><small>${c.type}</small></article>`).join('');
+function sourceCard(key, compact = false) {
+  const s = RESEARCH[key];
+  return `<article class="source-card ${compact ? "compact" : ""}"><span class="source-tag">${esc(s.kind)} · ${s.year}</span><h3>${esc(s.concept)}</h3><p>${esc(s.finding)}</p>${compact ? "" : `<div class="source-application"><b>作品への反映</b><p>${esc(s.application)}</p><small>${esc(s.limit)}</small></div>`}<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.authors)} (${s.year})<br><b>${esc(s.title)}</b> ↗</a>${compact ? "" : `<small>${esc(s.publication)}<br>DOI: ${esc(s.doi)}</small>`}</article>`;
 }
-function gasEndpoint() { return String(config.gasUrl||'').trim(); }
+function renderResearch() {
+  $("#researchList").innerHTML = Object.keys(RESEARCH)
+    .map((k) => sourceCard(k))
+    .join("");
+  const withURL = cats.filter((c) => safeURL(c.url)).length;
+  const corrected = cats.filter(
+    (c) => correctedSource(c.url) || correctedSource(c.url2),
+  ).length;
+  $("#dataStats").innerHTML =
+    `<span><b>${cats.length}</b>匹の元データ</span><span><b>${withURL}</b>件に出典URL</span><span><b>${corrected}</b>匹に照合済み書誌を適用</span><span><b>6</b>件の設計参照文献</span>`;
+}
+function correctedSource(url) {
+  const key = Object.keys(SOURCE_CORRECTIONS).find((part) =>
+    String(url).includes(part),
+  );
+  return key ? RESEARCH[SOURCE_CORRECTIONS[key]] : null;
+}
+function safeURL(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
+  } catch {
+    return "";
+  }
+}
+function sourceLink(label, url) {
+  const u = safeURL(url);
+  return u
+    ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(label || u)} ↗</a>`
+    : `<span>${esc(label || "記載なし")}</span>`;
+}
+function catPose(c) {
+  return c.y >= 8
+    ? "scared"
+    : c.y >= 6.5
+      ? "resting"
+      : c.y <= 3
+        ? "curious"
+        : c.no % 3 === 0
+          ? "hungry"
+          : "hello";
+}
+function catDetail(c, full = false) {
+  const source = correctedSource(c.url),
+    source2 = correctedSource(c.url2);
+  return `<div class="detail-cat-visual"><img src="${POSES[catPose(c)].src}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
+    full
+      ? `<p class="detail-note">猫の名前やタイプは元CSVの創作類型です。あなたの属性・性格・健康状態を意味しません。イラストのポーズは本作品の演出です。</p><h3>この猫が考える「参加の入口」</h3><p>${esc(c.action)}</p><h3>配慮したいこと</h3><p>${esc(c.risk)}</p><h3>根拠と参照先</h3><p>${esc(source ? source.finding : c.summary)}</p><div class="citation-box"><span>${source ? "リンク先の正式書誌を照合済み" : "元CSVに記載された出典（個別精査前を含む）"}</span>${sourceLink(source ? `${source.authors} (${source.year}) ${source.title}` : c.source, c.url)}${c.source2 ? sourceLink(source2 ? `${source2.authors} (${source2.year}) ${source2.title}` : c.source2, c.url2) : ""}<small>元CSVの根拠区分：${esc(c.evidence)}<br>元CSVの根拠レベル表記：${esc(c.level)}<br>この表記はアプリによる再認定ではありません。</small></div><h3>座標はどう置かれた？</h3><p>${esc(c.reason)}</p><details><summary>元CSVの全項目を見る</summary><dl class="raw-fields">${Object.entries(
+          c.raw,
+        )
+          .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v || "記載なし")}</dd>`)
+          .join("")}</dl></details>`
+      : `<p class="detail-note">${esc((c.action || c.summary).slice(0, 110))}${(c.action || c.summary).length > 110 ? "…" : ""}</p><button class="text-link" data-cat="${c.no}">根拠と、小さな入口を読む ↗</button>`
+  }`;
+}
+function openCat(no) {
+  const c = cats.find((c) => c.no === Number(no));
+  if (!c) return;
+  $("#catDialogBody").innerHTML = catDetail(c, true);
+  if (state.answers.length === 5 && chooseCat()?.no === c.no) {
+    const p = journeyPoint();
+    $("#catDialogBody").insertAdjacentHTML(
+      "afterbegin",
+      `<div class="takeaway"><span>この猫が選ばれた理由</span><p>回答の平均座標 X ${p.x.toFixed(2)} / Y ${p.y.toFixed(2)} に、元CSVの100匹で最も近い猫です。猫の座標は X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)}。同距離なら番号順で選びます。対応づけは作品の設計です。</p></div>`,
+    );
+  }
+  $("#catDialog").showModal();
+}
+function renderCats(query = "") {
+  const q = query.trim().toLowerCase(),
+    list = cats.filter((c) =>
+      `${c.name} ${c.type} ${c.domain} ${c.evidence} ${c.source}`
+        .toLowerCase()
+        .includes(q),
+    );
+  $("#catCount").textContent = `${list.length} / ${cats.length}匹`;
+  $("#catNoResults").hidden = !!list.length;
+  $("#catGallery").innerHTML = list
+    .map(
+      (c) =>
+        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${POSES[catPose(c)].src}" alt="" style="filter:hue-rotate(${(c.no % 5) * 3}deg)"></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
+    )
+    .join("");
+}
+function renderComplete() {
+  const c = chooseCat();
+  if (!c) return;
+  const p = journeyPoint(),
+    pose = currentPose();
+  $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
+  setPose("#finishedCatImage", pose);
+  $("#finishedCatImage").style.filter = coatFilter();
+  $("#finishedName").textContent = c.name;
+  $("#finishedCatch").textContent = state.kids
+    ? "今日のえらび方から出会った、あなたの相棒。"
+    : c.catch;
+  $("#finishedMood").textContent = POSES[pose].name;
+  $("#finishedDate").textContent = new Intl.DateTimeFormat("ja-JP", {
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  $("#resultTitle").textContent = "持ち帰るのは、ひとつの可能性。";
+  $("#resultText").textContent = state.kids
+    ? "今日の気分も、明日の気分も、ちがっていい。また別のえらび方で歩くと、ちがう猫に出会えるかも。"
+    : "近いのは、今日の選び方と、この猫の設計座標。あなたを決めつける結果ではありません。背景の出典を読みながら、次に試したい関わり方をひとつ探してみて。";
+  $("#resultCoordinate").innerHTML =
+    `あなたの選択の平均 <b>X ${p.x.toFixed(2)} / Y ${p.y.toFixed(2)}</b><span>近い猫の座標 X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} · 数値は作品内の設計値</span>`;
+  $("#journeyJournal").innerHTML =
+    `<div class="section-heading"><div><p class="eyebrow">YOUR FIVE LITTLE STEPS</p><h2>歩いた道と、問いの背景。</h2></div></div><div class="journal-grid">${state.answers
+      .map((a, i) => {
+        const q = QUESTS[i],
+          choice = a.choice >= 0 ? q.answers[a.choice] : null;
+        return `<article><span>0${i + 1} · ${q.place}</span><h3>${esc(choice ? (state.kids ? choice.kid : choice.label) : "今は決めずに進んだ")}</h3><p>${esc(choice?.action || "保留した問いは、あとで考えても大丈夫。")}</p><small>${choice ? `設計座標 X ${choice.x} / Y ${choice.y}` : "座標の平均には含めていません"}</small><a href="#research">背景：${RESEARCH[q.refs[0]].concept} ↗</a><button data-visit="${i}" class="text-link">ここから選び直す →</button></article>`;
+      })
+      .join("")}</div>`;
+  $("#joinStatus").textContent = gasEndpoint()
+    ? state.optedIn
+      ? "共有参加がオンです。"
+      : "共有参加はオフです。"
+    : "いまはこの端末の足あとだけを表示します。共有機能は接続準備中です。";
+}
+async function downloadCard() {
+  const button = $("#downloadCard"),
+    c = chooseCat();
+  if (!c) return;
+  button.disabled = true;
+  button.textContent = "カードを描いています…";
+  try {
+    const img = $("#finishedCatImage");
+    await img.decode();
+    const canvas = document.createElement("canvas"),
+      ctx = canvas.getContext("2d");
+    canvas.width = 1080;
+    canvas.height = 1350;
+    ctx.fillStyle = "#183b38";
+    ctx.fillRect(0, 0, 1080, 1350);
+    ctx.fillStyle = "#f8f3e7";
+    ctx.fillRect(35, 35, 1010, 1280);
+    ctx.fillStyle = "#183b38";
+    ctx.font = "700 32px sans-serif";
+    ctx.fillText("家猫クエスト / TODAY’S COMPANION", 80, 104);
+    ctx.font = "500 26px monospace";
+    ctx.fillText(`NO. ${String(c.no).padStart(3, "0")}`, 820, 104);
+    ctx.fillStyle = "#e9d9ac";
+    ctx.beginPath();
+    ctx.ellipse(540, 510, 370, 340, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const scale = Math.min(760 / img.naturalWidth, 700 / img.naturalHeight),
+      w = img.naturalWidth * scale,
+      h = img.naturalHeight * scale;
+    ctx.save();
+    ctx.filter = coatFilter();
+    ctx.drawImage(img, 540 - w / 2, 535 - h / 2, w, h);
+    ctx.restore();
+    ctx.fillStyle = "#416158";
+    ctx.font = "500 24px sans-serif";
+    ctx.fillText("今日の選び方から出会った家猫", 80, 945);
+    ctx.fillStyle = "#183b38";
+    let size = 62;
+    while (size > 30) {
+      ctx.font = `800 ${size}px sans-serif`;
+      if (ctx.measureText(c.name).width <= 920) break;
+      size -= 2;
+    }
+    ctx.fillText(c.name, 80, 1035);
+    ctx.font = "500 30px sans-serif";
+    ctx.fillText(POSES[currentPose()].name, 80, 1100);
+    ctx.fillStyle = "#b66c4c";
+    ctx.fillRect(80, 1150, 920, 2);
+    ctx.fillStyle = "#416158";
+    ctx.font = "500 24px sans-serif";
+    ctx.fillText("あなたのペースで、まちとつながる。", 80, 1208);
+    ctx.font = "400 19px sans-serif";
+    ctx.fillText(
+      "作品内の設計座標による対応です。性格や属性の診断ではありません。",
+      80,
+      1252,
+    );
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/png"),
+    );
+    if (!blob) throw new Error("canvas");
+    const url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = `ieneko-card-${String(c.no).padStart(3, "0")}.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast("家猫カードを保存しました。");
+  } catch {
+    toast("画像を読み込めませんでした。少し待って、もう一度保存してください。");
+  } finally {
+    button.disabled = false;
+    button.textContent = "家猫カードを保存する ↓";
+  }
+}
+function renderTown() {
+  $("#townStops").innerHTML = QUESTS.map(
+    (q, i) =>
+      `<button class="town-stop ${selectedPlace === i ? "selected" : ""} ${state.answers[i] ? "visited" : ""}" data-place="${i}" style="left:${coords[i][0]}%;top:${coords[i][1]}%" aria-label="${q.place}の詳細" aria-pressed="${selectedPlace === i}"><span class="stop-icon">${q.icon}</span><b>${q.place}</b>${state.answers[i] ? "<small>✓ あなたの足あと</small>" : ""}</button>`,
+  ).join("");
+  $("#localTrailCount").textContent =
+    `この端末の足あと ${state.answers.length} / 5`;
+  renderPlaceDetail(selectedPlace);
+  renderMarkers([]);
+}
+function renderPlaceDetail(index) {
+  selectedPlace = index;
+  const q = QUESTS[index],
+    done = state.answers[index],
+    a = currentAnswer(index);
+  $("#placeDetail").innerHTML =
+    `<span class="eyebrow">PLACE 0${index + 1} / ${q.topic}</span><div class="place-cat"><img src="${POSES[q.pose].src}" alt="${POSES[q.pose].alt}"></div><h2>${q.place}</h2><p>${q.title}</p><div class="place-note"><b>${done ? "この端末に残った足あと" : "この場所で出会う問い"}</b><p>${esc(done ? (a ? (state.kids ? a.kid : a.label) : "今は決めずに進んだ") : q.scene)}</p></div><button class="button small primary" data-visit="${Math.min(index, state.answers.length, 4)}">${done ? "この問いを選び直す" : index > state.answers.length ? "ここへ向かって歩く" : "この問いに出会う"} →</button><a href="#research" class="text-link">背景：${RESEARCH[q.refs[0]].concept} ↗</a>`;
+  document.querySelectorAll(".town-stop").forEach((b) => {
+    const on = Number(b.dataset.place) === index;
+    b.classList.toggle("selected", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+}
+function renderMarkers(players) {
+  const selfIndex = Math.min(state.step, 4),
+    markers = [];
+  if (state.answers.length)
+    markers.push(
+      `<div class="local-cat-marker" style="left:${coords[selfIndex][0]}%;top:${coords[selfIndex][1] - 12}%"><img src="${POSES[currentPose()].src}" alt="この端末の猫の現在地"><span>あなた</span></div>`,
+    );
+  const grouped = [[], [], [], [], []];
+  players.forEach((p) =>
+    grouped[Math.max(0, Math.min(4, Math.round(Number(p.step) || 1) - 1))].push(
+      p,
+    ),
+  );
+  grouped.forEach((list, loc) => {
+    if (!list.length) return;
+    markers.push(
+      `<button class="shared-marker" data-place="${loc}" style="left:${coords[loc][0] + 6}%;top:${coords[loc][1] - 11}%" aria-label="${QUESTS[loc].place}に共有参加者${list.length}匹"><span>🐾 ${list.length}</span></button>`,
+    );
+  });
+  $("#playerMarkers").innerHTML = markers.join("");
+}
+function renderAtlas() {
+  $("#atlasPoints").innerHTML = cats
+    .map((c) => {
+      const same = cats.filter((a) => a.x === c.x && a.y === c.y),
+        index = same.findIndex((a) => a.no === c.no);
+      const dx =
+          same.length > 1
+            ? Math.cos((index * 2 * Math.PI) / same.length) * 8
+            : 0,
+        dy =
+          same.length > 1
+            ? Math.sin((index * 2 * Math.PI) / same.length) * 8
+            : 0;
+      return `<button class="atlas-dot" data-atlas="${c.no}" style="left:calc(${c.x * 10}% + ${dx}px);bottom:calc(${c.y * 10}% + ${dy}px);--dot:${c.y >= 7 ? "#ae7156" : c.x < 5 ? "#417c6c" : "#c49849"}" aria-label="${esc(c.name)}。X ${c.x}、Y ${c.y}" title="${esc(c.name)}"><span>${String(c.no).padStart(2, "0")}</span></button>`;
+    })
+    .join("");
+  $("#atlasCount").textContent = `${cats.length}匹`;
+  const c = chooseCat() || cats[0];
+  if (c) $("#atlasDetail").innerHTML = catDetail(c);
+  const p = journeyPoint();
+  if (state.answers.length) {
+    const you = document.createElement("span");
+    you.className = "atlas-you";
+    you.style.left = `${p.x * 10}%`;
+    you.style.bottom = `${p.y * 10}%`;
+    you.textContent = "あなたの選択";
+    $("#atlasPoints").append(you);
+  }
+}
+function setAtlas(on) {
+  $("#townView").classList.toggle("hidden", on);
+  $("#atlasView").classList.toggle("hidden", !on);
+  $("#townTab").classList.toggle("active", !on);
+  $("#atlasTab").classList.toggle("active", on);
+  $("#townTab").setAttribute("aria-pressed", String(!on));
+  $("#atlasTab").setAttribute("aria-pressed", String(on));
+}
+function gasEndpoint() {
+  return String(config.gasUrl || "").trim();
+}
 function sendEvent(payload) {
-  const url=gasEndpoint(); if(!url) return;
-  const body={...payload,playerId:state.playerId,name:($('#playerName')?.value||'たびねこ').trim().slice(0,16)||'たびねこ',step:payload.step||state.step,catNo:payload.catNo||state.cat?.no||1};
-  fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),keepalive:true}).catch(()=>{});
+  if (!gasEndpoint()) return;
+  fetch(gasEndpoint(), {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    keepalive: true,
+    body: JSON.stringify({
+      ...payload,
+      playerId: state.playerId,
+      name: state.name,
+      step: payload.step || Math.min(5, state.step + 1),
+      catNo: payload.catNo || chooseCat()?.no || 1,
+    }),
+  }).catch(() => {});
 }
-function loadWorld(callback) {
-  const url=gasEndpoint(); if(!url) { callback([]);return; }
-  const cb=`ienekoMap_${Date.now()}_${Math.floor(Math.random()*10000)}`;
-  const timer=setTimeout(()=>{delete window[cb];callback(null);},8000);
-  window[cb]=(data)=>{clearTimeout(timer);delete window[cb];callback(Array.isArray(data)?data:[]);};
-  const script=document.createElement('script');script.src=`${url}?mode=map&callback=${cb}&_=${Date.now()}`;script.onerror=()=>{clearTimeout(timer);delete window[cb];callback(null);};document.body.appendChild(script);script.onload=()=>script.remove();
+function loadWorld() {
+  return new Promise((resolve) => {
+    const cb = `ienekoMap_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      script = document.createElement("script");
+    let settled = false;
+    const finish = (data) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
+      resolve(data);
+    };
+    const timer = setTimeout(() => finish(null), 8000);
+    window[cb] = (data) => finish(Array.isArray(data) ? data : null);
+    script.onerror = () => finish(null);
+    script.src = `${gasEndpoint()}?mode=map&callback=${cb}&_=${Date.now()}`;
+    document.body.append(script);
+  });
 }
-function refreshWorld() {
-  if(!gasEndpoint()) { $('#worldStatus').innerHTML='<i></i>GAS連携は未設定';renderWorld([]);return; }
-  $('#worldStatus').innerHTML='<i></i>世界の足あとを確認中';
-  loadWorld(players=>{if(players===null){$('#worldStatus').innerHTML='<i></i>いまは世界とつながっていません';return;} $('#worldStatus').innerHTML='<i></i>世界とつながっています';renderWorld(players);});
-}
-function renderWorld(players) {
-  $('#worldCount').textContent=players.length;
-  $('#playerList').innerHTML=players.length?players.map(p=>`<div class="player-row"><span class="player-dot">🐾</span><span><b>${escapeHtml(p.name||'たびねこ')}</b><small>${escapeHtml(p.place||'冒険中')}</small></span><em>NO.${String(p.catNo||1).padStart(2,'0')}</em></div>`).join(''):'<p class="empty-state">世界はまだ静かです。あなたが最初の灯りになる？</p>';
-  const g=$('#playerMarkers');g.replaceChildren();players.forEach((p,i)=>{const loc=Math.max(0,Math.min(4,Number(p.step||1)-1)),node=document.querySelector(`.map-location[data-loc="${loc}"]`);if(!node)return;const tr=node.getAttribute('transform').match(/translate\(([^ ]+) ([^)]+)\)/);const x=Number(tr[1])+((i%3)-1)*25,y=Number(tr[2])+Math.floor(i/3)*25;const group=document.createElementNS('http://www.w3.org/2000/svg','g');group.setAttribute('class',`player-marker ${p.playerId===state.playerId?'you':''}`);group.setAttribute('transform',`translate(${x} ${y-34})`);group.innerHTML=`<circle r="14"/><text y="5">🐾</text>`;g.appendChild(group);});
-}
-function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function setWorldJoin(on) {
-  state.optedIn=on;saveState();$('#joinWorld').checked=on;$('#joinBox')?.classList.toggle('is-enabled',on);$('.join-box').classList.toggle('is-enabled',on);
-  if(on) { $('#joinStatus').textContent=gasEndpoint()?'参加を準備しています。名前はいつでも変更できます。':'GASの接続設定後に、マップへ参加できます。'; }
-  else { sendEvent({event:'leave',step:state.step,place:QUESTS[Math.max(0,Math.min(4,state.step))].place});$('#joinStatus').textContent='マップ参加をオフにしました。'; }
+async function refreshWorld() {
+  const request = ++worldRequest;
+  $("#worldStatus").textContent = gasEndpoint()
+    ? "共有された足あとを確認中"
+    : "この端末の足あとを表示中";
+  const players = gasEndpoint() ? await loadWorld() : [];
+  if (request !== worldRequest) return;
+  const list = Array.isArray(players) ? players : [];
+  $("#worldCount").textContent = players === null ? "?" : String(list.length);
+  $("#worldEmptyNote").textContent =
+    players === null
+      ? "共有の足あとを取得できませんでした。更新して再確認できます。"
+      : gasEndpoint()
+        ? "直近4分以内に共有された、物語上の地点です。"
+        : "共有接続は準備中です。いまは、この端末で歩いた道を楽しめます。";
+  if (gasEndpoint())
+    $("#worldStatus").textContent =
+      players === null ? "共有接続を確認できません" : "共有された冒険者の地点";
+  $("#playerList").innerHTML = list.length
+    ? list
+        .slice(0, 30)
+        .map(
+          (p) =>
+            `<div class="player-row"><span>🐾</span><div><b>${esc(String(p.name || "たびねこ").slice(0, 16))}</b><small>${esc(String(p.place || "冒険中").slice(0, 40))}</small></div><span>NO. ${esc(String(p.catNo || 1).slice(0, 3))}</span></div>`,
+        )
+        .join("")
+    : '<p class="empty-state">まだ、共有された足あとはありません。<br>架空の参加者は表示していません。</p>';
+  renderMarkers(list);
 }
 function setupPresence() {
-  if(presenceTimer) clearInterval(presenceTimer);
-  if(!state.optedIn||!gasEndpoint()) return;
-  const send=()=>sendEvent({event:'presence',step:Math.min(5,Math.max(1,state.step+1)),place:QUESTS[Math.max(0,Math.min(4,state.step))].place,catNo:state.cat?.no||1});
-  send();presenceTimer=setInterval(send,45000);
+  if (presenceTimer) clearInterval(presenceTimer);
+  presenceTimer = null;
+  if (!state.optedIn || !gasEndpoint()) return;
+  const send = () =>
+    sendEvent({
+      event: "presence",
+      step: state.step + 1,
+      place: QUESTS[state.step].place,
+    });
+  send();
+  presenceTimer = setInterval(send, 45000);
+}
+function setJoin(on) {
+  state.optedIn = on;
+  persist();
+  $(".join-box").classList.toggle("is-enabled", on);
+  if (!on) sendEvent({ event: "leave", step: state.step + 1 });
+  $("#joinStatus").textContent = gasEndpoint()
+    ? on
+      ? "共有をオンにしました。反映はマップ更新後に確認できます。"
+      : "共有はオフです。"
+    : "共有機能は接続準備中です。いまはこの端末に足あとを残します。";
+  setupPresence();
+}
+function toast(text) {
+  $("#toast").textContent = text;
+  $("#toast").classList.remove("hidden");
+  setTimeout(() => $("#toast").classList.add("hidden"), 4500);
+}
+function setKids() {
+  document.body.classList.toggle("kids-on", state.kids);
+  $("#kidsMode").setAttribute("aria-pressed", String(state.kids));
+  $("#kidsMode").innerHTML = `<span>Kids</span> ${state.kids ? "ON" : "OFF"}`;
 }
 
 async function init() {
   loadState();
-  try { const r=await fetch('dist/ieneko-100.csv'); if(!r.ok) throw new Error('csv'); cats=parseCSV(await r.text()); }
-  catch { cats=[]; }
-  if(state.step>=QUESTS.length && state.answers.length>=QUESTS.length) { state.step=QUESTS.length;state.cat=chooseCat(); }
-  $('#kidsMode').setAttribute('aria-pressed',String(state.kids));document.body.classList.toggle('kids-on',state.kids);$('#kidsMode').textContent=`Kids版　${state.kids?'ON':'OFF'}`;
-  refreshCat(); renderQuestion();
-  document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>localScreen(b.dataset.screen)));
-  $('#startJourney').addEventListener('click',startJourney);$('#downloadCard').addEventListener('click',downloadCard);$('#again').addEventListener('click',startJourney);
-  $('#kidsMode').addEventListener('click',()=>{state.kids=!state.kids;saveState();document.body.classList.toggle('kids-on',state.kids);$('#kidsMode').textContent=`Kids版　${state.kids?'ON':'OFF'}`;$('#kidsMode').setAttribute('aria-pressed',String(state.kids));if(activeScreen==='journey')renderQuestion();});
-  $('#readQuestion').addEventListener('click',()=>{if(!('speechSynthesis'in window))return;const q=QUESTS[state.step];const u=new SpeechSynthesisUtterance(state.kids?q.kid:q.body);u.lang='ja-JP';u.rate=state.kids?.83:.96;speechSynthesis.cancel();speechSynthesis.speak(u);});
-  $('#joinWorld').checked=state.optedIn;$('.join-box').classList.toggle('is-enabled',state.optedIn);$('#joinWorld').addEventListener('change',e=>{setWorldJoin(e.target.checked);setupPresence();});
-  $('#joinButton').addEventListener('click',()=>{if(!state.optedIn)setWorldJoin(true);if(!gasEndpoint()){ $('#joinStatus').textContent='接続URLはREADMEの手順で設定します。';return;}sendEvent({event:'presence',step:Math.min(5,Math.max(1,state.step)),place:QUESTS[Math.max(0,Math.min(4,state.step))].place,catNo:state.cat?.no||1});$('#joinStatus').textContent='冒険者として世界に登場しました。';refreshWorld();setupPresence();});
-  $('#refreshWorld').addEventListener('click',refreshWorld);$('#catSearch').addEventListener('input',e=>renderCats(e.target.value));
-  window.addEventListener('beforeunload',()=>{if(state.optedIn)sendEvent({event:'leave',step:state.step,place:QUESTS[Math.max(0,Math.min(4,state.step))].place});});
+  setKids();
+  try {
+    const response = await fetch("dist/ieneko-100.csv");
+    if (!response.ok) throw new Error("csv");
+    cats = parseCSV(await response.text());
+    if (
+      cats.length !== 100 ||
+      cats.some((c) => !Number.isFinite(c.x) || !Number.isFinite(c.y))
+    )
+      throw new Error("invalid_data");
+    connectChoiceAnchors();
+  } catch {
+    toast("家猫データを読み込めませんでした。ページを再読み込みしてください。");
+    $("#startJourney").disabled = true;
+    return;
+  }
+  renderResearch();
+  $("#playerName").value = state.name;
+  $("#joinWorld").checked = state.optedIn;
+  $(".join-box").classList.toggle("is-enabled", state.optedIn);
+  $("#startJourney").addEventListener("click", startJourney);
+  $("#again").addEventListener("click", startJourney);
+  $("#resumeJourney").addEventListener("click", () =>
+    navigate(state.answers.length === 5 ? "complete" : "journey"),
+  );
+  $("#kidsMode").addEventListener("click", () => {
+    state.kids = !state.kids;
+    persist();
+    setKids();
+    if (activeScreen === "journey") {
+      const wasFeedback = feedbackOpen;
+      renderQuestion();
+      if (wasFeedback)
+        confirmAnswer(state.answers[state.step]?.choice ?? -1, false);
+    }
+    if (activeScreen === "complete") renderComplete();
+    if (activeScreen === "world") renderPlaceDetail(selectedPlace);
+  });
+  $("#answerList").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-choice]");
+    if (b) previewChoice(Number(b.dataset.choice));
+  });
+  $("#confirmAnswer").addEventListener("click", () => {
+    if (selectedChoice !== null) confirmAnswer(selectedChoice);
+  });
+  $("#skipQuestion").addEventListener("click", () => confirmAnswer(-1));
+  $("#nextQuestion").addEventListener("click", nextQuestion);
+  $("#previousQuestion").addEventListener("click", () =>
+    visitQuestion(state.step - 1),
+  );
+  document.addEventListener("click", (e) => {
+    const cat = e.target.closest("[data-cat]");
+    if (cat) openCat(cat.dataset.cat);
+    const visit = e.target.closest("[data-visit]");
+    if (visit) visitQuestion(Number(visit.dataset.visit));
+    const place = e.target.closest("[data-place]");
+    if (place) renderPlaceDetail(Number(place.dataset.place));
+    const dot = e.target.closest("[data-atlas]");
+    if (dot) {
+      const c = cats.find((c) => c.no === Number(dot.dataset.atlas));
+      if (c) $("#atlasDetail").innerHTML = catDetail(c);
+      document
+        .querySelectorAll(".atlas-dot")
+        .forEach((d) => d.classList.toggle("selected", d === dot));
+    }
+  });
+  $("#catSearch").addEventListener("input", (e) => renderCats(e.target.value));
+  $("#closeCatDialog").addEventListener("click", () => $("#catDialog").close());
+  $("#catDialog").addEventListener("click", (e) => {
+    if (e.target === $("#catDialog")) {
+      const r = e.target.getBoundingClientRect();
+      if (
+        e.clientX < r.left ||
+        e.clientX > r.right ||
+        e.clientY < r.top ||
+        e.clientY > r.bottom
+      )
+        e.target.close();
+    }
+  });
+  $("#readQuestion").addEventListener("click", () => {
+    if (!("speechSynthesis" in window)) {
+      toast("このブラウザーでは読み上げを利用できません。");
+      return;
+    }
+    const q = QUESTS[state.step],
+      u = new SpeechSynthesisUtterance(
+        (state.kids ? q.kid : q.body) +
+          "。" +
+          q.answers.map((a) => (state.kids ? a.kid : a.label)).join("。"),
+      );
+    u.lang = "ja-JP";
+    u.rate = state.kids ? 0.85 : 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+  $("#downloadCard").addEventListener("click", downloadCard);
+  $("#resultEvidence").addEventListener("click", () =>
+    openCat(chooseCat()?.no),
+  );
+  $("#townTab").addEventListener("click", () => setAtlas(false));
+  $("#atlasTab").addEventListener("click", () => setAtlas(true));
+  $("#refreshWorld").addEventListener("click", refreshWorld);
+  $("#joinWorld").addEventListener("change", (e) => setJoin(e.target.checked));
+  $("#joinButton").addEventListener("click", () => {
+    state.name =
+      $("#playerName")
+        .value.replace(/[<>@`\\]/g, "")
+        .trim()
+        .slice(0, 16) || "たびねこ";
+    persist();
+    if (!state.optedIn) {
+      $("#joinStatus").textContent =
+        "共有する場合は、上のチェックをオンにしてください。";
+      return;
+    }
+    setupPresence();
+    $("#joinStatus").textContent = gasEndpoint()
+      ? "共有の更新を送りました。マップを更新して確認できます。"
+      : "共有接続は準備中です。ニックネームはこの端末に保存しました。";
+  });
+  window.addEventListener("hashchange", () =>
+    showScreen(location.hash.slice(1)),
+  );
+  window.addEventListener("pagehide", () => {
+    if (state.optedIn) sendEvent({ event: "leave", step: state.step + 1 });
+  });
+  showScreen(location.hash.slice(1) || "home");
   setupPresence();
-  if(state.step>0 && state.step<QUESTS.length) { const resume=document.createElement('button');resume.className='button small ghost';resume.textContent='つづきから';resume.addEventListener('click',()=>{localScreen('journey');renderQuestion();});$('.hero-buttons').append(resume); }
 }
-
 init();

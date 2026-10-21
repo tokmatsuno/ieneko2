@@ -1,0 +1,13 @@
+{
+  "created": "2026-10-22",
+  "mode": "built-in image_gen",
+  "reference": "mike-main-visual.png",
+  "transparent_background": true,
+  "common_prompt": "Use case: identity-preserve. Create a production game character cutout of the EXACT SAME black-and-cream tuxedo cat in the reference: golden eyes, pink nose, cream muzzle/chest/belly/paws, charcoal fur, fine hand-inked vintage storybook fur texture. Preserve its identity and painterly linework. Whole body fully visible with generous clear margin on every side. NO letters, NO border, NO typography, NO extra cats. True transparent background. This is a separate single-pose illustration, not a sheet.",
+  "variants": {
+    "cat-scared.png": "The cat is adorably startled and timid, crouched low, ears tilted back, shoulders raised, wide round eyes, tail puffed and curled close. One forepaw lifted cautiously. Warm empathetic expression, no distress or violence.",
+    "cat-hungry.png": "The cat sits upright looking hopefully up at the viewer, both forepaws held begging gently together near chest, mouth slightly open as if meowing for dinner, tail curled around feet. A small empty cream ceramic food bowl at its feet, cute food-seeking expression.",
+    "cat-curious.png": "The cat is a curious little explorer on four paws, leaning forward to sniff a tiny green seedling, one forepaw gently raised, alert forward ears, head tilted, tail lifted in a question-mark curve. Quiet wonder.",
+    "cat-resting.png": "The cat is content and reassured, curled into a loaf with closed smiling eyes, relaxed ears and tail wrapped around its body. Warm peaceful resting expression. No accessories."
+  }
+}
