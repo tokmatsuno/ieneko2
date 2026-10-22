@@ -28,271 +28,8 @@ const POSES = {
 
 // Each authored answer refers to an existing CSV cat as a design anchor.
 // Its x/y values are loaded verbatim from that row, not a validated scale.
-const QUESTS = [
-  {
-    place: "ひだまり広場",
-    icon: "☀",
-    topic: "安心と、はじめの接点",
-    weather: "15:00 · 木もれ日",
-    pose: "scared",
-    bubble: "知らない猫ばかり…",
-    scene: "輪のそとにも、居場所はある。",
-    title: "楽しそう。でも、入るのはちょっと怖い。",
-    body: "広場では、まちの小さなお祭りの準備中。猫は行ってみたいのに、植え込みの陰で立ち止まっています。「自分だったら」と考えると、どんな入口がうれしい？",
-    kid: "ひろばで、おまつりのじゅんび中。知らない子ばかりで、猫はどきどき。どんな入り方なら、ほっとする？",
-    refs: ["community", "ties"],
-    why: "地域活動への関わり始めや、仲介者の役割を、安心できる入口の問いに翻案しました。",
-    answers: [
-      {
-        label: "知っている人と、一緒に。",
-        kid: "知っている子と、いっしょに行く",
-        note: "顔見知りの案内があれば安心",
-        key: "kind",
-        anchorNo: 94,
-        pose: "hello",
-        reaction: "「いっしょなら、行けそう。」",
-        feedback:
-          "猫は植え込みから顔を出しました。知っている誰かが、いつもの場所と新しい場所をつないでくれることも。",
-        action: "気になる地域の催しを、顔見知りにひとつ聞いてみる。",
-      },
-      {
-        label: "10分だけ、お手伝い。",
-        kid: "10分だけ、じゅんびを手つだう",
-        note: "時間と役割が見えたら踏み出せる",
-        key: "brave",
-        anchorNo: 52,
-        pose: "curious",
-        reaction: "「10分なら、できるかも。」",
-        feedback:
-          "小さな役割が見つかって、猫は一歩。ずっと参加できなくても、その日の短い関わり方を選べます。",
-        action: "「10分だけでもいいですか？」と聞ける活動をひとつ探す。",
-      },
-      {
-        label: "まずは、端っこで見学。",
-        kid: "まずは、はしっこから見てみる",
-        note: "参加するかは、見てから決めたい",
-        key: "wise",
-        anchorNo: 72,
-        pose: "resting",
-        reaction: "「ここから見てても、いい？」",
-        feedback:
-          "猫は日陰に座って、しばらく見学。関心を持つことと、すぐに輪に入ることは別々でいいのです。",
-        action: "気になる活動の案内を見て、見学できるか確かめる。",
-      },
-    ],
-  },
-  {
-    place: "毛糸の森",
-    icon: "✿",
-    topic: "関心と、参加のきっかけ",
-    weather: "15:20 · いいにおい",
-    pose: "hungry",
-    bubble: "おなか、ぐぅ…",
-    scene: "「好き」から始まる関わり。",
-    title: "おいしい匂いの先に、まちの食堂。",
-    body: "森の入口に、一日だけのまちの食堂。猫は空っぽの器を抱えています。食べる人、手伝う人、立ち寄るだけの人。あなたなら、どんなふうに関わりたい？",
-    kid: "森の食堂から、いいにおい。猫のおなかが、ぐう。食べるだけでも、お手つだいでもいいんだって。どうしたい？",
-    refs: ["autonomy", "community"],
-    why: "自分で関わり方を選べる設計を、参加の動機と地域活動の入口という観点から考えます。",
-    answers: [
-      {
-        label: "食べながら、隣の人と話す。",
-        kid: "となりの子と、おしゃべりしてみる",
-        note: "同じテーブルから、ゆるくつながる",
-        key: "kind",
-        anchorNo: 94,
-        pose: "hello",
-        reaction: "「おすすめ、教えてにゃ。」",
-        feedback:
-          "猫は器を置いて、隣にちょこん。一緒に食べるという身近な関心が、言葉を交わすきっかけになるかもしれません。",
-        action: "お店や食堂で、気になる一品について一言聞いてみる。",
-      },
-      {
-        label: "自分の得意を、ひとつだけ。",
-        kid: "おさらをならべるの、やってみる",
-        note: "片付け、撮影、案内。できる形で",
-        key: "brave",
-        anchorNo: 100,
-        pose: "curious",
-        reaction: "「おさら運びなら、まかせて。」",
-        feedback:
-          "猫は自分で選んだ役割をひとつ。どれだけ手伝ったかを競わず、自分ができる形から考えます。",
-        action: "自分にできる「ひとつだけのお手伝い」をメモする。",
-      },
-      {
-        label: "今日は、食べて帰る。",
-        kid: "今日は、おいしく食べて帰る",
-        note: "楽しむだけの日があってもいい",
-        key: "wise",
-        anchorNo: 35,
-        pose: "resting",
-        reaction: "「今日は、ごちそうさまだけ。」",
-        feedback:
-          "猫は満足そうに一息。手伝わない選択も、自分で決めていい。次の関わり方は、次の自分に任せましょう。",
-        action:
-          "好きだった場所をひとつ覚えておく。次に行くかは、その日に決める。",
-      },
-    ],
-  },
-  {
-    place: "しずくの庭",
-    icon: "⌁",
-    topic: "小さな協力と、共用の場所",
-    weather: "15:40 · 雨あがり",
-    pose: "curious",
-    bubble: "この道、通りにくいにゃ",
-    scene: "小さな「困った」が、まちの問い。",
-    title: "水たまりで、いつもの道が遠回り。",
-    body: "庭の入口に大きな水たまり。歩く人も、車いすの猫も、少し困っています。みんなが使う場所の「困った」に、どんな関わり方を選ぶ？",
-    kid: "にわの道が、水たまりでいっぱい。車いすの猫も、こまっているよ。あなたなら、どうしたい？",
-    refs: ["efficacy", "commons"],
-    why: "近隣で協力する意志と、共用する場所を管理する仕組みを、身近な場面へ翻案しました。",
-    answers: [
-      {
-        label: "困っている人の声を聞く。",
-        kid: "「どこがこまる？」と聞いてみる",
-        note: "自分の想像だけで決めずに",
-        key: "kind",
-        anchorNo: 60,
-        pose: "hello",
-        reaction: "「一緒に、考えていい？」",
-        feedback:
-          "猫はまず、困っている相手のほうへ。何が必要かを決めつけず、声を聞くところから始めました。",
-        action: "身近な道で、誰がどんな点に困るかを一つ観察する。",
-      },
-      {
-        label: "管理する人に、場所を伝える。",
-        kid: "道をなおす人に、知らせる",
-        note: "ひとりで直さず、担当とつなぐ",
-        key: "brave",
-        anchorNo: 82,
-        pose: "curious",
-        reaction: "「ここだよ、って伝えよう。」",
-        feedback:
-          "猫は危ない作業をせず、場所を伝えることにしました。共用の場所では、管理する人との連絡も関わりのひとつです。",
-        action: "公園や道路の管理窓口を、自治体の公式サイトで調べる。",
-      },
-      {
-        label: "まず記録して、あとで考える。",
-        kid: "場所をおぼえて、あとで考える",
-        note: "今すぐ動けなくても、気づきは残せる",
-        key: "wise",
-        anchorNo: 99,
-        pose: "resting",
-        reaction: "「気づいたこと、忘れないように。」",
-        feedback:
-          "猫は少し離れて、気づきをメモ。行動を急がず、時間のある日に考え直せる形で残しました。",
-        action: "場所と困りごとを、個人が特定されない一行のメモにする。",
-      },
-    ],
-  },
-  {
-    place: "月あかり坂",
-    icon: "☾",
-    topic: "役割の見えやすさと、余白",
-    weather: "16:00 · 夕方の風",
-    pose: "resting",
-    bubble: "ずっとは、むずかしいにゃ",
-    scene: "手を挙げる前に、知りたいこと。",
-    title: "手伝いたい。でも、毎週は無理。",
-    body: "坂道の花壇を育てる仲間を募集中。「入ったら、ずっと続けないとだめ？」と猫。仕事や学校、ひと休みも大切にしながら関わるなら？",
-    kid: "坂の花だんで、なかまをぼしゅう中。でも、まいしゅうは行けない。どんなお手つだいが、できそう？",
-    refs: ["organization", "autonomy"],
-    why: "組織の参画方法を問い直す研究を背景に、時間と役割を限定できる選択肢を設計しました。",
-    answers: [
-      {
-        label: "仲間と交代できる役割。",
-        kid: "なかまと、じゅんばんにやる",
-        note: "休むときに、代われる安心",
-        key: "kind",
-        anchorNo: 82,
-        pose: "hello",
-        reaction: "「交代なら、できる日があるよ。」",
-        feedback:
-          "猫は「休む日もある」と伝えました。続け方をひとりの頑張りだけに任せず、役割の分け方を考えます。",
-        action: "活動の募集で、休める仕組みと担当範囲を確認する。",
-      },
-      {
-        label: "今日だけの、水やり係。",
-        kid: "今日だけ、水をあげる",
-        note: "終わりの見える、単発の一歩",
-        key: "brave",
-        anchorNo: 100,
-        pose: "curious",
-        reaction: "「今日の一回、やってみる。」",
-        feedback:
-          "猫は小さなじょうろを手にしました。回数と終わりが見えると、自分の予定と相談しやすくなります。",
-        action: "所要時間と完了条件が書かれた、単発の活動を探す。",
-      },
-      {
-        label: "家から、アイデアを送る。",
-        kid: "おうちから、いい考えを送る",
-        note: "現地に行かない参加も選べる",
-        key: "wise",
-        anchorNo: 99,
-        pose: "resting",
-        reaction: "「おうちからでも、いいかにゃ？」",
-        feedback:
-          "猫は家から花のアイデアをひとつ。現地に行くことだけを参加の条件にしない、別の入口を考えました。",
-        action:
-          "地域の公式な意見募集や、オンラインの参加方法をひとつ見てみる。",
-      },
-    ],
-  },
-  {
-    place: "鈴の城下町",
-    icon: "♜",
-    topic: "みんなで決める、次の一歩",
-    weather: "16:20 · 鈴の音",
-    pose: "hello",
-    bubble: "このまち、どうしたい？",
-    scene: "まちを育てるのは、いろんな声。",
-    title: "空き地がひとつ。何があったら、うれしい？",
-    body: "町の空き地の使い方を考える日。花壇、ベンチ、小さな催し。いろんな案があります。猫はあなたに、最初の一歩を聞いてきました。",
-    kid: "まちの空き地に、何をつくろう？お花？ベンチ？小さなおまつり？みんなで決めるなら、どう始めたい？",
-    refs: ["commons", "community"],
-    why: "利用者が関わるルールづくりという考え方を、まちの小さな合意形成へ翻案しています。",
-    answers: [
-      {
-        label: "まだ聞けていない声を集める。",
-        kid: "まだ話していない子にも、聞く",
-        note: "その場にいない人も思い浮かべる",
-        key: "kind",
-        anchorNo: 94,
-        pose: "hello",
-        reaction: "「来られない猫にも、聞いてみよう。」",
-        feedback:
-          "猫は集まった声だけで決めないことにしました。気持ちや生活が違う誰かにも、選べる場所を残したいから。",
-        action: "近所にあると嬉しい場所を、身近な人と一つずつ話す。",
-      },
-      {
-        label: "小さく試して、みんなで見直す。",
-        kid: "一日だけ、ためしてみる",
-        note: "最初から完成させなくても",
-        key: "brave",
-        anchorNo: 76,
-        pose: "curious",
-        reaction: "「一日だけなら、試せるね。」",
-        feedback:
-          "猫は小さな実験から始めることに。土地の管理者と相談して、使う人の声で見直す場を考えました。",
-        action:
-          "もし使えたら嬉しい場所を、所有者の許可が必要な企画メモとして描く。",
-      },
-      {
-        label: "案内を読んで、自分の考えを一票。",
-        kid: "おしらせを読んで、一つえらぶ",
-        note: "対面の集まりが苦手でも",
-        key: "wise",
-        anchorNo: 99,
-        pose: "resting",
-        reaction: "「一票にも、私の気持ちがある。」",
-        feedback:
-          "猫は案内を読み、自分の考えを残しました。声の大きさや出席時間だけで、まちへの思いは決まりません。",
-        action: "地域の計画や意見募集を、自治体の公式サイトで一つ読んでみる。",
-      },
-    ],
-  },
-];
+const QUESTS = window.IENEKO_QUESTS;
+const JourneyModel = window.JourneyModel;
 
 const $ = (s) => document.querySelector(s);
 const KID_TITLES = [
@@ -344,6 +81,7 @@ let cats = [],
   feedbackOpen = false,
   selectedPlace = 0,
   activeScreen = "home";
+let blendPaintTimer = null;
 let presenceTimer = null,
   worldTimer = null,
   worldRequest = 0;
@@ -452,7 +190,7 @@ function loadState() {
         const a = saved.answers[i];
         if (!a || !Number.isInteger(a.choice) || a.choice < -1 || a.choice > 2)
           break;
-        state.answers.push({ choice: a.choice });
+        state.answers.push(JourneyModel.normalize(a));
       }
     }
     state.step = Math.max(
@@ -546,17 +284,7 @@ function currentAnswer(i = state.step) {
     ? QUESTS[i].answers[index]
     : null;
 }
-function journeyPoint() {
-  const choices = state.answers
-    .map((a, i) => (a.choice >= 0 ? QUESTS[i].answers[a.choice] : null))
-    .filter(Boolean);
-  return choices.length
-    ? {
-        x: choices.reduce((v, a) => v + a.x, 0) / choices.length,
-        y: choices.reduce((v, a) => v + a.y, 0) / choices.length,
-      }
-    : { x: 5, y: 5 };
-}
+function journeyPoint() {return JourneyModel.point(state.answers, QUESTS);}
 function chooseCat() {
   const p = journeyPoint();
   return cats.reduce((best, c) => {
@@ -586,7 +314,7 @@ function currentPose() {
 }
 function appearance(preview) {
   const answers = state.answers.slice();
-  if (preview !== undefined) answers[state.step] = {choice: preview};
+  if (preview !== undefined) answers[state.step] = JourneyModel.normalize(preview);
   return CatStudio.derive(answers, QUESTS);
 }
 function cardAppearance() {return state.cardPose ? CatStudio.withPose(appearance(),state.cardPose) : appearance();}
@@ -625,6 +353,7 @@ function summonCat() {
 function renderQuestion() {
   const q = QUESTS[state.step];
   selectedChoice = null;
+  clearTimeout(blendPaintTimer);
   feedbackOpen = false;
   $("#journey").classList.remove("is-feedback");
   document.title = `第${state.step + 1}地点 | 家猫クエスト`;
@@ -649,9 +378,13 @@ function renderQuestion() {
   $("#answerList").innerHTML = q.answers
     .map(
       (a, i) =>
-        `<button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b>${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button>`,
+        `<button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b><span class="answer-letter">${["A","B","C"][i]}</span> ${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button>`,
     )
     .join("");
+  const oldWeights = JourneyModel.weights(state.answers[state.step]) || [1/3,1/3,1/3];
+  $("#blendSliders").innerHTML = q.answers.map((a,i)=>`<label><span><b>${['A','B','C'][i]}</b> ${esc(state.kids?a.kid:a.label)} <output id="blendValue${i}">${Math.round(oldWeights[i]*100)}%</output></span><input type="range" min="0" max="100" step="0.1" value="${oldWeights[i]*100}" data-blend="${i}" aria-label="${esc(a.label)}の割合"></label>`).join('');
+  $("#blendPanel").open = false;
+  $("#blendSummary").textContent = '3つの気持ちを、好きな配分に。';
   $("#confirmAnswer").disabled = true;
   $("#confirmAnswer").textContent = "気になる答えを選んでね";
   $("#previousQuestion").hidden = state.step === 0;
@@ -661,8 +394,10 @@ function renderQuestion() {
   ).join("");
 }
 function previewChoice(index) {
+  clearTimeout(blendPaintTimer);
   selectedChoice = index;
   document.querySelectorAll(".answer-button").forEach((b, i) => {
+    b.removeAttribute("data-mixed");
     b.setAttribute("aria-pressed", String(i === index));
     b.querySelector(".answer-check").textContent = i === index ? "✓" : "○";
   });
@@ -675,11 +410,25 @@ function previewChoice(index) {
   $("#catBubble").textContent = a.reaction;
   $("#companionMood").textContent = POSES[a.pose].name;
 }
-function confirmAnswer(index, record = true) {
+function previewBlend(values) {
+  const answer = JourneyModel.normalize(values), w = answer.weights;
+  if(!w)return;
+  selectedChoice = answer;
+  document.querySelectorAll('.answer-button').forEach((b,i)=>{b.setAttribute('aria-pressed','false');b.dataset.mixed='true';b.querySelector('.answer-check').textContent=`${+(w[i]*100).toFixed(1)}%`;});
+  document.querySelectorAll('[data-blend]').forEach((input,i)=>{input.value=w[i]*100;$("#blendValue"+i).textContent=`${+(w[i]*100).toFixed(1)}%`;});
+  $("#blendSummary").textContent = ['A','B','C'].map((v,i)=>`${v} ${+(w[i]*100).toFixed(1)}%`).join(' ・ ');
+  $("#confirmAnswer").disabled=false;
+  $("#confirmAnswer").textContent='この配分で、一歩進む →';
+  const look=appearance(answer);renderRecipe(look,state.step);
+  $("#catBubble").textContent='どっちの気持ちも、あるにゃ。';
+  clearTimeout(blendPaintTimer);
+  blendPaintTimer=setTimeout(()=>setPose('#companionImage',QUESTS[state.step].answers[answer.choice].pose,look),160);
+}
+function confirmAnswer(value, record = true) {
   if (feedbackOpen) return;
-  const q = QUESTS[state.step],
-    a = index >= 0 ? q.answers[index] : null;
-  state.answers[state.step] = { choice: index };
+  clearTimeout(blendPaintTimer);
+  const answer=JourneyModel.normalize(value),index=answer.choice,q=QUESTS[state.step],a=index>=0?q.answers[index]:null;
+  state.answers[state.step] = answer;
   if (record) state.cardPose = "";
   persist();
   feedbackOpen = true;
@@ -700,13 +449,23 @@ function confirmAnswer(index, record = true) {
         ][index]
       : a.feedback
     : "猫はひと休みして、次の場所へ。答えを保留することも、自分のペースを大切にする選択です。";
+  if(JourneyModel.mixed(answer)){
+    $("#feedbackReaction").textContent='「あいだの気持ちも、きみの答え。」';
+    $("#feedbackText").textContent=JourneyModel.describe(answer,q,state.kids)+' という配分でした。気になる一歩を、ひとつから試してみよう。';
+  }
   $("#feedbackAction").textContent = a
     ? state.kids
       ? KID_ACTIONS[state.step][index]
       : a.action
     : "今日、気になったことをひとつだけ覚えておく。";
+  $("#blendFeedback").innerHTML=JourneyModel.mixed(answer)?'<span>もうひとつの気持ちから</span>'+answer.weights.map((w,i)=>i!==index&&w>.05?`<p>${Math.round(w*100)}%：${esc(state.kids?KID_ACTIONS[state.step][i]:q.answers[i].action)}</p>`:'').join(''):'';
   $("#questionEvidenceBody").innerHTML =
     `<p class="research-application">${esc(q.why)}</p>${a ? `<p class="quiet-note">選択肢の参照猫：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>。その猫の設計座標 X ${a.x} / Y ${a.y} を使います。選択肢との対応は制作者の解釈です。</p>` : ""}${q.refs.map((key) => sourceCard(key, true)).join("")}<p class="quiet-note">問い・選択肢・反応は本作品の創作です。研究がこの回答を正解と認定したものではありません。</p>`;
+  if(JourneyModel.mixed(answer)){
+    const p=JourneyModel.point([answer],[q]);
+    $("#questionEvidenceBody .quiet-note")?.remove();
+    $("#questionEvidenceBody").insertAdjacentHTML('afterbegin',`<p class="quiet-note">各参照猫の設計座標を回答の配分で加重平均：X ${p.x.toFixed(3)} / Y ${p.y.toFixed(3)}。${esc(JourneyModel.describe(answer,q))}</p><p class="quiet-note">${q.answers.map((a,i)=>answer.weights[i]>0?`${['A','B','C'][i]}：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>（X ${a.x} / Y ${a.y}）`:'').filter(Boolean).join('、')}。選択肢との対応は制作者の解釈です。</p>`);
+  }
   $("#nextQuestion").textContent =
     state.step === 4 ? "わたしの猫を、呼んでみる ✦" : "次の足あとを、つけにいく →";
   setPose("#companionImage", a?.pose || "resting");
@@ -836,9 +595,11 @@ function renderComplete() {
   $("#cardEdition").textContent = `ATELIER / ${look.signature}`;
   $("#cardSeal").textContent = ["✿", "✦", "☾"][look.choices[4]] || "✦";
   $("#cardTraits").innerHTML = look.values.map((v,i)=>`<span>${look.labels[i]} <b>${esc(v)}</b></span>`).join("");
-  $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
+  $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":JourneyModel.mixed(a)?"◒":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
   $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さ、5問目は瞳と左右の模様に反映します。表情とポーズは初めに象限と5つの回答の組み合わせで選びます。今回の組み合わせ：${look.values.join("、")}。`;
 
+  $("#cardMixChart").innerHTML=JourneyModel.barsSVG(state.answers);
+  $("#resultGraph").innerHTML=JourneyModel.barsSVG(state.answers);
   $("#finishedName").textContent = c.name;
   $("#finishedCatch").textContent = state.kids
     ? "今日のえらび方から出会った、あなたの相棒。"
@@ -860,7 +621,7 @@ function renderComplete() {
       .map((a, i) => {
         const q = QUESTS[i],
           choice = a.choice >= 0 ? q.answers[a.choice] : null;
-        return `<article><span>0${i + 1} · ${q.place}</span><h3>${esc(choice ? (state.kids ? choice.kid : choice.label) : "今は決めずに進んだ")}</h3><p>${esc(choice?.action || "保留した問いは、あとで考えても大丈夫。")}</p><small>${choice ? `設計座標 X ${choice.x} / Y ${choice.y}` : "座標の平均には含めていません"}</small><a href="#research">背景：${RESEARCH[q.refs[0]].concept} ↗</a><button data-visit="${i}" class="text-link">ここから選び直す →</button></article>`;
+        return `<article><span>0${i + 1} · ${q.place}</span><h3>${esc(JourneyModel.describe(a,q,state.kids))}</h3><p>${esc(choice?.action || "保留した問いは、あとで考えても大丈夫。")}</p><small>${choice ? `回答の設計座標 X ${JourneyModel.point([a],[q]).x.toFixed(2)} / Y ${JourneyModel.point([a],[q]).y.toFixed(2)}` : "座標の平均には含めていません"}</small><a href="#research">背景：${RESEARCH[q.refs[0]].concept} ↗</a><button data-visit="${i}" class="text-link">ここから選び直す →</button></article>`;
       })
       .join("")}</div>`;
   $("#joinStatus").textContent = gasEndpoint()
@@ -882,15 +643,15 @@ async function downloadCard() {
     const canvas = document.createElement("canvas"),
       ctx = canvas.getContext("2d");
     canvas.width = 1080;
-    canvas.height = 1350;
+    canvas.height = 1710;
     const look = cardAppearance(), t = look.theme;
     ctx.fillStyle = t.ink;
-    ctx.fillRect(0,0,1080,1350);
-    const gloss = ctx.createLinearGradient(0,0,1080,1350);
+    ctx.fillRect(0,0,1080,1710);
+    const gloss = ctx.createLinearGradient(0,0,1080,1710);
     gloss.addColorStop(0,"#ffffff15"); gloss.addColorStop(.48,"#ffffff00"); gloss.addColorStop(.52,"#fff2bd16"); gloss.addColorStop(1,"#ffffff00");
-    ctx.fillStyle=gloss;ctx.fillRect(0,0,1080,1350);
+    ctx.fillStyle=gloss;ctx.fillRect(0,0,1080,1710);
     ctx.strokeStyle=t.gold; ctx.lineWidth=2;
-    ctx.strokeRect(22,22,1036,1306);ctx.strokeRect(35,35,1010,1280);
+    ctx.strokeRect(22,22,1036,1666);ctx.strokeRect(35,35,1010,1640);
     ctx.fillStyle=t.gold;ctx.font="500 26px sans-serif";
     ctx.fillText("✦ 家猫クエスト / CAT ATELIER",70,94);
     ctx.textAlign="right";ctx.font="500 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
@@ -906,10 +667,15 @@ async function downloadCard() {
     ctx.font="500 26px sans-serif";ctx.fillText(t.name,105,940);
     ctx.strokeStyle="#d6c39f";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(105,973);ctx.lineTo(975,973);ctx.stroke();
     ctx.font="500 23px sans-serif";
-    look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45));
-    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1230);
-    ctx.fillStyle="#fff5df";ctx.font="400 19px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1270);
-    ctx.font="400 15px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1300);
+    look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45,420));
+    ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,1195,950,340,22);ctx.fill();
+    ctx.fillStyle=t.ink;ctx.font="600 24px sans-serif";ctx.fillText("5つの問い、きょうの配分。",105,1242);
+    const mixColors=['#47775e','#c69c4e','#bb755e'];
+    state.answers.forEach((answer,i)=>{const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="500 20px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;if(weights)weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,25);x+=w*790;});else ctx.fillText('保留',175,y+19);});
+    ctx.fillStyle=t.ink;ctx.font="400 16px sans-serif";ctx.fillText('緑=A  黄=B  茶=C：各問の答えの配分。能力や性格の点数ではありません。',105,1510);
+    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1590);
+    ctx.fillStyle="#fff5df";ctx.font="400 19px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1630);
+    ctx.font="400 15px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1665);
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, "image/png"),
     );
@@ -964,7 +730,7 @@ function renderPlaceDetail(index) {
     done = state.answers[index],
     a = currentAnswer(index);
   $("#placeDetail").innerHTML =
-    `<span class="eyebrow">PLACE 0${index + 1} / ${q.topic}</span><div class="place-cat"><img src="${POSES[q.pose].src}" alt="${POSES[q.pose].alt}"></div><h2>${q.place}</h2><p>${q.title}</p><div class="place-note"><b>${done ? "この端末に残った足あと" : "この場所で出会う問い"}</b><p>${esc(done ? (a ? (state.kids ? a.kid : a.label) : "今は決めずに進んだ") : q.scene)}</p></div><button class="button small primary" data-visit="${Math.min(index, state.answers.length, 4)}">${done ? "この問いを選び直す" : index > state.answers.length ? "ここへ向かって歩く" : "この問いに出会う"} →</button><a href="#research" class="text-link">背景：${RESEARCH[q.refs[0]].concept} ↗</a>`;
+    `<span class="eyebrow">PLACE 0${index + 1} / ${q.topic}</span><div class="place-cat"><img src="${POSES[q.pose].src}" alt="${POSES[q.pose].alt}"></div><h2>${q.place}</h2><p>${q.title}</p><div class="place-note"><b>${done ? "この端末に残った足あと" : "この場所で出会う問い"}</b><p>${esc(done ? JourneyModel.describe(done,q,state.kids) : q.scene)}</p></div><button class="button small primary" data-visit="${Math.min(index, state.answers.length, 4)}">${done ? "この問いを選び直す" : index > state.answers.length ? "ここへ向かって歩く" : "この問いに出会う"} →</button><a href="#research" class="text-link">背景：${RESEARCH[q.refs[0]].concept} ↗</a>`;
   document.querySelectorAll(".town-stop").forEach((b) => {
     const on = Number(b.dataset.place) === index;
     b.classList.toggle("selected", on);
@@ -1166,7 +932,7 @@ async function init() {
       const wasFeedback = feedbackOpen;
       renderQuestion();
       if (wasFeedback)
-        confirmAnswer(state.answers[state.step]?.choice ?? -1, false);
+        confirmAnswer(state.answers[state.step] ?? -1, false);
     }
     if (activeScreen === "complete") renderComplete();
     if (activeScreen === "world") renderPlaceDetail(selectedPlace);
@@ -1175,6 +941,13 @@ async function init() {
     const b = e.target.closest("[data-choice]");
     if (b) previewChoice(Number(b.dataset.choice));
   });
+  $("#blendPanel").addEventListener("toggle",()=>{if($("#blendPanel").open)previewBlend(JourneyModel.weights(selectedChoice??state.answers[state.step])||[1,1,1]);});
+  $("#blendSliders").addEventListener("input",e=>{
+    const input=e.target.closest('[data-blend]');if(!input)return;
+    const i=Number(input.dataset.blend),w=JourneyModel.weights(selectedChoice)||[1/3,1/3,1/3],v=Number(input.value)/100,other=1-w[i];
+    previewBlend(w.map((n,k)=>k===i?v:other>1e-8?n*(1-v)/other:(1-v)/2));
+  });
+  $("#blendPresets").addEventListener("click",e=>{const b=e.target.closest('[data-mid]');if(!b)return;const [a,c]=b.dataset.mid.split(',').map(Number);previewBlend([0,1,2].map(i=>(i===a||i===c)?0.5:0));$("#blendPanel").open=true;});
   $("#confirmAnswer").addEventListener("click", () => {
     if (selectedChoice !== null) confirmAnswer(selectedChoice);
   });
@@ -1276,6 +1049,8 @@ async function init() {
   });
   showScreen(location.hash.slice(1) || "home");
   setupPresence();
+  const requestedCat=Number(new URLSearchParams(location.search).get("cat"));
+  if(activeScreen==="cats"&&Number.isInteger(requestedCat)&&requestedCat>=1&&requestedCat<=100)openCat(requestedCat);
   $("#startJourney").disabled = false;
   $("#resumeJourney").disabled = false;
   $("#dataStatus").textContent = "100匹の準備ができました。";

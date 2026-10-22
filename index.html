@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.04" />
-    <link rel="stylesheet" href="appearance.css?v=2.04&amp;r=3" />
+    <link rel="stylesheet" href="app.css?v=2.05" />
+    <link rel="stylesheet" href="appearance.css?v=2.05&amp;r=3" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -56,7 +56,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.04#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.05#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -90,6 +90,7 @@
           ><i>↗</i><span>02 <b>猫の気持ちに出会う</b></span
           ><i>↗</i><span>03 <b>まちへの一歩を持ち帰る</b></span>
         </div>
+        <a href="ienekomap2/" class="city-map-entry"><div><small>まちづくりをする人へ</small><b>家猫MAP2</b><p>地域と答えの分布から、参加しやすい入口を考える。</p></div><span aria-hidden="true">↗</span></a>
         <div class="home-purpose">
           <p class="eyebrow">WHY HOUSE CATS?</p>
           <h2>「参加しない」を責めるより、<br />参加したくなる入口を。</h2>
@@ -155,6 +156,13 @@
                 role="group"
                 aria-label="答えの選択肢"
               ></div>
+              <details id="blendPanel" class="blend-panel">
+                <summary>どれも少しずつ。あいだを選ぶ <span>＋</span></summary>
+                <p>3つの気持ちを混ぜてみよう。どれかを動かすと、残りの割合も合わせて変わります。</p>
+                <div id="blendSliders" class="blend-sliders"></div>
+                <div id="blendPresets" class="blend-presets"><button data-mid="0,1">AとBのあいだ</button><button data-mid="1,2">BとCのあいだ</button><button data-mid="0,2">AとCのあいだ</button></div>
+                <output id="blendSummary" class="blend-summary"></output>
+              </details>
               <div class="answer-action">
                 <button id="confirmAnswer" class="button primary" disabled>
                   気になる答えを選んでね</button
@@ -176,6 +184,7 @@
                 <small>やってみるかは、あなたのペースで。</small>
               </div>
               <div class="feedback-reflection"><p id="feedbackReaction"></p><p id="feedbackText" class="feedback-text"></p></div>
+              <div id="blendFeedback" class="blend-feedback"></div>
               <details id="questionEvidence" class="evidence-fold">
                 <summary>この問いの背景にある研究 <span>＋</span></summary>
                 <div id="questionEvidenceBody"></div>
@@ -229,9 +238,10 @@
               <div class="card-traits" id="cardTraits"></div>
             </div>
             <div class="card-route" id="cardRoute" aria-label="5つの問いの足あと"></div>
+            <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.04</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.05</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -239,6 +249,7 @@
             <h2 id="resultTitle"></h2>
             <p id="resultText"></p>
             <div class="result-coordinate" id="resultCoordinate"></div>
+            <details class="result-graph"><summary>答えの配分をグラフで見る</summary><div id="resultGraph"></div><p>3つの答えの割合をそのまま図示します。能力や性格の点数ではありません。保留した問いは集計に含めません。</p></details>
             <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
             <div class="action-stack">
               <button id="downloadCard" class="button primary">
@@ -249,6 +260,7 @@
               ><a href="#world" class="button ghost"
                 >みんなの世界に足あとを残す ↗</a
               >
+              <a href="ienekomap2/#contribute" class="button ghost">家猫MAP2へ。まちづくりのデータに参加する ↗</a>
             </div>
             <a class="community-invite" href="https://discord.com/channels/1369281268977500170/1504436492242522314" target="_blank" rel="noopener" aria-label="Discordで、まちの話をする（新しいタブ）"><span class="community-icon" aria-hidden="true">💬</span><span><b>Discordで、まちの話をする ↗</b><small>猫やまちのアイデアを、チーム1のチャンネルで。</small><small>ログインとチャンネルへの参加権限が必要です。</small></span></a>
             <div class="join-box">
@@ -615,7 +627,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.04</small></a
+        >家猫クエスト <small id="appVersion">ver2.05</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -624,7 +636,7 @@
           target="_blank"
           rel="noopener"
           >GitHub ↗</a
-        ><a href="https://discord.com/channels/1369281268977500170/1504436492242522314" target="_blank" rel="noopener" aria-label="Discord（新しいタブ）">Discord ↗</a><a href="https://github.com/tokmatsuno/ieneko2/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新履歴 ↗</a>
+        ><a href="ienekomap2/">家猫MAP2 ↗</a><a href="https://discord.com/channels/1369281268977500170/1504436492242522314" target="_blank" rel="noopener" aria-label="Discord（新しいタブ）">Discord ↗</a><a href="https://github.com/tokmatsuno/ieneko2/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新履歴 ↗</a>
       </div>
     </footer>
     <dialog id="catDialog" aria-labelledby="catDialogTitle">
@@ -645,10 +657,12 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.04"></script>
+    <script src="version.js?v=2.05"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.04"></script>
+    <script src="cat-data.js?v=2.05"></script>
+    <script src="quests.js?v=2.05"></script>
+    <script src="journey-model.js?v=2.05"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -660,7 +674,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.04&amp;r=2"></script>
-    <script src="app.js?v=2.04"></script>
+    <script src="cat-studio.js?v=2.05&amp;r=2"></script>
+    <script src="app.js?v=2.05"></script>
   </body>
 </html>

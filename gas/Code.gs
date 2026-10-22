@@ -1,7 +1,7 @@
 const LOG_SHEET = '冒険ログ';
 const ONLINE_WINDOW_MS = 4 * 60 * 1000;
 
-function doGet(e) {
+function legacyDoGet(e) {
   const p = (e && e.parameter) || {};
   if (p.mode !== 'map') return json_({ ok: true, service: 'ieneko2', map: '?mode=map&callback=name' });
   const players = getPlayers_();
@@ -13,7 +13,7 @@ function doGet(e) {
   return json_(players);
 }
 
-function doPost(e) {
+function legacyDoPost(e) {
   try {
     const raw = e && e.postData && e.postData.contents;
     const data = JSON.parse(raw || '{}');

@@ -1,6 +1,6 @@
 const {readFileSync}=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),context=vm.createContext({window:{},document:{},crypto:{},console});
-vm.runInContext(readFileSync(path.join(root,'cat-studio.js'),'utf8'),context);
+for(const file of ['quests.js','journey-model.js','cat-studio.js'])vm.runInContext(readFileSync(path.join(root,file),'utf8'),context);
 vm.runInContext(readFileSync(path.join(root,'app.js'),'utf8').replace(/init\(\);\s*$/,''),context);
 context.csv=readFileSync(path.join(root,'dist/ieneko-100.csv'),'utf8');vm.runInContext('cats=parseCSV(csv);connectChoiceAnchors();',context);
 const studio=context.window.CatStudio,quests=vm.runInContext('QUESTS',context),as=values=>values.map(choice=>({choice})),look=values=>studio.derive(as(values),quests);

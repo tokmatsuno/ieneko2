@@ -1,5 +1,6 @@
 /* Preserve the original raster artwork. Color changes are display effects only. */
 (function () {
+  const assetRoot=document.currentScript?.src?new URL(".",document.currentScript.src).href:"";
   const themes = [
     {key:'grove',name:'木もれびのアトリエ',ink:'#244b42',light:'#e2e7da',gold:'#dfbd7c',coats:[[61,60,57],[92,82,67],[105,109,107]],names:['白黒','こげ茶と白','墨灰と白']},
     {key:'sun',name:'ひだまりのアトリエ',ink:'#78503b',light:'#f5e0bd',gold:'#e4c085',coats:[[163,112,68],[143,91,53],[175,142,99]],names:['茶白','赤茶と白','砂色と白']},
@@ -31,19 +32,31 @@
     bristling:[[.29,.48],[.65,.58],[.90,.24],[.54,.91]],drunken:[[.60,.20],[.52,.52],[.78,.65],[.49,.94]],oppappi:[[.55,.23],[.55,.56],[.23,.52],[.52,.93]],scooter:[[.46,.15],[.57,.53],[.86,.46],[.56,.80]],napping:[[.26,.24],[.64,.58],[.65,.83],[.60,.80]],'sports-car':[[.62,.23],[.62,.39],[.87,.33],[.53,.42]],guitar:[[.48,.22],[.52,.56],[.84,.73],[.55,.87]],reading:[[.52,.19],[.51,.56],[.25,.85],[.60,.87]],gardening:[[.54,.23],[.63,.57],[.85,.53],[.68,.92]],
   });
   function derive(answers,quests,point) {
-    const choices=Array.from({length:5},(_,i)=>answers[i]?.choice??-1);
+    const choices=Array.from({length:5},(_,i)=>answers[i]?.choice??window.JourneyModel?.normalize(answers[i]).choice??-1);
+    const weights=Array.from({length:5},(_,i)=>window.JourneyModel?.weights(answers[i])||null);
     const selected=choices.map((c,i)=>c>=0?quests[i]?.answers[c]:null).filter(Boolean);
-    const p=point||(selected.length?{x:selected.reduce((v,a)=>v+a.x,0)/selected.length,y:selected.reduce((v,a)=>v+a.y,0)/selected.length}:{x:5,y:5});
+    const p=point||(window.JourneyModel?window.JourneyModel.point(answers,quests):null)||(selected.length?{x:selected.reduce((v,a)=>v+a.x,0)/selected.length,y:selected.reduce((v,a)=>v+a.y,0)/selected.length}:{x:5,y:5});
     const quadrant=quadrantFor(p),theme=themes[quadrant];
     const family=choices[0],pattern=Math.max(0,choices[1]),layout=Math.max(0,choices[2]),density=Math.max(0,choices[3]),eye=choices[4];
     const finalPose=choices.some(c=>c>=0)?poseFor(p,choices):'hello';
     const name=family<0?'原画の白黒猫':coatNames[family][pattern];
     const values=[name,choices[1]<0?'まだ模様を選んでいません':[['単色','黒のぶち','黒と茶のぶち'],['単色','白い胸と足','茶色のまだら'],['単色','白い胸と足','しま模様']][Math.max(0,family)][pattern],choices[2]<0?'基本の模様の位置':['顔と背中に模様','体と尻尾に模様','左右に違う模様'][layout],poseShortNames[finalPose]+'・'+['小ぶち','中ぶち','大ぶち'][density],eye<0?'原画の金色の瞳':eyes[eye].name];
-    return {theme,quadrant,choices,family,pattern,layout,density,eye,finalPose,name,values,labels:['毛色','模様','模様の位置','姿・広さ','瞳'],signature:choices.map(c=>c<0?'0':c+1).join(''),point:p,iris:eye<0?null:eyes[eye].color,seed:choices.reduce((v,c,i)=>v+(c+1)*[1,3,11,37,101][i],0)};
+    const active=weights.some(w=>w&&Math.max(...w)<1-1e-8);
+    const blendedSeed=weights.reduce((v,w,i)=>v+(w?w.reduce((n,p,k)=>n+p*(k+1),0):0)*[1,3,11,37,101][i],0);
+    const key=weights.map(w=>w?w.map(n=>n.toFixed(4)).join(','):'_').join('|');
+    let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;
+    if(active){
+      if(weights[0]&&window.JourneyModel.mixed(weights[0]))values[0]=['白','黒','茶'].map((n,i)=>weights[0][i]>.0005?`${n}${+(weights[0][i]*100).toFixed(1)}%`:'').filter(Boolean).join('・');
+      if(weights[1]&&window.JourneyModel.mixed(weights[1]))values[1]='配分でミックス';
+      if(weights[2]&&window.JourneyModel.mixed(weights[2]))values[2]='あいだの配置';
+      if(weights[3]&&window.JourneyModel.mixed(weights[3]))values[3]=poseShortNames[finalPose]+'・ぶちの広さをミックス';
+      if(weights[4]&&window.JourneyModel.mixed(weights[4]))values[4]='配分で混ぜた瞳';
+    }
+    return {theme,quadrant,choices,family,pattern,layout,density,eye,finalPose,name,values,blend:{active,weights:weights.map(w=>w||[1,0,0])},labels:['毛色','模様','模様の位置','姿・広さ','瞳'],signature:active?'M'+hash.toString(36).toUpperCase():choices.map(c=>c<0?'0':c+1).join(''),point:p,iris:eye<0?null:active?eyes[0].color.map((_,j)=>eyes.reduce((v,e,i)=>v+e.color[j]*(weights[4]||[1,0,0])[i],0)):eyes[eye].color,seed:active?blendedSeed:choices.reduce((v,c,i)=>v+(c+1)*[1,3,11,37,101][i],0)};
   }
   function withPose(a,pose){if(!sources[pose])return a;const values=a.values.slice();values[3]=poseShortNames[pose]+'・'+['小ぶち','中ぶち','大ぶち'][a.density];return{...a,finalPose:pose,values};}
   function valuesText(a){return a.values.join('、');}
-  function sourceFor(pose){return pose==='clock'?'dist/cat-clock.png':sources[pose]||sources.hello;}
+  function sourceFor(pose){return assetRoot+(pose==='clock'?'dist/cat-clock.png':sources[pose]||sources.hello);}
   function load(src){if(!loaded.has(src))loaded.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{loaded.delete(src);reject(new Error('artwork_load'));};img.src=src;}));return loaded.get(src);}
   function smooth(lo,hi,x){const t=Math.max(0,Math.min(1,(x-lo)/(hi-lo)));return t*t*(3-2*t);}
   function patch(nx,ny,cx,cy,rx,ry,seed){
@@ -52,6 +65,7 @@
     return 1-smooth(.82,1.04,edge);
   }
   function coatWeights(x,y,a,pose,lum){
+    if(a.blend?.active)return blendedCoatWeights(x,y,a,pose,lum);
     // White, black and ginger pigment, clipped by the original painted fur.
     const originalLight=smooth(145,215,lum);
     if(a.pattern===0)return a.family===0?[1,0,0]:a.family===1?[0,1,0]:[0,0,1];
@@ -76,6 +90,21 @@
     const stripe=(.5+.5*Math.sin(y*(72+a.density*9)+Math.sin(x*18+a.seed)*2.1+x*14));
     const dark=smooth(.73,.91,stripe)*.60*(1-originalLight*.65);
     return[0,dark,1-dark];
+  }
+  function blendedCoatWeights(x,y,a,pose,lum){
+    const [family,pattern,layout,density,eye]=a.blend.weights,originalLight=smooth(145,215,lum);
+    const spread=.72*density[0]+density[1]+1.28*density[2],marks=landmarks[pose]||landmarks.hello;
+    const shift=-.035*eye[0]+.035*eye[1],jitter=Math.sin(a.seed)*.025,head=marks[0],body=marks[1],tail=marks[2];
+    const one=patch(x,y,head[0]+shift+jitter-.07,head[1]-.045,.115*spread,.14*spread,a.seed);
+    const two=patch(x,y,body[0]-.13*layout[0]+.11*(layout[1]+layout[2]),body[1]+jitter,.17*spread,.16*spread,a.seed+13);
+    const three=patch(x,y,tail[0]+shift,tail[1],.095*spread,.18*spread,a.seed+23);
+    const extra=layout[2]*patch(x,y,body[0]-.16,body[1]+.24,.12*spread,.10*spread,a.seed+41);
+    const black=Math.max(one,two,three,extra),calicoBlack=Math.max(layout[1]*two+(1-layout[1])*one,extra),calicoGinger=Math.max(layout[1]*one+(1-layout[1])*two,three)*(1-calicoBlack);
+    const white1=Math.max(originalLight,extra*.8),white2=Math.max(originalLight,extra*.9);
+    const stripe=.5+.5*Math.sin(y*(72+(density[1]+2*density[2])*9)+Math.sin(x*18+a.seed)*2.1+x*14),dark=smooth(.73,.91,stripe)*.60*(1-originalLight*.65);
+    const white=family[0]*(pattern[0]+pattern[1]*(1-black)+pattern[2]*Math.max(0,1-calicoBlack-calicoGinger))+family[1]*pattern[1]*white1+family[2]*pattern[1]*white2;
+    const ink=family[0]*(pattern[1]*black+pattern[2]*calicoBlack)+family[1]*(pattern[0]+pattern[1]*(1-white1)+pattern[2]*(1-black))+family[2]*pattern[2]*dark;
+    return[white,ink,Math.max(0,1-white-ink)];
   }
   function inPolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))inside=!inside;}return inside;}
   function protectedProp(x,y,pose){

@@ -1,0 +1,23 @@
+# 家猫MAP2 収集サービス
+
+`IenekoMap2.gs` は `opendata-core.js`、元CSV由来の設問参照座標、`map2-service.js` を `node scripts/build-map-service.cjs` でまとめた生成物です。元CSVや収集仕様を変更したら再生成し、`--check` で一致を確認します。
+
+既存サービスへ追加する場合、従来の `doGet` と `doPost` の関数名だけを `legacyDoGet` と `legacyDoPost` に変更し、生成物を追加します。`api=ieneko2` の要求だけを新APIへ分岐し、従来の要求は元の関数へ渡します。既存プロジェクトのコード全文をこのリポジトリへ転載する必要はありません。新設する場合は、リポジトリの `Code.gs` と `IenekoMap2.gs` を同じプロジェクトへ登録します。
+
+`setupIenekoMap2` を管理者が一度実行すると、専用の非公開スプレッドシートが作られます。IDは Script Properties の `IENEKO_MAP2_SHEET_ID` に保存されます。回答は `responses`、動作検証は `verification` の別タブへ入り、検証記録は公開集計から除外します。元の公開シートには新しい個別回答を入れません。管理者はこの保存先をリンク公開しないでください。
+
+既存Webアプリの新バージョンとして更新し、公開URLを `config.js` の `openDataUrl` へ設定します。`gasUrl` は従来RPGの共有参加者・Discord通知用で別の設定です。現状空欄のままで、MAP2の回答をDiscordへ通知する機能はありません。
+
+## API
+
+- GET `?api=ieneko2&mode=health`: 受付の準備状態とバージョン。
+- GET `?api=ieneko2&mode=aggregate`: 公開基準を満たした集計だけのJSON。
+- GET `?api=ieneko2&mode=receipt&id=記録ID`: 保存済みかを返す。回答内容は返さない。
+- GETに `callback` を指定すると、検証済みの関数名だけJSONPに対応。
+- POST: text/plainのJSONで `api: "ieneko2"` と回答を送る。配分・任意の地域・イベント・粗いセル・入口の希望・同意値・ランダム記録IDを検証し、座標はサーバーで再計算。
+
+ブラウザーはPOSTだけでは成功表示せず、receiptを読み返して保存を確認します。同一IDの再送は重複追加しません。匿名の公開受付なので、別IDによる重複やいたずらまで防ぐ本人認証ではありません。上限20,000行、同時書き込みはロックで直列化します。
+
+`/ienekomap2/?test=1` は保存動作の検証用です。自分の端末に5問の回答を作り、同意して送ると `verification` だけに保存されます。本番公開集計に混ぜず、シート側も読み返して確認できます。実回答として架空のデータを投入しないでください。
+
+公開単位は月・地域・イベント・0.01度セル・2座標単位の設計ゾーンです。5件未満のグループは非公開。記録ID、個別配分、正確な日時・クリック地点は公開しません。公開集計はCC BY 4.0、帰属名は `2026年度東京大学シビックテックデザイン学講座Team 1`。定義は `ienekomap2/data-dictionary.json` を参照してください。

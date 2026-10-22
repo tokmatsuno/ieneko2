@@ -5,7 +5,7 @@ const csv=readFileSync(path.join(root,'dist/ieneko-100.csv'),'utf8');
 const app=readFileSync(path.join(root,'app.js'),'utf8').replace(/init\(\);\s*$/,'');
 function makeContext(fetch){
   const context=vm.createContext({window:{},document:{},crypto:{},console,fetch,location:{protocol:'file:'}});
-  vm.runInContext(app,context);
+  vm.runInContext(readFileSync(path.join(root,'quests.js'),'utf8'),context);vm.runInContext(readFileSync(path.join(root,'journey-model.js'),'utf8'),context);vm.runInContext(app,context);
   return context;
 }
 (async()=>{
