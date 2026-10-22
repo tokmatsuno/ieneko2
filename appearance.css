@@ -181,3 +181,11 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 @keyframes retro-eyes{from{transform:translateX(-17px)}to{transform:translateX(17px)}}
 @media(max-width:600px){.summon-stage{padding:21px 17px 14px}.summon-stage h2{font-size:21px}.summon-art{height:min(365px,48dvh)}.summon-stage .eyebrow{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.retro-clock-tail,.retro-clock-pupils,.retro-clock-hour,.retro-clock-minute{animation:none!important}}
+
+/* Keep startup status and a recovery path visible when data cannot load. */
+.data-status{flex-basis:100%;margin:0;font-size:11px;line-height:1.8;color:#5b7563}
+.data-status[data-state="ready"]:before{content:'✓ ';color:#36724f;font-weight:700}
+.data-status[data-state="error"]{color:#a34937;font-weight:700}
+.start-error{flex-basis:100%;padding:16px 18px;border:1px solid #d8b39e;border-radius:15px;background:#fff6eb}
+.start-error p{font-size:12px;line-height:1.8;margin:0 0 15px}.start-error>.text-link{margin:15px 0 0 15px;font-size:11px}
+@media(max-width:600px){.data-status{flex-basis:auto;text-align:center;width:100%}.start-error{flex-basis:auto}.start-error>.text-link{display:block;margin:17px auto 0}.hero-buttons:has(.data-status){gap:13px}}

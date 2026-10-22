@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.03" />
-    <link rel="stylesheet" href="appearance.css?v=2.03&amp;r=2" />
+    <link rel="stylesheet" href="app.css?v=2.04" />
+    <link rel="stylesheet" href="appearance.css?v=2.04&amp;r=2" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -46,13 +46,19 @@
           </p>
           </div>
           <div class="hero-buttons">
-            <button class="button primary" id="startJourney">
+            <button class="button primary" id="startJourney" disabled aria-describedby="dataStatus">
               <span class="start-paw" aria-hidden="true"><svg viewBox="0 0 32 32" width="29" height="29" fill="currentColor"><ellipse cx="8" cy="11" rx="3.2" ry="4.5" transform="rotate(-25 8 11)"/><ellipse cx="15" cy="7" rx="3.2" ry="4.5"/><ellipse cx="22" cy="9" rx="3.2" ry="4.5" transform="rotate(18 22 9)"/><ellipse cx="27" cy="15" rx="3" ry="4" transform="rotate(35 27 15)"/><path d="M8 23c0-4 4-9 8-9s9 5 9 9c0 6-5 3-8 3s-9 3-9-3Z"/></svg></span>
               <span class="start-copy"><b>猫と、まちへ出る</b><small>5つの問いで、相棒に出会う</small></span>
               <span class="start-arrow" aria-hidden="true">↗</span></button
             ><button class="text-link" id="resumeJourney" hidden>
               前のつづきから →
             </button>
+            <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
+            <div id="startError" class="start-error" role="alert" hidden>
+              <p>公開版を開くか、ページを読み込み直してください。</p>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.04#home" class="button small primary">公開版を開く ↗</a>
+              <button id="retryLoad" class="text-link">もう一度読み込む</button>
+            </div>
           </div>
           <p class="quiet-note">5つの問い · 登録不要 · 自分のペースで</p>
           <div class="hero-proof">
@@ -225,7 +231,7 @@
             <div class="card-route" id="cardRoute" aria-label="5つの問いの足あと"></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.03</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.04</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -609,7 +615,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.03</small></a
+        >家猫クエスト <small id="appVersion">ver2.04</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -639,9 +645,10 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.03"></script>
+    <script src="version.js?v=2.04"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
+    <script src="cat-data.js?v=2.04"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -653,7 +660,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.03&amp;r=2"></script>
-    <script src="app.js?v=2.03"></script>
+    <script src="cat-studio.js?v=2.04&amp;r=2"></script>
+    <script src="app.js?v=2.04"></script>
   </body>
 </html>

@@ -416,6 +416,24 @@ function parseCSV(text) {
       url2: r.URL2,
     }));
 }
+function checkedCatData(text) {
+  const data = parseCSV(text);
+  if (
+    data.length !== 100 || new Set(data.map(c => c.no)).size !== 100 ||
+    data.some(c => !Number.isInteger(c.no) || c.no < 1 || c.no > 100 ||
+      !c.name || Object.keys(c.raw).length !== 20 ||
+      !Number.isFinite(c.x) || !Number.isFinite(c.y))
+  ) throw new Error("invalid_data");
+  return data;
+}
+async function loadCatData() {
+  // Classic script data also works when the HTML is opened directly from disk.
+  if (typeof window.IENEKO_CAT_CSV === "string")
+    return checkedCatData(window.IENEKO_CAT_CSV);
+  const response = await fetch("dist/ieneko-100.csv");
+  if (!response.ok) throw new Error("csv");
+  return checkedCatData(await response.text());
+}
 function persist() {
   try {
     localStorage.setItem(STORAGE, JSON.stringify(state));
@@ -1116,22 +1134,19 @@ function setKids() {
 }
 
 async function init() {
+  $("#startJourney").disabled = true;
+  $("#resumeJourney").disabled = true;
   loadState();
   renderRelease();
   setKids();
   try {
-    const response = await fetch("dist/ieneko-100.csv");
-    if (!response.ok) throw new Error("csv");
-    cats = parseCSV(await response.text());
-    if (
-      cats.length !== 100 ||
-      cats.some((c) => !Number.isFinite(c.x) || !Number.isFinite(c.y))
-    )
-      throw new Error("invalid_data");
+    cats = await loadCatData();
     connectChoiceAnchors();
   } catch {
-    toast("家猫データを読み込めませんでした。ページを再読み込みしてください。");
-    $("#startJourney").disabled = true;
+    $("#dataStatus").textContent = "家猫データを読み込めませんでした。";
+    $("#dataStatus").dataset.state = "error";
+    $("#startError").hidden = false;
+    $("#retryLoad").addEventListener("click", () => location.reload(), {once: true});
     return;
   }
   renderResearch();
@@ -1261,5 +1276,9 @@ async function init() {
   });
   showScreen(location.hash.slice(1) || "home");
   setupPresence();
+  $("#startJourney").disabled = false;
+  $("#resumeJourney").disabled = false;
+  $("#dataStatus").textContent = "100匹の準備ができました。";
+  $("#dataStatus").dataset.state = "ready";
 }
 init();

@@ -4,9 +4,9 @@
 
 公開アプリ: https://tokmatsuno.github.io/ieneko2/
 
-## 現在のバージョン: ver2.02
+## 現在のバージョン: ver2.04
 
-フッターに「2026年度東京大学シビックテックデザイン学講座Team 1」と `ver2.02` を表示します。版番号は `version.js`、更新履歴は [CHANGELOG.md](CHANGELOG.md) に記録。以後のコミット件名も `verX.XX: 更新内容` とします。
+フッターに「2026年度東京大学シビックテックデザイン学講座Team 1」と `ver2.04` を表示します。版番号は `version.js`、更新履歴は [CHANGELOG.md](CHANGELOG.md) に記録。以後のコミット件名も `verX.XX: 更新内容` とします。
 
 元絵を参照した9種類のポーズを追加し、合計14種類にしました。毛を逆立てる猫、酔拳風、はいオッパッピー風、電動キックボード、昼寝、スポーツカー、ギター、読み聞かせ、庭づくりです。画像は `dist/cat-*.png`、内蔵画像編集機能へ渡した制作条件は `dist/pose-prompts-ver2.02.json` に保存しています。
 
@@ -85,7 +85,9 @@
 
 ## ローカル表示・公開
 
-静的サイトです。プロジェクトフォルダで `python3 -m http.server 8873 --bind 127.0.0.1` を実行し、`http://127.0.0.1:8873/` を開きます。`file:` で開くとCSVを読み込めない場合があります。
+静的サイトです。Chromeでは上記の公開URLを利用できます。ver2.04では元CSVと同一の100匹データをクラシック形式の `cat-data.js` に同梱し、`index.html` の直接起動時もCSVの通信読み込みに依存しないようにしました。画像を使う毛色加工やカード保存も含めた通常の利用・検証には、公開URLまたは `python3 -m http.server 8873 --bind 127.0.0.1` で起動する `http://127.0.0.1:8873/` を使います。
+
+元データは引き続き `dist/ieneko-100.csv` です。CSVを更新したら `node scripts/build-cat-data.cjs` で同梱ファイルを再生成します。公開時は `node scripts/build-cat-data.cjs --check` で一致を確認します。
 
 GitHub Pagesは `main` への更新から `.github/workflows/pages.yml` で公開します。GitHubの Settings / Pages の公開元は GitHub Actions。
 

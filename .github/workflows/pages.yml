@@ -30,6 +30,8 @@ jobs:
           node --check version.js
           node --check app.js
           node --check cat-studio.js
+          node scripts/build-cat-data.cjs --check
+          node tests/cat-data.test.cjs
           node tests/cat-studio.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
