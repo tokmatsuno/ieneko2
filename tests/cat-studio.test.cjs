@@ -28,7 +28,7 @@ const art=new Set(),results=new Map();
 for(let n=0;n<243;n++) {
  let k=n; const choices=Array.from({length:5},()=>{const c=k%3;k=Math.floor(k/3);return c;});
  const answers=as(choices),look=studio.derive(answers,quests);
- art.add(studio.svg(look));
+ art.add(studio.svg(look).replace(/aria-label="[^"]*"/, ""));
  assert(!studio.svg(look).includes('undefined'));
  results.set(look.theme.key,(results.get(look.theme.key)||0)+1);
  context.answerJSON=JSON.stringify(answers);
