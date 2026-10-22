@@ -39,3 +39,17 @@
 @keyframes tail-swing{from{transform:rotate(-8deg)}to{transform:rotate(9deg)}}@keyframes eye-look{from{transform:translateX(-4px)}to{transform:translateX(4px)}}@keyframes wave{from{transform:rotate(-6deg)}to{transform:rotate(10deg)}}@keyframes clock-spin{to{transform:rotate(360deg)}}@keyframes sparkle{from{opacity:.3;transform:scale(.7) rotate(-12deg)}to{opacity:1;transform:scale(1.1) rotate(12deg)}}@keyframes summon-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes card-sheen{from{transform:translateX(-40%) rotate(8deg)}to{transform:translateX(40%) rotate(8deg)}}
 @media(max-width:600px){.cat-recipe{padding:10px 12px;margin-bottom:12px}.recipe-parts span{padding:2px 6px;font-size:10px}.finished-card{max-width:460px;width:100%;margin:auto;padding:21px}.finished-cat{height:285px}.finished-copy h2{font-size:26px}.card-seal{top:270px}.summon-art{height:265px}.summon-stage{padding:23px 18px 16px}.summon-stage h2{font-size:20px}.answer-button{border-radius:18px}}
 @media(prefers-reduced-motion:reduce){.studio-tail,.studio-pupil,.studio-wave,.clock-hour,.clock-minute,.summon-spark,.finished-card:after,.summon-progress i{animation:none!important}.summon-progress i{transform:scaleX(1)}.button.primary,.answer-button,.scene-cat-wrap img{transition:none}.button.primary:hover:not(:disabled){transform:none}}
+
+/* Keep the previous edition's hand-painted cat large and natural. */
+.scene-cat-wrap img {object-fit:contain;filter:none}
+.finished-cat img {height:104%;width:95%;filter:drop-shadow(0 8px 8px #102b2716)}
+.painted-clock {height:100%;position:relative;display:flex;justify-content:center}
+.painted-clock > img {height:100%;width:100%;object-fit:contain;transform-origin:50% 80%;animation:painted-sway 1.4s ease-in-out infinite alternate}
+.painted-clock-dial {position:absolute;left:calc(50% - 25px);top:57%;width:50px;height:50px;border:3px double #bd9351;border-radius:50%;background:radial-gradient(circle,#fff9e8,#eadfc5);box-shadow:0 3px 5px #352b2430}
+.painted-hour,.painted-minute {position:absolute;left:calc(50% - 1px);bottom:50%;width:2px;height:14px;background:#554437;transform-origin:50% 100%;border-radius:2px;animation:clock-spin 1.5s linear infinite}.painted-minute{height:18px;animation-duration:.6s}.painted-clock-dial i {position:absolute;left:calc(50% - 3px);top:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:#bd9351}
+@keyframes painted-sway{from{transform:rotate(-1deg)}to{transform:rotate(1deg)}}
+@media(prefers-reduced-motion:reduce){.painted-clock>img,.painted-hour,.painted-minute{animation:none!important}}
+
+.painted-clock-svg{width:100%;height:100%;overflow:visible}.paint-clock-tail{transform-origin:790px 1000px;animation:paint-tail-sway .65s ease-in-out infinite alternate}.paint-clock-eyes{animation:paint-eye-look .7s ease-in-out infinite alternate}.paint-clock-hour,.paint-clock-minute{transform-origin:483px 636px;animation:clock-spin 1.8s linear infinite}.paint-clock-minute{animation-duration:.6s}
+@keyframes paint-tail-sway{from{transform:rotate(-2deg)}to{transform:rotate(3deg)}}@keyframes paint-eye-look{from{transform:translateX(-5px)}to{transform:translateX(5px)}}
+@media(prefers-reduced-motion:reduce){.paint-clock-tail,.paint-clock-eyes,.paint-clock-hour,.paint-clock-minute{animation:none!important}}

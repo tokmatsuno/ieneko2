@@ -1,0 +1,7 @@
+{
+  "mode": "built-in image_gen edit",
+  "reference": "dist/mike-main-visual.png",
+  "output": "dist/cat-clock.png",
+  "prompt": "Edit the original mike-main-visual.png. Preserve the same cat identity, upright pose, proportions, fine painted fur texture, cream and charcoal coat, golden eyes, pink ears, tail and whiskers. Add only a small brass pocket watch on a dark green ribbon, with an ivory dial and tick marks but no hands, to animate in the app. True transparent background, no redesign, no geometric or simplified cartoon, no text or logo.",
+  "use": "Only the 3-second clock reveal. The journey and final card retain the original five PNG illustrations."
+}

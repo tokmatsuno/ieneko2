@@ -569,12 +569,18 @@ function appearance(preview) {
 }
 function setPose(selector, key, look = appearance()) {
   const img = $(selector);
-  img.src = CatStudio.uri(look, {mood: selector === "#finishedCatImage" ? undefined : key});
+  const pose = selector === "#finishedCatImage" ? look.finalPose : key;
+  const token = String(Number(img.dataset.paintToken || 0) + 1);
+  img.dataset.paintToken = token;
+  img.src = CatStudio.sourceFor(pose);
+  const painted = CatStudio.render(look, pose);
+  img.painting = painted;
+  painted.then(src => {if (img.dataset.paintToken === token) img.src = src;}).catch(() => {});
   img.alt = CatStudio.valuesText(look);
   img.dataset.pose = key;
 }
 function renderRecipe(look, changed = -1) {
-  $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${look.values.map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。色合いは回答の平均座標で変わります。</small>`;
+  $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${look.values.map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。原画の毛並みを保って色を変えます。</small>`;
 }
 let summonTimer = null, summoning = false;
 function finishSummon() {
@@ -588,8 +594,10 @@ function summonCat() {
   if (summoning) return;
   summoning = true;
   const look = appearance();
-  // Keep eyes visible during the clock performance even for a sleepy final face.
-  $("#summonArt").innerHTML = CatStudio.svg({...look, face:1}, {clock:true});
+  const clockSource="dist/cat-clock.png";
+  const tailPath="M786 1026C886 1010 963 884 991 704C1008 617 1020 542 979 501C955 475 918 478 887 503C849 536 871 599 862 661C859 738 829 792 790 835Z";
+  $("#summonArt").innerHTML = `<svg class="painted-clock-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1536" role="img" aria-label="前バージョンの絵を引き継いだ猫時計。瞳、尻尾、時計の針が動きます。"><defs><clipPath id="paintTailClip"><path d="${tailPath}"/></clipPath><mask id="paintBodyMask"><rect width="1024" height="1536" fill="white"/><path d="${tailPath}" fill="black"/></mask><clipPath id="paintEyeClip"><ellipse cx="455" cy="219" rx="20" ry="18"/><ellipse cx="584" cy="241" rx="20" ry="18"/></clipPath></defs><g class="paint-clock-tail"><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" clip-path="url(#paintTailClip)"/></g><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" mask="url(#paintBodyMask)"/><g class="paint-clock-eyes"><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" clip-path="url(#paintEyeClip)"/></g><path class="paint-clock-hour" d="M483 636v-27" stroke="#574532" stroke-width="7" stroke-linecap="round"/><path class="paint-clock-minute" d="M483 636v-39" stroke="#574532" stroke-width="4" stroke-linecap="round"/><circle cx="483" cy="636" r="6" fill="#b18b48"/></svg>`;
+  CatStudio.render(look,"clock").then(src=>{if(summoning)document.querySelectorAll(".clock-art-layer").forEach(el=>el.setAttribute("href",src));}).catch(()=>{});
   $("#summonDialog").showModal();
   summonTimer = setTimeout(finishSummon, 3000);
 }
@@ -758,7 +766,7 @@ function catPose(c) {
 function catDetail(c, full = false) {
   const source = correctedSource(c.url),
     source2 = correctedSource(c.url2);
-  return `<div class="detail-cat-visual"><img src="${CatStudio.uri(CatStudio.derive([], QUESTS, c), {mood:catPose(c)})}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
+  return `<div class="detail-cat-visual"><img src="${POSES[catPose(c)].src}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
     full
       ? `<p class="detail-note">猫の名前やタイプは元CSVの創作類型です。あなたの属性・性格・健康状態を意味しません。イラストのポーズは本作品の演出です。</p><h3>この猫が考える「参加の入口」</h3><p>${esc(c.action)}</p><h3>配慮したいこと</h3><p>${esc(c.risk)}</p><h3>根拠と参照先</h3><p>${esc(source ? source.finding : c.summary)}</p><div class="citation-box"><span>${source ? "リンク先の正式書誌を照合済み" : "元CSVに記載された出典（個別精査前を含む）"}</span>${sourceLink(source ? `${source.authors} (${source.year}) ${source.title}` : c.source, c.url)}${c.source2 ? sourceLink(source2 ? `${source2.authors} (${source2.year}) ${source2.title}` : c.source2, c.url2) : ""}<small>元CSVの根拠区分：${esc(c.evidence)}<br>元CSVの根拠レベル表記：${esc(c.level)}<br>この表記はアプリによる再認定ではありません。</small></div><h3>座標はどう置かれた？</h3><p>${esc(c.reason)}</p><details><summary>元CSVの全項目を見る</summary><dl class="raw-fields">${Object.entries(
           c.raw,
@@ -793,7 +801,7 @@ function renderCats(query = "") {
   $("#catGallery").innerHTML = list
     .map(
       (c) =>
-        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${CatStudio.uri(CatStudio.derive([], QUESTS, c), {mood:catPose(c)})}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
+        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${POSES[catPose(c)].src}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
     )
     .join("");
 }
@@ -801,7 +809,7 @@ function renderComplete() {
   const c = chooseCat();
   if (!c) return;
   const p = journeyPoint(),
-    pose = currentPose();
+    pose = appearance().finalPose;
   $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
   setPose("#finishedCatImage", pose);
   const look = appearance(), card = $("#finishedCard");
@@ -810,16 +818,16 @@ function renderComplete() {
   card.style.setProperty("--card-light", look.theme.light);
   card.style.setProperty("--card-gold", look.theme.gold);
   $("#cardEdition").textContent = `ATELIER / ${look.signature}`;
-  $("#cardSeal").textContent = ["❋", "☀", "☾", "✿"][look.quadrant];
+  $("#cardSeal").textContent = ["✿", "✦", "☾"][look.choices[4]] || "✦";
   $("#cardTraits").innerHTML = look.values.map((v,i)=>`<span>${look.labels[i]} <b>${esc(v)}</b></span>`).join("");
   $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
-  $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は模様、2問目は瞳、3問目は表情、4問目はポーズ、5問目はお守りを選びます。今回の組み合わせ：${look.values.join("、")}。`;
+  $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さと姿、5問目は瞳と左右の模様に反映します。今回の組み合わせ：${look.values.join("、")}。`;
 
   $("#finishedName").textContent = c.name;
   $("#finishedCatch").textContent = state.kids
     ? "今日のえらび方から出会った、あなたの相棒。"
     : c.catch;
-  $("#finishedMood").textContent = look.theme.name;
+  $("#finishedMood").textContent = `${look.name} · ${look.theme.name}`;
   $("#finishedDate").textContent = new Intl.DateTimeFormat("ja-JP", {
     timeZone: "Asia/Tokyo",
     month: "2-digit",
@@ -853,6 +861,7 @@ async function downloadCard() {
   button.textContent = "カードを描いています…";
   try {
     const img = $("#finishedCatImage");
+    if (img.painting) img.src = await img.painting;
     await img.decode();
     const canvas = document.createElement("canvas"),
       ctx = canvas.getContext("2d");
