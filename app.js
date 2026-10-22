@@ -354,6 +354,7 @@ const state = {
   playerId: "",
   optedIn: false,
   name: "たびねこ",
+  cardPose: "",
 };
 const coords = [
   [12, 54.6],
@@ -424,6 +425,7 @@ function persist() {
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE) || "{}");
+    state.cardPose = CatStudio.sources[saved.cardPose] ? saved.cardPose : "";
     state.kids = Boolean(saved.kids);
     state.optedIn = Boolean(saved.optedIn);
     state.name = String(saved.name || "たびねこ").slice(0, 16);
@@ -507,6 +509,7 @@ function showScreen(id) {
 function startJourney() {
   state.step = 0;
   state.answers = [];
+  state.cardPose = "";
   feedbackOpen = false;
   persist();
   navigate("journey");
@@ -567,17 +570,19 @@ function appearance(preview) {
   if (preview !== undefined) answers[state.step] = {choice: preview};
   return CatStudio.derive(answers, QUESTS);
 }
+function cardAppearance() {return state.cardPose ? CatStudio.withPose(appearance(),state.cardPose) : appearance();}
 function setPose(selector, key, look = appearance()) {
   const img = $(selector);
-  const pose = selector === "#finishedCatImage" ? look.finalPose : key;
+  const pose = selector === "#finishedCatImage" ? look.finalPose : look.choices.filter(c=>c>=0).length>=3 ? look.finalPose : key === "scared" ? "bristling" : key;
+  document.body.dataset.atelier = look.theme.key;
   const token = String(Number(img.dataset.paintToken || 0) + 1);
   img.dataset.paintToken = token;
   img.src = CatStudio.sourceFor(pose);
   const painted = CatStudio.render(look, pose);
   img.painting = painted;
   painted.then(src => {if (img.dataset.paintToken === token) img.src = src;}).catch(() => {});
-  img.alt = CatStudio.valuesText(look);
-  img.dataset.pose = key;
+  img.alt = `${CatStudio.poseNames[pose] || "猫時計"}。${CatStudio.valuesText(look)}`;
+  img.dataset.pose = pose;
 }
 function renderRecipe(look, changed = -1) {
   $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${look.values.map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。原画の毛並みを保って色を変えます。</small>`;
@@ -658,6 +663,7 @@ function confirmAnswer(index, record = true) {
   const q = QUESTS[state.step],
     a = index >= 0 ? q.answers[index] : null;
   state.answers[state.step] = { choice: index };
+  if (record) state.cardPose = "";
   persist();
   feedbackOpen = true;
   $("#choiceView").classList.add("hidden");
@@ -752,21 +758,11 @@ function sourceLink(label, url) {
     ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(label || u)} ↗</a>`
     : `<span>${esc(label || "記載なし")}</span>`;
 }
-function catPose(c) {
-  return c.y >= 8
-    ? "scared"
-    : c.y >= 6.5
-      ? "resting"
-      : c.y <= 3
-        ? "curious"
-        : c.no % 3 === 0
-          ? "hungry"
-          : "hello";
-}
+function catPose(c) {return CatStudio.poseFor(c,c.no);}
 function catDetail(c, full = false) {
   const source = correctedSource(c.url),
     source2 = correctedSource(c.url2);
-  return `<div class="detail-cat-visual"><img src="${POSES[catPose(c)].src}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
+  return `<div class="detail-cat-visual"><img src="${CatStudio.sourceFor(catPose(c))}" alt="${esc(CatStudio.poseNames[catPose(c)])}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
     full
       ? `<p class="detail-note">猫の名前やタイプは元CSVの創作類型です。あなたの属性・性格・健康状態を意味しません。イラストのポーズは本作品の演出です。</p><h3>この猫が考える「参加の入口」</h3><p>${esc(c.action)}</p><h3>配慮したいこと</h3><p>${esc(c.risk)}</p><h3>根拠と参照先</h3><p>${esc(source ? source.finding : c.summary)}</p><div class="citation-box"><span>${source ? "リンク先の正式書誌を照合済み" : "元CSVに記載された出典（個別精査前を含む）"}</span>${sourceLink(source ? `${source.authors} (${source.year}) ${source.title}` : c.source, c.url)}${c.source2 ? sourceLink(source2 ? `${source2.authors} (${source2.year}) ${source2.title}` : c.source2, c.url2) : ""}<small>元CSVの根拠区分：${esc(c.evidence)}<br>元CSVの根拠レベル表記：${esc(c.level)}<br>この表記はアプリによる再認定ではありません。</small></div><h3>座標はどう置かれた？</h3><p>${esc(c.reason)}</p><details><summary>元CSVの全項目を見る</summary><dl class="raw-fields">${Object.entries(
           c.raw,
@@ -801,18 +797,17 @@ function renderCats(query = "") {
   $("#catGallery").innerHTML = list
     .map(
       (c) =>
-        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${POSES[catPose(c)].src}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
+        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${CatStudio.sourceFor(catPose(c))}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
     )
     .join("");
 }
 function renderComplete() {
   const c = chooseCat();
   if (!c) return;
-  const p = journeyPoint(),
-    pose = appearance().finalPose;
+  const p = journeyPoint(), look = cardAppearance(), pose = look.finalPose;
   $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
-  setPose("#finishedCatImage", pose);
-  const look = appearance(), card = $("#finishedCard");
+  setPose("#finishedCatImage", pose, look);
+  const card = $("#finishedCard");
   card.dataset.theme = look.theme.key;
   card.style.setProperty("--card-ink", look.theme.ink);
   card.style.setProperty("--card-light", look.theme.light);
@@ -821,7 +816,7 @@ function renderComplete() {
   $("#cardSeal").textContent = ["✿", "✦", "☾"][look.choices[4]] || "✦";
   $("#cardTraits").innerHTML = look.values.map((v,i)=>`<span>${look.labels[i]} <b>${esc(v)}</b></span>`).join("");
   $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
-  $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さと姿、5問目は瞳と左右の模様に反映します。今回の組み合わせ：${look.values.join("、")}。`;
+  $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さ、5問目は瞳と左右の模様に反映します。表情とポーズは初めに象限と5つの回答の組み合わせで選びます。今回の組み合わせ：${look.values.join("、")}。`;
 
   $("#finishedName").textContent = c.name;
   $("#finishedCatch").textContent = state.kids
@@ -867,7 +862,7 @@ async function downloadCard() {
       ctx = canvas.getContext("2d");
     canvas.width = 1080;
     canvas.height = 1350;
-    const look = appearance(), t = look.theme;
+    const look = cardAppearance(), t = look.theme;
     ctx.fillStyle = t.ink;
     ctx.fillRect(0,0,1080,1350);
     const gloss = ctx.createLinearGradient(0,0,1080,1350);
@@ -891,7 +886,7 @@ async function downloadCard() {
     ctx.strokeStyle="#d6c39f";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(105,973);ctx.lineTo(975,973);ctx.stroke();
     ctx.font="500 23px sans-serif";
     look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45));
-    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature}  /  ${$("#finishedDate").textContent}`,75,1230);
+    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1230);
     ctx.fillStyle="#fff5df";ctx.font="400 19px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1270);
     ctx.font="400 15px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1300);
     const blob = await new Promise((resolve) =>
@@ -901,7 +896,7 @@ async function downloadCard() {
     const url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = `ieneko-card-${String(c.no).padStart(3, "0")}.png`;
+    a.download = `ieneko-ver${window.IENEKO_RELEASE.version}-card-${String(c.no).padStart(3, "0")}.png`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
     toast("家猫カードを保存しました。");
@@ -911,6 +906,26 @@ async function downloadCard() {
     button.disabled = false;
     button.textContent = "家猫カードを保存する ↓";
   }
+}
+let poseGroup = 0;
+function renderPoseGallery(group = poseGroup) {
+  poseGroup = Math.max(0, Math.min(3, Number(group)));
+  const look = cardAppearance(), section = CatStudio.quadrants[poseGroup];
+  $("#poseGroups").innerHTML = CatStudio.quadrants.map((q,i)=>`<button data-pose-group="${i}" aria-pressed="${i===poseGroup}">${esc(q.title)}</button>`).join("");
+  $("#poseGroupNote").textContent = section.note;
+  $("#poseGallery").innerHTML = section.poses.map(key=>`<button class="pose-tile ${key===look.finalPose?'selected':''}" data-card-pose="${key}" aria-pressed="${key===look.finalPose}"><img loading="lazy" src="${CatStudio.sourceFor(key)}" alt="${esc(CatStudio.poseNames[key])}"><b>${esc(CatStudio.poseNames[key])}</b><small>この一日をカードにする ↗</small></button>`).join("");
+}
+function openPoseGallery() {renderPoseGallery(appearance().quadrant);$("#poseDialog").showModal();}
+function setCardPose(key) {
+  state.cardPose = CatStudio.sources[key] ? key : "";
+  persist(); $("#poseDialog").close(); renderComplete();
+  toast(state.cardPose ? "あなたの毛並みで、今日の一枚を変えました。" : "回答から選ばれたポーズに戻しました。");
+}
+function renderRelease() {
+  const release = window.IENEKO_RELEASE;
+  $("#appVersion").textContent = `ver${release.version}`;
+  $("#teamCredit").textContent = release.team;
+  $("#cardVersion").textContent = `ver${release.version}`;
 }
 function renderTown() {
   $("#townStops").innerHTML = QUESTS.map(
@@ -1099,6 +1114,7 @@ function setKids() {
 
 async function init() {
   loadState();
+  renderRelease();
   setKids();
   try {
     const response = await fetch("dist/ieneko-100.csv");
@@ -1150,6 +1166,10 @@ async function init() {
     visitQuestion(state.step - 1),
   );
   document.addEventListener("click", (e) => {
+    const group = e.target.closest("[data-pose-group]");
+    if (group) renderPoseGallery(group.dataset.poseGroup);
+    const pose = e.target.closest("[data-card-pose]");
+    if (pose) setCardPose(pose.dataset.cardPose);
     const cat = e.target.closest("[data-cat]");
     if (cat) openCat(cat.dataset.cat);
     const visit = e.target.closest("[data-visit]");
@@ -1196,6 +1216,9 @@ async function init() {
     speechSynthesis.speak(u);
   });
   $("#downloadCard").addEventListener("click", downloadCard);
+  $("#morePoses").addEventListener("click", openPoseGallery);
+  $("#closePoseDialog").addEventListener("click", () => $("#poseDialog").close());
+  $("#automaticPose").addEventListener("click", () => setCardPose(""));
   $("#skipSummon").addEventListener("click", finishSummon);
   $("#summonDialog").addEventListener("cancel", (e) => {e.preventDefault(); finishSummon();});
   $("#summonDialog").addEventListener("close", () => {if(summoning) finishSummon();});

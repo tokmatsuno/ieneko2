@@ -27,6 +27,7 @@ jobs:
           node-version: '22'
       - name: Verify answer-built cats
         run: |
+          node --check version.js
           node --check app.js
           node --check cat-studio.js
           node tests/cat-studio.test.cjs
