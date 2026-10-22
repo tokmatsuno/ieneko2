@@ -87,7 +87,7 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 .is-feedback .scene-top,.is-feedback .scene-caption,.is-feedback .scene-decoration{display:none}
 .is-feedback .feedback-scene-label{display:grid;gap:12px;position:relative;z-index:2;text-align:center;color:#f0dfa9}
 .feedback-scene-label>span{font:9px monospace;letter-spacing:.17em}
-.feedback-scene-label>b{font-size:30px;letter-spacing:.08em;font-family:serif;font-weight:500}
+.feedback-scene-label>b{font-size:clamp(20px,2.5vw,30px);letter-spacing:.08em;font-family:serif;font-weight:500;white-space:nowrap}
 .is-feedback .scene-cat-wrap{flex:1;min-height:0;height:390px;padding:20px 0 0}
 .is-feedback .scene-cat-wrap img{max-height:380px;height:100%;width:100%;object-fit:contain}
 .is-feedback .scene-bubble{font-size:12px;top:16px;right:-5px;background:#f9edcf;color:#315144;border:0;box-shadow:0 5px 20px #0b281b22}
@@ -154,6 +154,15 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
   #nextQuestion{font-size:12px;min-height:57px;padding:12px 10px}
 }
 @media(max-width:350px){#startJourney .start-copy b{font-size:16px}#startJourney .start-copy small{font-size:8px}#startJourney{gap:9px;padding-inline:12px}.is-feedback #feedbackTitle{font-size:23px}.is-feedback .question-panel{padding:19px 14px}.is-feedback .takeaway p{font-size:18px}}
+@media(min-width:601px) and (max-width:900px){
+  .is-feedback .journey-layout{grid-template-columns:1fr;padding:18px;gap:10px}
+  .is-feedback .scene-panel{display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:0;height:180px;padding:8px 20px;overflow:hidden;background:none!important}
+  .is-feedback .feedback-scene-label{text-align:left;gap:15px}
+  .is-feedback .feedback-scene-label>b{font-size:28px;letter-spacing:.04em}
+  .is-feedback .scene-cat-wrap{flex:0 0 43%;height:180px;padding:0}
+  .is-feedback .scene-cat-wrap img{height:100%;max-height:180px;width:100%}
+  .is-feedback .scene-bubble{display:none}
+}
 @media(prefers-reduced-motion:reduce){.community-invite{transition:none}}
 
 /* The calling clock is an original glossy object; the companion stays painted. */
