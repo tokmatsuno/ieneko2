@@ -468,6 +468,9 @@ function showScreen(id) {
   if (id === "complete" && state.answers.length < 5) id = "journey";
   if (id === "journey") renderQuestion();
   if (id === "complete") renderComplete();
+  if (summoning && id !== "journey") {
+    summoning = false; clearTimeout(summonTimer); $("#summonDialog").close();
+  }
   activeScreen = id;
   document
     .querySelectorAll(".screen")
@@ -559,23 +562,36 @@ function currentPose() {
     ? currentAnswer(state.answers.length - 1)?.pose || "resting"
     : "hello";
 }
-function coatFilter() {
-  const counts = { kind: 0, brave: 0, wise: 0 };
-  state.answers.forEach((a, i) => {
-    if (a.choice >= 0) counts[QUESTS[i].answers[a.choice].key]++;
-  });
-  return counts.kind > counts.brave && counts.kind > counts.wise
-    ? "sepia(.1) saturate(.85)"
-    : counts.brave > counts.wise
-      ? "sepia(.22) saturate(1.12)"
-      : "saturate(.75)";
+function appearance(preview) {
+  const answers = state.answers.slice();
+  if (preview !== undefined) answers[state.step] = {choice: preview};
+  return CatStudio.derive(answers, QUESTS);
 }
-function setPose(selector, key) {
-  const img = $(selector),
-    pose = POSES[key] || POSES.hello;
-  if (img.getAttribute("src") !== pose.src) img.src = pose.src;
-  img.alt = pose.alt;
+function setPose(selector, key, look = appearance()) {
+  const img = $(selector);
+  img.src = CatStudio.uri(look, {mood: selector === "#finishedCatImage" ? undefined : key});
+  img.alt = CatStudio.valuesText(look);
   img.dataset.pose = key;
+}
+function renderRecipe(look, changed = -1) {
+  $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${look.values.map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。色合いは回答の平均座標で変わります。</small>`;
+}
+let summonTimer = null, summoning = false;
+function finishSummon() {
+  if (!summoning) return;
+  summoning = false;
+  clearTimeout(summonTimer);
+  $("#summonDialog").close();
+  if (activeScreen === "journey") navigate("complete");
+}
+function summonCat() {
+  if (summoning) return;
+  summoning = true;
+  const look = appearance();
+  // Keep eyes visible during the clock performance even for a sleepy final face.
+  $("#summonArt").innerHTML = CatStudio.svg({...look, face:1}, {clock:true});
+  $("#summonDialog").showModal();
+  summonTimer = setTimeout(finishSummon, 3000);
 }
 function renderQuestion() {
   const q = QUESTS[state.step];
@@ -591,6 +607,7 @@ function renderQuestion() {
   $("#catBubble").textContent = q.bubble;
   $("#companionMood").textContent = POSES[q.pose].name;
   setPose("#companionImage", q.pose);
+  renderRecipe(appearance());
   $(".scene-panel").dataset.scene = state.step;
   $("#questionTitle").textContent = state.kids
     ? KID_TITLES[state.step]
@@ -622,7 +639,9 @@ function previewChoice(index) {
   $("#confirmAnswer").disabled = false;
   $("#confirmAnswer").textContent = "この一歩にする →";
   const a = QUESTS[state.step].answers[index];
-  setPose("#companionImage", a.pose);
+  const look = appearance(index);
+  setPose("#companionImage", a.pose, look);
+  renderRecipe(look, state.step);
   $("#catBubble").textContent = a.reaction;
   $("#companionMood").textContent = POSES[a.pose].name;
 }
@@ -655,8 +674,9 @@ function confirmAnswer(index, record = true) {
   $("#questionEvidenceBody").innerHTML =
     `<p class="research-application">${esc(q.why)}</p>${a ? `<p class="quiet-note">選択肢の参照猫：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>。その猫の設計座標 X ${a.x} / Y ${a.y} を使います。選択肢との対応は制作者の解釈です。</p>` : ""}${q.refs.map((key) => sourceCard(key, true)).join("")}<p class="quiet-note">問い・選択肢・反応は本作品の創作です。研究がこの回答を正解と認定したものではありません。</p>`;
   $("#nextQuestion").textContent =
-    state.step === 4 ? "今日の家猫に会いにいく →" : "次の場所へ →";
+    state.step === 4 ? "わたしの猫を、呼んでみる ✦" : "次の足あとを、つけにいく →";
   setPose("#companionImage", a?.pose || "resting");
+  renderRecipe(appearance(), state.step);
   $("#catBubble").textContent = a?.reaction || "ここで、ひと休み。";
   $("#companionMood").textContent = POSES[a?.pose || "resting"].name;
   $("#feedbackTitle").focus({ preventScroll: true });
@@ -673,7 +693,7 @@ function nextQuestion() {
   if (!feedbackOpen) return;
   feedbackOpen = false;
   if (state.step === 4) {
-    navigate("complete");
+    summonCat();
     if (state.optedIn)
       sendEvent({
         event: "complete",
@@ -738,7 +758,7 @@ function catPose(c) {
 function catDetail(c, full = false) {
   const source = correctedSource(c.url),
     source2 = correctedSource(c.url2);
-  return `<div class="detail-cat-visual"><img src="${POSES[catPose(c)].src}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
+  return `<div class="detail-cat-visual"><img src="${CatStudio.uri(CatStudio.derive([], QUESTS, c), {mood:catPose(c)})}" alt="${esc(POSES[catPose(c)].alt)}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
     full
       ? `<p class="detail-note">猫の名前やタイプは元CSVの創作類型です。あなたの属性・性格・健康状態を意味しません。イラストのポーズは本作品の演出です。</p><h3>この猫が考える「参加の入口」</h3><p>${esc(c.action)}</p><h3>配慮したいこと</h3><p>${esc(c.risk)}</p><h3>根拠と参照先</h3><p>${esc(source ? source.finding : c.summary)}</p><div class="citation-box"><span>${source ? "リンク先の正式書誌を照合済み" : "元CSVに記載された出典（個別精査前を含む）"}</span>${sourceLink(source ? `${source.authors} (${source.year}) ${source.title}` : c.source, c.url)}${c.source2 ? sourceLink(source2 ? `${source2.authors} (${source2.year}) ${source2.title}` : c.source2, c.url2) : ""}<small>元CSVの根拠区分：${esc(c.evidence)}<br>元CSVの根拠レベル表記：${esc(c.level)}<br>この表記はアプリによる再認定ではありません。</small></div><h3>座標はどう置かれた？</h3><p>${esc(c.reason)}</p><details><summary>元CSVの全項目を見る</summary><dl class="raw-fields">${Object.entries(
           c.raw,
@@ -773,7 +793,7 @@ function renderCats(query = "") {
   $("#catGallery").innerHTML = list
     .map(
       (c) =>
-        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${POSES[catPose(c)].src}" alt="" style="filter:hue-rotate(${(c.no % 5) * 3}deg)"></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
+        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${CatStudio.uri(CatStudio.derive([], QUESTS, c), {mood:catPose(c)})}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
     )
     .join("");
 }
@@ -784,13 +804,24 @@ function renderComplete() {
     pose = currentPose();
   $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
   setPose("#finishedCatImage", pose);
-  $("#finishedCatImage").style.filter = coatFilter();
+  const look = appearance(), card = $("#finishedCard");
+  card.dataset.theme = look.theme.key;
+  card.style.setProperty("--card-ink", look.theme.ink);
+  card.style.setProperty("--card-light", look.theme.light);
+  card.style.setProperty("--card-gold", look.theme.gold);
+  $("#cardEdition").textContent = `ATELIER / ${look.signature}`;
+  $("#cardSeal").textContent = ["❋", "☀", "☾", "✿"][look.quadrant];
+  $("#cardTraits").innerHTML = look.values.map((v,i)=>`<span>${look.labels[i]} <b>${esc(v)}</b></span>`).join("");
+  $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
+  $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は模様、2問目は瞳、3問目は表情、4問目はポーズ、5問目はお守りを選びます。今回の組み合わせ：${look.values.join("、")}。`;
+
   $("#finishedName").textContent = c.name;
   $("#finishedCatch").textContent = state.kids
     ? "今日のえらび方から出会った、あなたの相棒。"
     : c.catch;
-  $("#finishedMood").textContent = POSES[pose].name;
+  $("#finishedMood").textContent = look.theme.name;
   $("#finishedDate").textContent = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
@@ -827,50 +858,33 @@ async function downloadCard() {
       ctx = canvas.getContext("2d");
     canvas.width = 1080;
     canvas.height = 1350;
-    ctx.fillStyle = "#183b38";
-    ctx.fillRect(0, 0, 1080, 1350);
-    ctx.fillStyle = "#f8f3e7";
-    ctx.fillRect(35, 35, 1010, 1280);
-    ctx.fillStyle = "#183b38";
-    ctx.font = "700 32px sans-serif";
-    ctx.fillText("家猫クエスト / TODAY’S COMPANION", 80, 104);
-    ctx.font = "500 26px monospace";
-    ctx.fillText(`NO. ${String(c.no).padStart(3, "0")}`, 820, 104);
-    ctx.fillStyle = "#e9d9ac";
-    ctx.beginPath();
-    ctx.ellipse(540, 510, 370, 340, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const scale = Math.min(760 / img.naturalWidth, 700 / img.naturalHeight),
-      w = img.naturalWidth * scale,
-      h = img.naturalHeight * scale;
-    ctx.save();
-    ctx.filter = coatFilter();
-    ctx.drawImage(img, 540 - w / 2, 535 - h / 2, w, h);
-    ctx.restore();
-    ctx.fillStyle = "#416158";
-    ctx.font = "500 24px sans-serif";
-    ctx.fillText("今日の選び方から出会った家猫", 80, 945);
-    ctx.fillStyle = "#183b38";
-    let size = 62;
-    while (size > 30) {
-      ctx.font = `800 ${size}px sans-serif`;
-      if (ctx.measureText(c.name).width <= 920) break;
-      size -= 2;
-    }
-    ctx.fillText(c.name, 80, 1035);
-    ctx.font = "500 30px sans-serif";
-    ctx.fillText(POSES[currentPose()].name, 80, 1100);
-    ctx.fillStyle = "#b66c4c";
-    ctx.fillRect(80, 1150, 920, 2);
-    ctx.fillStyle = "#416158";
-    ctx.font = "500 24px sans-serif";
-    ctx.fillText("あなたのペースで、まちとつながる。", 80, 1208);
-    ctx.font = "400 19px sans-serif";
-    ctx.fillText(
-      "作品内の設計座標による対応です。性格や属性の診断ではありません。",
-      80,
-      1252,
-    );
+    const look = appearance(), t = look.theme;
+    ctx.fillStyle = t.ink;
+    ctx.fillRect(0,0,1080,1350);
+    const gloss = ctx.createLinearGradient(0,0,1080,1350);
+    gloss.addColorStop(0,"#ffffff15"); gloss.addColorStop(.48,"#ffffff00"); gloss.addColorStop(.52,"#fff2bd16"); gloss.addColorStop(1,"#ffffff00");
+    ctx.fillStyle=gloss;ctx.fillRect(0,0,1080,1350);
+    ctx.strokeStyle=t.gold; ctx.lineWidth=2;
+    ctx.strokeRect(22,22,1036,1306);ctx.strokeRect(35,35,1010,1280);
+    ctx.fillStyle=t.gold;ctx.font="500 26px sans-serif";
+    ctx.fillText("✦ 家猫クエスト / CAT ATELIER",70,94);
+    ctx.textAlign="right";ctx.font="500 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
+    ctx.fillStyle=t.light;ctx.beginPath();ctx.ellipse(540,420,350,300,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=t.gold;ctx.lineWidth=3;ctx.stroke();
+    const scale=Math.min(780/img.naturalWidth,670/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+    ctx.drawImage(img,540-w/2,420-h/2,w,h);
+    ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,745,950,428,25);ctx.fill();
+    ctx.fillStyle=t.ink;ctx.font="500 22px sans-serif";ctx.fillText("TODAY’S COMPANION",105,800);
+    let size=62;
+    while(size>26){ctx.font=`800 ${size}px sans-serif`;if(ctx.measureText(c.name).width<=865)break;size-=2;}
+    ctx.fillText(c.name,105,887);
+    ctx.font="500 26px sans-serif";ctx.fillText(t.name,105,940);
+    ctx.strokeStyle="#d6c39f";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(105,973);ctx.lineTo(975,973);ctx.stroke();
+    ctx.font="500 23px sans-serif";
+    look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45));
+    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature}  /  ${$("#finishedDate").textContent}`,75,1230);
+    ctx.fillStyle="#fff5df";ctx.font="400 19px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1270);
+    ctx.font="400 15px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1300);
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, "image/png"),
     );
@@ -1173,6 +1187,9 @@ async function init() {
     speechSynthesis.speak(u);
   });
   $("#downloadCard").addEventListener("click", downloadCard);
+  $("#skipSummon").addEventListener("click", finishSummon);
+  $("#summonDialog").addEventListener("cancel", (e) => {e.preventDefault(); finishSummon();});
+  $("#summonDialog").addEventListener("close", () => {if(summoning) finishSummon();});
   $("#resultEvidence").addEventListener("click", () =>
     openCat(chooseCat()?.no),
   );

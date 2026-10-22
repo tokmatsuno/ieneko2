@@ -13,7 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=3" />
+    <link rel="stylesheet" href="app.css?v=4" />
+    <link rel="stylesheet" href="appearance.css?v=4" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -119,6 +120,7 @@
               <span id="sceneTopic" class="eyebrow"></span>
               <h2 id="sceneTitle"></h2>
               <p id="companionMood"></p>
+              <div id="catRecipe" class="cat-recipe" aria-live="polite"></div>
             </div>
           </aside>
           <article class="question-panel">
@@ -196,6 +198,8 @@
             <div class="finished-top">
               <span>家猫クエスト</span><span id="finishedNo"></span>
             </div>
+            <span class="card-edition" id="cardEdition"></span>
+            <span class="card-seal" id="cardSeal" aria-hidden="true">✦</span>
             <div class="finished-cat">
               <img
                 id="finishedCatImage"
@@ -208,7 +212,9 @@
               <h2 id="finishedName"></h2>
               <p id="finishedCatch"></p>
               <span id="finishedMood"></span>
+              <div class="card-traits" id="cardTraits"></div>
             </div>
+            <div class="card-route" id="cardRoute" aria-label="5つの問いの足あと"></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
               ><time id="finishedDate"></time>
@@ -219,6 +225,7 @@
             <h2 id="resultTitle"></h2>
             <p id="resultText"></p>
             <div class="result-coordinate" id="resultCoordinate"></div>
+            <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
             <div class="action-stack">
               <button id="downloadCard" class="button primary">
                 家猫カードを保存する ↓</button
@@ -614,6 +621,18 @@
     <div id="toast" class="toast hidden" role="status"></div>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="app.js?v=3"></script>
+    <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
+      <div class="summon-stage">
+        <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
+        <h2 id="summonTitle">きみの猫を、呼んでいるよ。</h2>
+        <span class="summon-spark one" aria-hidden="true">✦</span><span class="summon-spark two" aria-hidden="true">✧</span><span class="summon-spark three" aria-hidden="true">✦</span>
+        <div id="summonArt" class="summon-art"></div>
+        <p id="summonText" aria-live="polite">5つの一歩を、ひとつの出会いに。</p>
+        <div class="summon-progress" aria-hidden="true"><i></i></div>
+        <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
+      </div>
+    </dialog>
+    <script src="cat-studio.js?v=4"></script>
+    <script src="app.js?v=4"></script>
   </body>
 </html>

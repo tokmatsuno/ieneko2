@@ -1,0 +1,40 @@
+/* Visual mappings are authored artwork, not inferred personal characteristics. */
+(function () {
+  const themes = [
+    { key: 'grove', name: '木もれびのアトリエ', fur: '#8b9e86', dark: '#4c6557', eye: '#c49639', ink: '#244b42', light: '#dce9da', gold: '#dfbd7c', shape: 'leaf' },
+    { key: 'sun', name: 'ひだまりのアトリエ', fur: '#d3a06f', dark: '#946040', eye: '#6c9b91', ink: '#78503b', light: '#f5e0bd', gold: '#f0c976', shape: 'sun' },
+    { key: 'moon', name: '月あかりのアトリエ', fur: '#8f95b4', dark: '#535b7e', eye: '#bba5df', ink: '#3d4567', light: '#e1e1f1', gold: '#d9c48f', shape: 'moon' },
+    { key: 'rose', name: '花だよりのアトリエ', fur: '#c49c9e', dark: '#8b606e', eye: '#86a891', ink: '#704757', light: '#f1dfe3', gold: '#e2be8b', shape: 'flower' },
+  ];
+  const coats = ['はちわれ', 'しま模様', 'ぶち模様'];
+  const eyes = [{ name: '琥珀の瞳', color: '#c39538' }, { name: '翡翠の瞳', color: '#679b8d' }, { name: 'すみれの瞳', color: '#9b84bd' }];
+  const faces = ['にっこり', 'きらきら', 'おっとり'];
+  const irisPalettes = [['#c49639','#639b85','#9c8bc4'],['#cc8e3d','#6c9b91','#b48bb4'],['#b4a2d6','#7eacb4','#8a82c1'],['#c7966d','#86a891','#b48eaf']];
+  const poses = ['おててでごあいさつ', 'ぐんとのび', 'ちょこんと香箱'];
+  const accessories = ['花のブローチ', '星のスカーフ', '月のペンダント'];
+  const labels = ['模様', '瞳', '表情', 'ポーズ', 'お守り'];
+  function derive(answers, quests, point) {
+    const choices = answers.map(a => a?.choice ?? -1);
+    const picked = choices.map((c, i) => c >= 0 ? quests[i]?.answers[c] : null).filter(Boolean);
+    const p = point || (picked.length ? { x: picked.reduce((v,a)=>v+a.x,0)/picked.length, y: picked.reduce((v,a)=>v+a.y,0)/picked.length } : { x:5, y:5 });
+    const quadrant = (p.y >= 5 ? 2 : 0) + (p.x >= 5 ? 1 : 0);
+    const theme = themes[quadrant];
+    const at = i => choices[i] >= 0 ? choices[i] : null;
+    const values = [at(0) === null ? 'まだらのない毛並み' : coats[at(0)], at(1) === null ? 'アトリエの瞳' : eyes[at(1)].name, at(2) === null ? 'ふんわり' : faces[at(2)], at(3) === null ? 'おすわり' : poses[at(3)], at(4) === null ? '小さな鈴' : accessories[at(4)]];
+    return { theme, quadrant, pattern: at(0), iris: at(1) === null ? theme.eye : irisPalettes[quadrant][at(1)], face:at(2), pose:at(3), accessory:at(4), values, labels, choices, signature:choices.map(c=>c<0?'0':c+1).join(''), point:p };
+  }
+  function svg(a, options = {}) {
+    const t=a.theme, clock=!!options.clock, mood=options.mood, sleepy=a.face===2 || mood==='resting', surprise=mood==='scared', stretch=a.pose===1&&!clock, loaf=a.pose===2&&!clock;
+    const fur=t.fur, dark=t.dark, cream='#fff6e5', line=t.ink;
+    const face = sleepy ? `<path d="M129 155q13-13 26 0m48 0q13-13 26 0" fill="none" stroke="${line}" stroke-width="5" stroke-linecap="round"/>` : [143,215].map(x=>`<g class="studio-eye"><ellipse cx="${x}" cy="151" rx="${surprise?21:19}" ry="${surprise?26:23}" fill="${cream}"/><ellipse cx="${x}" cy="153" rx="12" ry="17" fill="${a.iris}"/><g class="studio-pupil"><ellipse cx="${x}" cy="153" rx="${a.face===1?7:5}" ry="13" fill="${line}"/><circle cx="${x-4}" cy="146" r="4" fill="white"/></g></g>`).join('');
+    const pattern = a.pattern===0 ? `<path d="M108 121Q128 92 173 101L158 160Q123 185 99 160Z" fill="${dark}"/><path d="M188 101Q233 94 253 130L258 166Q222 183 197 157Z" fill="${dark}"/>` : a.pattern===1 ? `<path d="M158 95l8 29m15-32v30m17-27-6 29M93 145l25 8m-25 13 23 2m148-23-24 8m24 13-23 2" stroke="${dark}" stroke-width="9" stroke-linecap="round" fill="none"/>` : a.pattern===2 ? `<ellipse cx="120" cy="132" rx="28" ry="32" fill="${dark}" transform="rotate(25 120 132)"/><ellipse cx="210" cy="106" rx="20" ry="14" fill="${dark}"/>` : '';
+    const charm = a.accessory===0 ? `<g fill="${t.gold}"><circle cx="179" cy="237" r="6"/>${[0,72,144,216,288].map(r=>`<ellipse cx="179" cy="226" rx="5" ry="8" transform="rotate(${r} 179 237)"/>`).join('')}</g>` : a.accessory===1 ? `<path d="M153 221l61 0-9 31-27-14-18 14Z" fill="${t.gold}"/><path d="m177 224 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="${cream}"/>` : a.accessory===2 ? `<path d="M171 226q-16 17 6 26 18 1 18-16-11 12-24-10" fill="${t.gold}"/>` : `<circle cx="179" cy="236" r="10" fill="${t.gold}"/><path d="M175 239h8" stroke="${line}" stroke-width="2"/>`;
+    const head=`<g class="studio-head" transform="${stretch?'translate(10 30) rotate(-8 179 153)':''}"><path d="M100 126Q82 91 98 49Q127 57 148 91Q180 84 210 92Q233 54 261 51Q277 95 257 131" fill="${fur}" stroke="${line}" stroke-width="3" stroke-linejoin="round"/><path d="M105 100l-2-34 27 29m99 0 27-29-2 35" fill="#e6b4ac"/><path d="M98 120Q111 89 179 92Q248 89 261 123Q283 178 243 204Q180 238 116 204Q78 180 98 120Z" fill="${fur}" stroke="${line}" stroke-width="3"/>${pattern}<path d="M121 170Q141 155 179 170Q215 153 239 175Q243 206 179 211Q118 208 121 170Z" fill="${cream}"/>${face}<g fill="#dc9d99" opacity=".6"><ellipse cx="115" cy="179" rx="13" ry="7"/><ellipse cx="244" cy="179" rx="13" ry="7"/></g><path d="M172 174q7-5 14 0l-7 7Z" fill="#ad7378"/><path d="M179 181v6m-14-1q7 12 14 1 7 11 14-1" fill="none" stroke="${line}" stroke-width="3" stroke-linecap="round"/>${a.face===0?`<path d="M168 191q11 19 22 0" fill="#d49c9c" stroke="${line}" stroke-width="2.5"/>`:a.face===1?`<g fill="${cream}"><path d="m123 127 3 6 6 3-6 3-3 6-3-6-6-3 6-3Z"/><path d="m236 128 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></g>`:''}<g fill="none" stroke="${line}" stroke-width="2.5" stroke-linecap="round"><path d="M118 180l-30-4m29 13-29 6m153-15 30-4m-29 13 29 6"/></g></g>`;
+    const body = loaf ? `<path d="M103 264Q75 240 106 213Q150 192 211 217Q251 220 263 268L251 299H109Z" fill="${fur}" stroke="${line}" stroke-width="3"/><ellipse cx="165" cy="285" rx="63" ry="17" fill="${cream}"/>` : `<path d="M132 201Q106 231 112 284L108 305Q125 325 149 311L211 311Q239 325 252 305L246 279Q249 224 224 204Z" fill="${fur}" stroke="${line}" stroke-width="3"/><ellipse cx="180" cy="266" rx="43" ry="42" fill="${cream}"/><path d="M148 276v29m62-29v29" stroke="${line}" stroke-width="3" stroke-linecap="round"/><ellipse cx="131" cy="305" rx="25" ry="13" fill="${cream}" stroke="${line}" stroke-width="3"/><ellipse cx="230" cy="305" rx="25" ry="13" fill="${cream}" stroke="${line}" stroke-width="3"/>`;
+    const clockFace=clock?`<g class="studio-clock-face"><circle cx="180" cy="265" r="43" fill="${cream}" stroke="${t.gold}" stroke-width="5"/>${Array.from({length:12},(_,i)=>`<path d="M180 229v${i%3===0?6:3}" stroke="${line}" stroke-width="2" transform="rotate(${i*30} 180 265)"/>`).join('')}<path class="clock-hour" d="M180 265v-21" stroke="${line}" stroke-width="5" stroke-linecap="round"/><path class="clock-minute" d="M180 265v-31" stroke="${line}" stroke-width="3" stroke-linecap="round"/><circle cx="180" cy="265" r="4" fill="${t.gold}"/></g>`:'';
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" class="studio-cat ${clock?'is-clock':''}" role="img" aria-label="${valuesText(a)}"><ellipse cx="180" cy="326" rx="99" ry="10" fill="${line}" opacity=".1"/><g class="studio-tail"><path d="M235 292Q317 306 292 239Q276 197 309 190" fill="none" stroke="${line}" stroke-width="24" stroke-linecap="round"/><path d="M235 292Q317 306 292 239Q276 197 309 190" fill="none" stroke="${fur}" stroke-width="18" stroke-linecap="round"/></g><g ${stretch?'transform="translate(-9 25) rotate(-8 180 275)"':''}>${body}${a.pose===0&&!clock?`<g class="studio-wave"><path d="M122 256Q75 257 78 205" fill="none" stroke="${line}" stroke-width="25" stroke-linecap="round"/><path d="M122 256Q75 257 78 205" fill="none" stroke="${fur}" stroke-width="19" stroke-linecap="round"/><ellipse cx="78" cy="201" rx="17" ry="21" fill="${cream}" stroke="${line}" stroke-width="3"/><ellipse cx="78" cy="205" rx="7" ry="8" fill="#dfa5a1"/></g>`:''}${head}<path d="M143 218q36 13 72 0" fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round"/>${charm}${clockFace}</g></svg>`;
+  }
+  function valuesText(a) {return a.values.join('、');}
+  function uri(a, options) {return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg(a,options));}
+  window.CatStudio={derive,svg,uri,themes,valuesText};
+})();
