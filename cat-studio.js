@@ -79,6 +79,7 @@
   }
   function inPolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))inside=!inside;}return inside;}
   function protectedProp(x,y,pose){
+    if(pose==='sports-car'&&((x-.608)/.044)**2+((y-.438)/.055)**2<1)return false;
     if(pose==='sports-car')return y>.52||(x<.40&&y>.30)||((x-.51)**2+(y-.426)**2<.0105&&!(x<.48&&y<.40))||(x>.73&&x<.83&&y>.35&&y<.52);
     if(pose==='scooter')return y>.84||(Math.abs(x-(.40-.32*y))<.038&&y>.37&&y<.83)||((y>.31&&y<.39&&x>.07&&x<.52)&&!((x>.1&&x<.23&&y<.35)||(x>.35&&x<.47&&y<.38)));
     if(pose==='guitar'){const body=((x-.29)/.29)**2+((y-.59)/.20)**2<1.04&&!(((x-.23)/.13)**2+((y-.49)/.07)**2<1);const neck=x>.38&&x<.99&&Math.abs(y-(.75-.45*x))<.055&&!(x>.64&&x<.78&&y>.39&&y<.52);return body||neck;}
