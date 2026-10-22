@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.05" />
-    <link rel="stylesheet" href="appearance.css?v=2.05&amp;r=3" />
+    <link rel="stylesheet" href="app.css?v=2.06" />
+    <link rel="stylesheet" href="appearance.css?v=2.06&amp;r=3" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -56,7 +56,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.05#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.06#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -150,19 +150,15 @@
               <h2 id="questionTitle" tabindex="-1"></h2>
               <p id="questionBody" class="question-body"></p>
               <p class="question-prompt">いまのあなたに、しっくりくるのは？</p>
-              <div
-                id="answerList"
-                class="answer-list"
-                role="group"
-                aria-label="答えの選択肢"
-              ></div>
-              <details id="blendPanel" class="blend-panel">
-                <summary>どれも少しずつ。あいだを選ぶ <span>＋</span></summary>
-                <p>3つの気持ちを混ぜてみよう。どれかを動かすと、残りの割合も合わせて変わります。</p>
-                <div id="blendSliders" class="blend-sliders"></div>
-                <div id="blendPresets" class="blend-presets"><button data-mid="0,1">AとBのあいだ</button><button data-mid="1,2">BとCのあいだ</button><button data-mid="0,2">AとCのあいだ</button></div>
+              <section id="blendPanel" class="blend-panel" aria-labelledby="blendTitle">
+                <h3 id="blendTitle">ぴったりも、あいだも。割合で選ぼう。</h3>
+                <p id="blendHelp">各答えの下のつまみを動かして、気持ちを混ぜられます。3つで合計100%。残りは自動で調整します。答えを押すと、その気持ちが100%になります。</p>
+                <div id="blendSliders" class="blend-sliders">
+                  <div id="answerList" class="answer-list" role="group" aria-label="答えと割合の選択"></div>
+                </div>
+                <div id="blendPresets" class="blend-presets"><button data-mid="0,1">AとBのあいだ</button><button data-mid="1,2">BとCのあいだ</button><button data-mid="0,2">AとCのあいだ</button><button data-equal>3つを同じくらい</button></div>
                 <output id="blendSummary" class="blend-summary"></output>
-              </details>
+              </section>
               <div class="answer-action">
                 <button id="confirmAnswer" class="button primary" disabled>
                   気になる答えを選んでね</button
@@ -241,7 +237,7 @@
             <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.05</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.06</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -627,7 +623,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.05</small></a
+        >家猫クエスト <small id="appVersion">ver2.06</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -657,12 +653,12 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.05"></script>
+    <script src="version.js?v=2.06"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.05"></script>
-    <script src="quests.js?v=2.05"></script>
-    <script src="journey-model.js?v=2.05"></script>
+    <script src="cat-data.js?v=2.06"></script>
+    <script src="quests.js?v=2.06"></script>
+    <script src="journey-model.js?v=2.06"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -674,7 +670,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.05&amp;r=2"></script>
-    <script src="app.js?v=2.05"></script>
+    <script src="cat-studio.js?v=2.06&amp;r=2"></script>
+    <script src="app.js?v=2.06"></script>
   </body>
 </html>
