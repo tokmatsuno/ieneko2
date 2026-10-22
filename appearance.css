@@ -188,4 +188,4 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 .data-status[data-state="error"]{color:#a34937;font-weight:700}
 .start-error{flex-basis:100%;padding:16px 18px;border:1px solid #d8b39e;border-radius:15px;background:#fff6eb}
 .start-error p{font-size:12px;line-height:1.8;margin:0 0 15px}.start-error>.text-link{margin:15px 0 0 15px;font-size:11px}
-@media(max-width:600px){.data-status{flex-basis:auto;text-align:center;width:100%}.start-error{flex-basis:auto}.start-error>.text-link{display:block;margin:17px auto 0}.hero-buttons:has(.data-status){gap:13px}}
+@media(max-width:600px){.data-status{flex-basis:auto;text-align:center;width:100%}.start-error{flex-basis:auto}.start-error>.text-link{display:block;margin:17px auto 0}.hero-buttons:has(.data-status){gap:13px;grid-row:2;margin-top:0}.hero-copy>.quiet-note{grid-row:3;margin:10px 0 18px}.hero-art{grid-row:4}}
