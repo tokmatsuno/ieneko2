@@ -11,4 +11,10 @@ const left=structuredClone(mix),right=structuredClone(mix);left[0]=model.normali
 const samples=[];for(let y=.1;y<.95;y+=.1)for(let x=.1;x<.95;x+=.1){const l=studio.coatWeights(x,y,al,'hello',120),r=studio.coatWeights(x,y,ar,'hello',120);assert(l.every(n=>n>=-1e-9&&n<=1.000001));assert(Math.abs(l.reduce((v,n)=>v+n,0)-1)<1e-8);samples.push(l.reduce((v,n,i)=>v+Math.abs(n-r[i]),0));}assert(Math.max(...samples)<.3);
 for(const family of [0,1,2])for(const pattern of [0,1,2]){const answers=[family,pattern,1,1,1].map(choice=>({choice})),p=studio.derive(answers,quests);assert(!p.blend.active);assert.equal(p.signature,answers.map(a=>a.choice+1).join(''));}
 assert(model.describe(mix[0],quests[0]).includes('%'));assert(model.barsSVG(mix).includes('割合'));assert.equal(model.normalize({choice:-1}).choice,-1);
+const colourMix=studio.derive([model.normalize([.6,.2,.2])],quests),dominant=[0,0,0];let distinct=0,total=0;
+for(let y=.1;y<.95;y+=.02)for(let x=.2;x<.85;x+=.02){const w=studio.coatWeights(x,y,colourMix,'hello',120),max=Math.max(...w);dominant[w.indexOf(max)]++;if(max>.9)distinct++;total++;}
+assert(dominant.every(n=>n>20),'mixed answers retain distinct white, black and ginger patches');assert(distinct/total>.7,'most fur uses a distinct pigment instead of uniform gray');
+const skippedFirst=studio.derive([{choice:-1},{choice:2}],quests);assert.equal(skippedFirst.family,2);assert.equal(skippedFirst.choices[0],-1);
+const referenceNames=new Set(cats.map(cat=>{const before=JSON.stringify(cat),look=studio.referenceAppearance(cat);assert.equal(JSON.stringify(cat),before);assert.equal(look.point.x,cat.x);assert.equal(look.point.y,cat.y);return look.name;}));assert.equal(referenceNames.size,9);
 console.log('PASS: exact weighted anchor midpoints, 101 distinct positions/art signatures, stable intermediate pigments, old pure-answer behavior, skipped answers and non-diagnostic distribution chart.');
+console.log('PASS: distinct pigment patches for 60/20/20 answers, fur after a skipped first question, and 9 reference coats without source-coordinate changes.');

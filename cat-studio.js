@@ -34,10 +34,11 @@
   function derive(answers,quests,point) {
     const choices=Array.from({length:5},(_,i)=>answers[i]?.choice??window.JourneyModel?.normalize(answers[i]).choice??-1);
     const weights=Array.from({length:5},(_,i)=>window.JourneyModel?.weights(answers[i])||null);
+    if(!weights[0]){const later=weights.slice(1).filter(Boolean);if(later.length)weights[0]=[0,1,2].map(k=>later.reduce((v,w)=>v+w[k],0)/later.length);}
     const selected=choices.map((c,i)=>c>=0?quests[i]?.answers[c]:null).filter(Boolean);
     const p=point||(window.JourneyModel?window.JourneyModel.point(answers,quests):null)||(selected.length?{x:selected.reduce((v,a)=>v+a.x,0)/selected.length,y:selected.reduce((v,a)=>v+a.y,0)/selected.length}:{x:5,y:5});
     const quadrant=quadrantFor(p),theme=themes[quadrant];
-    const family=choices[0],pattern=Math.max(0,choices[1]),layout=Math.max(0,choices[2]),density=Math.max(0,choices[3]),eye=choices[4];
+    const family=weights[0]?weights[0].indexOf(Math.max(...weights[0])):-1,pattern=Math.max(0,choices[1]),layout=Math.max(0,choices[2]),density=Math.max(0,choices[3]),eye=choices[4];
     const finalPose=choices.some(c=>c>=0)?poseFor(p,choices):'hello';
     const name=family<0?'原画の白黒猫':coatNames[family][pattern];
     const values=[name,choices[1]<0?'まだ模様を選んでいません':[['単色','黒のぶち','黒と茶のぶち'],['単色','白い胸と足','茶色のまだら'],['単色','白い胸と足','しま模様']][Math.max(0,family)][pattern],choices[2]<0?'基本の模様の位置':['顔と背中に模様','体と尻尾に模様','左右に違う模様'][layout],poseShortNames[finalPose]+'・'+['小ぶち','中ぶち','大ぶち'][density],eye<0?'原画の金色の瞳':eyes[eye].name];
@@ -104,7 +105,15 @@
     const stripe=.5+.5*Math.sin(y*(72+(density[1]+2*density[2])*9)+Math.sin(x*18+a.seed)*2.1+x*14),dark=smooth(.73,.91,stripe)*.60*(1-originalLight*.65);
     const white=family[0]*(pattern[0]+pattern[1]*(1-black)+pattern[2]*Math.max(0,1-calicoBlack-calicoGinger))+family[1]*pattern[1]*white1+family[2]*pattern[1]*white2;
     const ink=family[0]*(pattern[1]*black+pattern[2]*calicoBlack)+family[1]*(pattern[0]+pattern[1]*(1-white1)+pattern[2]*(1-black))+family[2]*pattern[2]*dark;
-    return[white,ink,Math.max(0,1-white-ink)];
+    return separatePigments([white,ink,Math.max(0,1-white-ink)],x,y,a.seed);
+  }
+  // Answer proportions move the borders of coat patches instead of tinting the whole cat gray.
+  function separatePigments(weights,x,y,seed){
+    if(Math.max(...weights)>1-1e-8)return weights;
+    const field=Math.max(.001,Math.min(.999,.5+.27*Math.sin(x*8+seed*.03)+.21*Math.cos(y*9-seed*.02)+.08*Math.sin((x+y)*19)));
+    const black=weights[1]>1e-8?1-smooth(weights[1]-.035,weights[1]+.035,field):0;
+    const ginger=weights[2]>1e-8?(1-black)*(1-smooth(weights[1]+weights[2]-.035,weights[1]+weights[2]+.035,field)):0;
+    return[Math.max(0,1-black-ginger),black,ginger];
   }
   function inPolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))inside=!inside;}return inside;}
   function protectedProp(x,y,pose){
@@ -150,15 +159,25 @@
     }
     return data;
   }
-  function render(a,pose=a.finalPose){
+  function render(a,pose=a.finalPose,maxSize=0){
     const src=sourceFor(pose);if(a.family<0&&!a.iris)return Promise.resolve(src);
-    const key=[src,a.signature,a.quadrant].join('|');
+    const key=[src,a.signature,a.quadrant,maxSize].join('|');
     if(!cache.has(key)){
-      const task=load(src).then(img=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);recolor(pixels.data,canvas.width,canvas.height,a,pose);ctx.putImageData(pixels,0,0);return canvas.toDataURL('image/png');});
+      const task=load(src).then(img=>{const canvas=document.createElement('canvas'),scale=maxSize?Math.min(1,maxSize/Math.max(img.naturalWidth,img.naturalHeight)):1;canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,canvas.width,canvas.height);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);recolor(pixels.data,canvas.width,canvas.height,a,pose);ctx.putImageData(pixels,0,0);return canvas.toDataURL('image/png');});
       cache.set(key,task);task.catch(()=>cache.delete(key));
       if(cache.size>36)cache.delete(cache.keys().next().value);
     }
     return cache.get(key);
   }
-  window.CatStudio={derive,render,recolor,sourceFor,valuesText,themes,sources,poseNames,poseShortNames,coatWeights,quadrants,poseFor,withPose,protectedProp};
+  function referenceAppearance(cat){
+    const n=Math.max(0,Number(cat.no)-1),choices=[Math.floor(n/3)%3,n%3,Math.floor(n/9)%3,Math.floor(n/27)%3,Math.floor(n/7)%3];
+    return derive(choices.map(choice=>({choice})),[],{x:cat.x,y:cat.y});
+  }
+  const referenceCache=new Map();
+  function renderReference(cat,pose=poseFor(cat,cat.no),maxSize=320){
+    const key=[cat.no,cat.x,cat.y,pose,maxSize].join('|');
+    if(!referenceCache.has(key)){const task=render(referenceAppearance(cat),pose,maxSize);referenceCache.set(key,task);task.catch(()=>referenceCache.delete(key));if(referenceCache.size>256)referenceCache.delete(referenceCache.keys().next().value);}
+    return referenceCache.get(key);
+  }
+  window.CatStudio={derive,render,recolor,sourceFor,valuesText,themes,sources,poseNames,poseShortNames,coatWeights,quadrants,poseFor,withPose,protectedProp,referenceAppearance,renderReference};
 })();

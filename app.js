@@ -247,6 +247,7 @@ function showScreen(id) {
     worldTimer = setInterval(refreshWorld, 60000);
   }
   if (id === "cats") renderCats($("#catSearch").value);
+  if (id === "home" && state.answers.length) setPose(".hero-cat","hello");
   document.title = {
     home: "家猫クエスト | あなたのペースで、まちとつながる。",
     journey: `第${state.step + 1}地点 | 家猫クエスト`,
@@ -324,10 +325,11 @@ function setPose(selector, key, look = appearance()) {
   document.body.dataset.atelier = look.theme.key;
   const token = String(Number(img.dataset.paintToken || 0) + 1);
   img.dataset.paintToken = token;
-  img.src = CatStudio.sourceFor(pose);
+  if(!img.src.startsWith('data:image/'))img.src = CatStudio.sourceFor(pose);
+  img.dataset.paintState='pending';
   const painted = CatStudio.render(look, pose);
   img.painting = painted;
-  painted.then(src => {if (img.dataset.paintToken === token) img.src = src;}).catch(() => {});
+  painted.then(src => {if (img.dataset.paintToken === token){img.src = src;img.dataset.paintState='ready';}}).catch(() => {if(img.dataset.paintToken===token)img.dataset.paintState='error';});
   img.alt = `${CatStudio.poseNames[pose] || "猫時計"}。${CatStudio.valuesText(look)}`;
   img.dataset.pose = pose;
 }
@@ -546,10 +548,18 @@ function sourceLink(label, url) {
     : `<span>${esc(label || "記載なし")}</span>`;
 }
 function catPose(c) {return CatStudio.poseFor(c,c.no);}
+function paintReferenceImages(root=document,matchResult=false){
+  root.querySelectorAll('img[data-reference-cat]').forEach(img=>{
+    const c=cats.find(c=>c.no===Number(img.dataset.referenceCat));if(!c)return;
+    const own=matchResult&&state.answers.length===5&&chooseCat()?.no===c.no,look=own?cardAppearance():CatStudio.referenceAppearance(c),pose=own?look.finalPose:catPose(c);img.alt=look.name+'。'+CatStudio.poseNames[pose];
+    const painting=own?CatStudio.render(look,pose,500):CatStudio.renderReference(c,pose);
+    painting.then(src=>{if(img.isConnected)img.src=src;}).catch(()=>{});
+  });
+}
 function catDetail(c, full = false) {
   const source = correctedSource(c.url),
     source2 = correctedSource(c.url2);
-  return `<div class="detail-cat-visual"><img src="${CatStudio.sourceFor(catPose(c))}" alt="${esc(CatStudio.poseNames[catPose(c)])}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
+  return `<div class="detail-cat-visual"><img data-reference-cat="${c.no}" src="${CatStudio.sourceFor(catPose(c))}" alt="${esc(CatStudio.poseNames[catPose(c)])}"><span>NO. ${String(c.no).padStart(3, "0")}</span></div><p class="eyebrow">${esc(c.domain)}</p><h2 ${full ? 'id="catDialogTitle"' : ""}>${esc(c.name)}</h2><p class="cat-catch">${esc(c.catch)}</p><div class="coordinate-chip">X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} <span>設計座標</span></div>${
     full
       ? `<p class="detail-note">猫の名前やタイプは元CSVの創作類型です。あなたの属性・性格・健康状態を意味しません。イラストのポーズは本作品の演出です。</p><h3>この猫が考える「参加の入口」</h3><p>${esc(c.action)}</p><h3>配慮したいこと</h3><p>${esc(c.risk)}</p><h3>根拠と参照先</h3><p>${esc(source ? source.finding : c.summary)}</p><div class="citation-box"><span>${source ? "リンク先の正式書誌を照合済み" : "元CSVに記載された出典（個別精査前を含む）"}</span>${sourceLink(source ? `${source.authors} (${source.year}) ${source.title}` : c.source, c.url)}${c.source2 ? sourceLink(source2 ? `${source2.authors} (${source2.year}) ${source2.title}` : c.source2, c.url2) : ""}<small>元CSVの根拠区分：${esc(c.evidence)}<br>元CSVの根拠レベル表記：${esc(c.level)}<br>この表記はアプリによる再認定ではありません。</small></div><h3>座標はどう置かれた？</h3><p>${esc(c.reason)}</p><details><summary>元CSVの全項目を見る</summary><dl class="raw-fields">${Object.entries(
           c.raw,
@@ -563,6 +573,7 @@ function openCat(no) {
   const c = cats.find((c) => c.no === Number(no));
   if (!c) return;
   $("#catDialogBody").innerHTML = catDetail(c, true);
+  paintReferenceImages($("#catDialogBody"),true);
   if (state.answers.length === 5 && chooseCat()?.no === c.no) {
     const p = journeyPoint();
     $("#catDialogBody").insertAdjacentHTML(
@@ -584,9 +595,10 @@ function renderCats(query = "") {
   $("#catGallery").innerHTML = list
     .map(
       (c) =>
-        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" src="${CatStudio.sourceFor(catPose(c))}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
+        `<button class="cat-tile" data-cat="${c.no}"><span class="cat-tile-top">NO. ${String(c.no).padStart(3, "0")}<span>↗</span></span><div class="cat-avatar"><img loading="lazy" data-reference-cat="${c.no}" src="${CatStudio.sourceFor(catPose(c))}" alt=""></div><span class="cat-domain">${esc(c.domain)}</span><b>${esc(c.name)}</b><small>${esc(c.catch)}</small><span class="cat-source-tag">根拠をひらく ＋</span></button>`,
     )
     .join("");
+  paintReferenceImages($("#catGallery"));
 }
 function renderComplete() {
   const c = chooseCat();
@@ -707,7 +719,8 @@ function renderPoseGallery(group = poseGroup) {
   const look = cardAppearance(), section = CatStudio.quadrants[poseGroup];
   $("#poseGroups").innerHTML = CatStudio.quadrants.map((q,i)=>`<button data-pose-group="${i}" aria-pressed="${i===poseGroup}">${esc(q.title)}</button>`).join("");
   $("#poseGroupNote").textContent = section.note;
-  $("#poseGallery").innerHTML = section.poses.map(key=>`<button class="pose-tile ${key===look.finalPose?'selected':''}" data-card-pose="${key}" aria-pressed="${key===look.finalPose}"><img loading="lazy" src="${CatStudio.sourceFor(key)}" alt="${esc(CatStudio.poseNames[key])}"><b>${esc(CatStudio.poseNames[key])}</b><small>この一日をカードにする ↗</small></button>`).join("");
+  $("#poseGallery").innerHTML = section.poses.map(key=>`<button class="pose-tile ${key===look.finalPose?'selected':''}" data-card-pose="${key}" aria-pressed="${key===look.finalPose}"><img loading="lazy" data-preview-pose="${key}" src="${CatStudio.sourceFor(key)}" alt="${esc(CatStudio.poseNames[key])}"><b>${esc(CatStudio.poseNames[key])}</b><small>この一日をカードにする ↗</small></button>`).join("");
+  $("#poseGallery").querySelectorAll('img').forEach(img=>CatStudio.render(look,img.dataset.previewPose,320).then(src=>{if(img.isConnected)img.src=src;}).catch(()=>{}));
 }
 function openPoseGallery() {renderPoseGallery(appearance().quadrant);$("#poseDialog").showModal();}
 function setCardPose(key) {
@@ -737,7 +750,8 @@ function renderPlaceDetail(index) {
     done = state.answers[index],
     a = currentAnswer(index);
   $("#placeDetail").innerHTML =
-    `<span class="eyebrow">PLACE 0${index + 1} / ${q.topic}</span><div class="place-cat"><img src="${POSES[q.pose].src}" alt="${POSES[q.pose].alt}"></div><h2>${q.place}</h2><p>${q.title}</p><div class="place-note"><b>${done ? "この端末に残った足あと" : "この場所で出会う問い"}</b><p>${esc(done ? JourneyModel.describe(done,q,state.kids) : q.scene)}</p></div><button class="button small primary" data-visit="${Math.min(index, state.answers.length, 4)}">${done ? "この問いを選び直す" : index > state.answers.length ? "ここへ向かって歩く" : "この問いに出会う"} →</button><a href="#research" class="text-link">背景：${RESEARCH[q.refs[0]].concept} ↗</a>`;
+    `<span class="eyebrow">PLACE 0${index + 1} / ${q.topic}</span><div class="place-cat"><img id="placeCatImage" src="${POSES[q.pose].src}" alt="${POSES[q.pose].alt}"></div><h2>${q.place}</h2><p>${q.title}</p><div class="place-note"><b>${done ? "この端末に残った足あと" : "この場所で出会う問い"}</b><p>${esc(done ? JourneyModel.describe(done,q,state.kids) : q.scene)}</p></div><button class="button small primary" data-visit="${Math.min(index, state.answers.length, 4)}">${done ? "この問いを選び直す" : index > state.answers.length ? "ここへ向かって歩く" : "この問いに出会う"} →</button><a href="#research" class="text-link">背景：${RESEARCH[q.refs[0]].concept} ↗</a>`;
+  if(state.answers.length)setPose('#placeCatImage',q.pose);
   document.querySelectorAll(".town-stop").forEach((b) => {
     const on = Number(b.dataset.place) === index;
     b.classList.toggle("selected", on);
@@ -749,7 +763,7 @@ function renderMarkers(players) {
     markers = [];
   if (state.answers.length)
     markers.push(
-      `<div class="local-cat-marker" style="left:${coords[selfIndex][0]}%;top:${coords[selfIndex][1] - 12}%"><img src="${POSES[currentPose()].src}" alt="この端末の猫の現在地"><span>あなた</span></div>`,
+      `<div class="local-cat-marker" style="left:${coords[selfIndex][0]}%;top:${coords[selfIndex][1] - 12}%"><img id="worldCatImage" src="${POSES[currentPose()].src}" alt="この端末の猫の現在地"><span>あなた</span></div>`,
     );
   const grouped = [[], [], [], [], []];
   players.forEach((p) =>
@@ -764,6 +778,7 @@ function renderMarkers(players) {
     );
   });
   $("#playerMarkers").innerHTML = markers.join("");
+  if(state.answers.length)setPose('#worldCatImage',currentPose());
 }
 function renderAtlas() {
   $("#atlasPoints").innerHTML = cats
@@ -783,7 +798,7 @@ function renderAtlas() {
     .join("");
   $("#atlasCount").textContent = `${cats.length}匹`;
   const c = chooseCat() || cats[0];
-  if (c) $("#atlasDetail").innerHTML = catDetail(c);
+  if (c){$("#atlasDetail").innerHTML = catDetail(c);paintReferenceImages($("#atlasDetail"));}
   const p = journeyPoint();
   if (state.answers.length) {
     const you = document.createElement("span");
@@ -980,7 +995,7 @@ async function init() {
     const dot = e.target.closest("[data-atlas]");
     if (dot) {
       const c = cats.find((c) => c.no === Number(dot.dataset.atlas));
-      if (c) $("#atlasDetail").innerHTML = catDetail(c);
+      if (c){$("#atlasDetail").innerHTML = catDetail(c);paintReferenceImages($("#atlasDetail"));}
       document
         .querySelectorAll(".atlas-dot")
         .forEach((d) => d.classList.toggle("selected", d === dot));
