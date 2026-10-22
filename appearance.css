@@ -3,7 +3,7 @@
 .button.primary:hover:not(:disabled){transform:translateY(-3px) rotate(-.5deg);box-shadow:0 7px 0 #102e28,0 15px 24px #183e3730;background:linear-gradient(140deg,#427e67,#234d40)}
 .button.primary:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #102e28}
 .button.primary:disabled {box-shadow:none; border:1px solid #d5d9cf}
-#startJourney:before,#confirmAnswer:before,#nextQuestion:before {content:'🐾';font-size:18px;margin-right:8px}
+#confirmAnswer:before,#nextQuestion:before {content:'🐾';font-size:18px;margin-right:8px}
 .answer-button {border-radius:22px;background:linear-gradient(120deg,#fffdf6,#f7f4ea);border:1px solid #d9dece;box-shadow:0 4px 0 #d7dbce; transition:transform .2s,box-shadow .2s,border-color .2s}
 .answer-button:hover {transform:translateY(-3px);border-color:#89a691;box-shadow:0 7px 0 #d7dbce,0 10px 20px #244b4210}
 .answer-button[aria-pressed='true'] {background:linear-gradient(120deg,#e0ebda,#f2f2dd);border-color:#4d7b60;box-shadow:0 4px 0 #8fa68c; transform:translateY(-2px)}
@@ -66,3 +66,109 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 #poseDialog::backdrop{background:#183a34bb;backdrop-filter:blur(8px)}#poseDialog h2{font-size:25px;margin:8px 0 12px}.pose-intro{font-size:12px;line-height:1.8;color:#567064}.pose-groups{display:flex;flex-wrap:wrap;gap:7px;margin:20px 0 10px}.pose-groups button{border:1px solid #b8c9bc;border-radius:20px;padding:10px 13px;background:#fffdf5;font-size:11px;color:#325548;cursor:pointer}.pose-groups button[aria-pressed="true"]{background:#254e41;color:#fff9df;border-color:#254e41}.pose-group-note{font-size:12px;color:#617569;line-height:1.8;margin:10px 0 16px}.pose-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.pose-tile{border:1px solid #c5d2c4;background:radial-gradient(ellipse at 50% 44%,#e3e9dc,#f7f7ef 70%);border-radius:19px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center;color:#254d40;cursor:pointer;box-shadow:0 4px 0 #d2dccd;transition:transform .2s}.pose-tile:hover{transform:translateY(-3px)}.pose-tile img{width:100%;height:190px;object-fit:contain}.pose-tile b{font-size:12px;line-height:1.7}.pose-tile small{font-size:10px;color:#61785e}.pose-tile[aria-pressed="true"]{border-color:#517b59;box-shadow:0 4px 0 #8aa17f}.pose-tile.selected:after{content:'今日の一枚';font-size:9px;background:#2e5a46;color:#fff4d8;padding:3px 8px;border-radius:20px}#automaticPose{display:block;margin:24px 0 4px}.finished-cat img[data-pose="sports-car"]{width:108%;max-width:none;height:96%}
 @media(max-width:600px){footer{display:grid;gap:17px;padding:25px 20px}footer .footer-credit{order:0;font-size:11px;width:100%}footer>div{gap:17px;font-size:10px}#poseDialog{padding:19px 15px;width:calc(100vw - 20px);max-height:94dvh}.pose-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pose-tile{padding:10px 7px}.pose-tile img{height:150px}.pose-tile b{font-size:11px}.pose-groups button{padding:9px 10px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.pose-tile{transition:none}.pose-tile:hover{transform:none}}
+
+/* ver2.03: a clear invitation, followed by a contrasting take-home moment. */
+.hero-message>.eyebrow{display:flex;align-items:center;gap:10px}
+#startJourney{width:min(100%,380px);min-height:84px;padding:16px 20px;gap:14px;border-radius:23px;justify-content:flex-start;text-align:left}
+#startJourney .start-paw{display:grid;place-items:center;flex:0 0 43px;height:43px;border:1px solid #e9efd64d;background:#ffffff12;border-radius:15px;font-size:24px;line-height:1;color:#f3d7a1}
+#startJourney .start-copy{display:grid;gap:6px;flex:1;min-width:0}
+#startJourney .start-copy b{font-size:18px;letter-spacing:.04em;line-height:1.5;white-space:nowrap}
+#startJourney .start-copy small{font-size:10px;font-weight:400;color:#e4ead7;line-height:1.5}
+#startJourney .start-arrow{display:grid;place-items:center;flex:0 0 30px;height:30px;font-size:23px;color:#f5dfa9}
+.hero-buttons{gap:20px}
+.community-invite{display:flex;align-items:center;gap:15px;margin:24px 0;padding:20px;border:1px solid #d5d0e3;border-radius:18px;background:#f2eff9;line-height:1.8;color:#46406c;transition:background .2s,transform .2s}
+.community-invite:hover{background:#e8e2f5;transform:translateY(-2px)}
+.community-icon{font-size:28px}
+.community-invite b{display:block;font-size:14px}.community-invite small{display:block;font-size:10px;color:#665e7d}
+.feedback-scene-label{display:none}
+.journey-layout{scroll-margin-top:22px}
+.is-feedback .journey-layout{background:#193f36;border-color:#406354;border-radius:28px;padding:22px;gap:22px;grid-template-columns:.8fr 1.2fr;box-shadow:0 22px 55px #183e3725}
+.is-feedback .scene-panel{background:radial-gradient(ellipse at 50% 65%,#68896888,transparent 65%)!important;border:0;min-height:580px;padding:25px 15px;justify-content:center;overflow:visible}
+.is-feedback .scene-top,.is-feedback .scene-caption,.is-feedback .scene-decoration{display:none}
+.is-feedback .feedback-scene-label{display:grid;gap:12px;position:relative;z-index:2;text-align:center;color:#f0dfa9}
+.feedback-scene-label>span{font:9px monospace;letter-spacing:.17em}
+.feedback-scene-label>b{font-size:30px;letter-spacing:.08em;font-family:serif;font-weight:500}
+.is-feedback .scene-cat-wrap{flex:1;min-height:0;height:390px;padding:20px 0 0}
+.is-feedback .scene-cat-wrap img{max-height:380px;height:100%;width:100%;object-fit:contain}
+.is-feedback .scene-bubble{font-size:12px;top:16px;right:-5px;background:#f9edcf;color:#315144;border:0;box-shadow:0 5px 20px #0b281b22}
+.is-feedback .question-panel{background:#fff9eb;border:1px solid #e9dbbd;border-radius:19px;padding:30px;box-shadow:0 10px 20px #0d261e22;position:relative}
+.is-feedback .question-meta{display:none}
+.feedback-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:17px}
+.feedback-heading .feedback-kicker{margin:0;font-size:9px;letter-spacing:.16em;color:#6e7660}
+.feedback-count{font:11px monospace;letter-spacing:.1em;color:#6a7861;border:1px solid #d2d6c0;padding:5px 9px;border-radius:20px}
+.is-feedback #feedbackTitle{font-family:serif;font-size:clamp(25px,2.6vw,36px);font-weight:600;letter-spacing:.03em;line-height:1.5;margin:0 0 10px;color:#214d3e}
+.feedback-intro{font-size:11px;color:#687263;line-height:1.8;margin-bottom:23px}
+.is-feedback .takeaway{position:relative;background:#f0dfb2;border:0;border-radius:14px;padding:24px 25px;color:#284d3d;box-shadow:0 5px 0 #d9c596}
+.is-feedback .takeaway>span{display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.05em;color:#626b4d}
+.takeaway>span i{font-size:22px;font-style:normal;line-height:1}
+.is-feedback .takeaway p{font-size:clamp(18px,1.8vw,23px);font-weight:700;line-height:1.85;margin:13px 0 16px;letter-spacing:.025em}
+.takeaway>small{font-size:10px;color:#686c52;line-height:1.8}
+.feedback-reflection{padding:23px 0 0}
+#feedbackReaction{font-size:15px;font-weight:700;line-height:1.8;color:#38604b;margin:0 0 8px}
+.feedback-reflection .feedback-text{font-size:12px;line-height:1.95;margin:0;color:#626e5e}
+.is-feedback .evidence-fold{margin:20px 0;border-color:#d9dccb}
+.is-feedback .evidence-fold summary{font-size:11px}
+#nextQuestion{width:100%;gap:10px;min-height:58px;font-size:13px;padding:13px 16px}
+#nextQuestion:before{margin:0;font-size:15px}
+#changeAnswer{display:block;margin:19px auto 0;font-size:11px;text-decoration:underline;text-underline-offset:4px;color:#64715f}
+.is-feedback .previous-question{margin-top:20px;padding-top:18px;border-top:1px solid #d9dccb}
+@media(max-width:600px){
+  .hero-copy{display:contents}
+  .hero-message{grid-row:1;padding:25px 0 16px}
+  .hero-message>.eyebrow{font-size:8px;letter-spacing:.06em;margin-bottom:13px}
+  .hero-copy h1{font-size:clamp(28px,7.3vw,36px);line-height:1.4;margin-bottom:14px;letter-spacing:-.055em}
+  .hero-lead{font-size:12px;line-height:1.85;margin-bottom:0}
+  .hero-art{grid-row:2;height:258px;margin:0;border:1px solid #cfdbca;border-radius:23px;overflow:hidden}
+  .hero-cat{width:88%;height:118%;left:7%;bottom:-17%;object-fit:contain}
+  .hero-orbit{width:72%;top:4%;left:14%}
+  .art-coordinate{font-size:7px;top:15px;left:15px}.art-coordinate small{display:none}
+  .art-spark{top:12%;right:10%;font-size:27px}
+  .cat-speech{top:25%;left:4%;font-size:10px;padding:9px 11px}
+  .hero-cat-label{left:auto;right:12px;bottom:12px;max-width:210px;padding:8px 12px;background:#fff9e8ee;transform:rotate(-2deg)}
+  .hero-cat-label b{font-size:11px}.hero-cat-label span{font-size:6px}.hero-cat-label small{display:none}
+  .hero-buttons{grid-row:3;width:100%;display:flex;flex-direction:column;align-items:stretch;gap:18px;margin:18px 0 0}
+  #startJourney{width:100%;min-height:80px;padding:15px 17px;gap:12px;border-radius:22px}
+  #startJourney .start-copy b{font-size:18px}#startJourney .start-copy small{font-size:10px}
+  #startJourney .start-paw{flex-basis:39px;height:42px;font-size:23px}#startJourney .start-arrow{flex-basis:25px}
+  #resumeJourney{align-self:center;min-height:35px;font-size:12px}
+  .hero-copy>.quiet-note{grid-row:4;margin:14px 0 25px;text-align:center;font-size:10px}
+  .home-strip{margin-top:0}
+  .community-invite{padding:17px 15px;gap:12px}.community-invite b{font-size:12px}
+  .journey-layout{scroll-margin-top:14px}
+  .is-feedback .journey-layout{padding:12px;gap:5px;border-radius:23px}
+  .is-feedback .scene-panel{display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:0;height:165px;padding:8px 10px;overflow:hidden;background:none!important}
+  .is-feedback .feedback-scene-label{text-align:left;gap:12px;flex:0 0 46%}
+  .feedback-scene-label>span{font-size:7px;line-height:1.8;letter-spacing:.04em}
+  .feedback-scene-label>b{font-size:22px;white-space:nowrap;letter-spacing:0}
+  .is-feedback .scene-cat-wrap{height:165px;width:54%;flex:none;padding:0}
+  .is-feedback .scene-cat-wrap img{height:100%;max-height:165px;width:100%;object-position:center}
+  .is-feedback .scene-bubble{display:none}
+  .is-feedback .question-panel{padding:22px 18px;border-radius:16px}
+  .feedback-heading{margin-bottom:14px}.feedback-heading .feedback-kicker{font-size:8px}
+  .is-feedback #feedbackTitle{font-size:26px;letter-spacing:0}
+  .feedback-intro{font-size:10px;margin-bottom:18px}
+  .is-feedback .takeaway{padding:19px 18px;border-radius:12px}
+  .is-feedback .takeaway p{font-size:19px;line-height:1.85;margin:12px 0}
+  .is-feedback .takeaway>span,.takeaway>small{font-size:9px}
+  #feedbackReaction{font-size:13px}.feedback-reflection .feedback-text{font-size:12px}
+  #nextQuestion{font-size:12px;min-height:57px;padding:12px 10px}
+}
+@media(max-width:350px){#startJourney .start-copy b{font-size:16px}#startJourney .start-copy small{font-size:8px}#startJourney{gap:9px;padding-inline:12px}.is-feedback #feedbackTitle{font-size:23px}.is-feedback .question-panel{padding:19px 14px}.is-feedback .takeaway p{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.community-invite{transition:none}}
+
+/* The calling clock is an original glossy object; the companion stays painted. */
+#summonDialog{width:min(450px,calc(100vw - 28px));border:2px solid #c2a76b;border-radius:29px;background:#eee5d1;overflow:auto}
+.summon-stage{padding:23px 25px 18px;background:radial-gradient(ellipse at 50% 43%,#fffdf6 0,#eee5d1 67%,#ddcfaf 100%)}
+.summon-stage h2{font-family:serif;font-size:23px;letter-spacing:.03em;margin:8px 0 4px}
+.summon-art{height:min(400px,51dvh);margin:5px 0 12px;filter:drop-shadow(0 9px 8px #483e2d25)}
+.retro-clock-svg{height:100%;width:100%;overflow:visible}
+.retro-clock-tail{transform-origin:512px 993px;animation:retro-tail .62s ease-in-out infinite alternate}
+.retro-clock-pupils{animation:retro-eyes .62s ease-in-out infinite alternate}
+.retro-clock-hour,.retro-clock-minute{transform-origin:513px 759px;animation:clock-spin 2.2s linear infinite}
+.retro-clock-minute{animation-duration:.75s}
+.summon-stage #summonText{font-size:11px;margin-bottom:14px}
+.summon-progress{background:#d6c8a7;margin-bottom:8px}.summon-progress i{background:#355c47}
+@keyframes retro-tail{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}
+@keyframes retro-eyes{from{transform:translateX(-17px)}to{transform:translateX(17px)}}
+@media(max-width:600px){.summon-stage{padding:21px 17px 14px}.summon-stage h2{font-size:21px}.summon-art{height:min(365px,48dvh)}.summon-stage .eyebrow{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.retro-clock-tail,.retro-clock-pupils,.retro-clock-hour,.retro-clock-minute{animation:none!important}}

@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.02" />
-    <link rel="stylesheet" href="appearance.css?v=2.02" />
+    <link rel="stylesheet" href="app.css?v=2.03" />
+    <link rel="stylesheet" href="appearance.css?v=2.03" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -34,6 +34,7 @@
     <main id="main">
       <section id="home" class="screen hero-screen" aria-labelledby="homeTitle">
         <div class="hero-copy">
+          <div class="hero-message">
           <p class="eyebrow">
             <span class="live-dot"></span> A LITTLE STEP INTO YOUR CITY
           </p>
@@ -43,9 +44,12 @@
           <p class="hero-lead">
             びびったり、お腹がすいたり、ひと休みしたり。<br />猫と歩く5つの問いから、<br />あなたに心地よい「まちとのつながり方」を探そう。
           </p>
+          </div>
           <div class="hero-buttons">
             <button class="button primary" id="startJourney">
-              猫と、まちへ出る <span>↗</span></button
+              <span class="start-paw" aria-hidden="true"><svg viewBox="0 0 32 32" width="29" height="29" fill="currentColor"><ellipse cx="8" cy="11" rx="3.2" ry="4.5" transform="rotate(-25 8 11)"/><ellipse cx="15" cy="7" rx="3.2" ry="4.5"/><ellipse cx="22" cy="9" rx="3.2" ry="4.5" transform="rotate(18 22 9)"/><ellipse cx="27" cy="15" rx="3" ry="4" transform="rotate(35 27 15)"/><path d="M8 23c0-4 4-9 8-9s9 5 9 9c0 6-5 3-8 3s-9 3-9-3Z"/></svg></span>
+              <span class="start-copy"><b>猫と、まちへ出る</b><small>5つの問いから、きみの相棒に会おう</small></span>
+              <span class="start-arrow" aria-hidden="true">↗</span></button
             ><button class="text-link" id="resumeJourney" hidden>
               前のつづきから →
             </button>
@@ -103,6 +107,7 @@
         <div id="storyMap" class="route" aria-label="旅の進み具合"></div>
         <div class="journey-layout">
           <aside class="scene-panel">
+            <div class="feedback-scene-label" aria-hidden="true"><span>A LITTLE STEP FOUND</span><b>一歩、みつけた。</b></div>
             <div class="scene-top">
               <span id="placeName"></span><span id="sceneWeather"></span>
             </div>
@@ -156,13 +161,15 @@
               </p>
             </div>
             <div id="feedbackView" class="hidden" aria-live="polite">
-              <span class="feedback-kicker">YOUR LITTLE STEP</span>
-              <h2 id="feedbackTitle" tabindex="-1"></h2>
-              <p id="feedbackText" class="feedback-text"></p>
+              <div class="feedback-heading"><span class="feedback-kicker">YOUR LITTLE STEP</span><span id="feedbackCount" class="feedback-count"></span></div>
+              <h2 id="feedbackTitle" tabindex="-1">今日の小さな一歩</h2>
+              <p class="feedback-intro">いま選んだ答えから、まちで試せること。</p>
               <div class="takeaway">
-                <span>まちで試せる、小さなこと</span>
+                <span><i aria-hidden="true">↗</i> こんなこと、してみよう</span>
                 <p id="feedbackAction"></p>
+                <small>やってみるかは、あなたのペースで。</small>
               </div>
+              <div class="feedback-reflection"><p id="feedbackReaction"></p><p id="feedbackText" class="feedback-text"></p></div>
               <details id="questionEvidence" class="evidence-fold">
                 <summary>この問いの背景にある研究 <span>＋</span></summary>
                 <div id="questionEvidenceBody"></div>
@@ -170,6 +177,7 @@
               <button id="nextQuestion" class="button primary">
                 次の場所へ →
               </button>
+              <button id="changeAnswer" class="text-link">この答えを選び直す</button>
             </div>
             <button id="previousQuestion" class="previous-question text-link">
               ← ひとつ前の問いへ
@@ -217,7 +225,7 @@
             <div class="card-route" id="cardRoute" aria-label="5つの問いの足あと"></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.02</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.03</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -236,6 +244,7 @@
                 >みんなの世界に足あとを残す ↗</a
               >
             </div>
+            <a class="community-invite" href="https://discord.com/channels/1369281268977500170/1504436492242522314" target="_blank" rel="noopener" aria-label="Discordで、まちの話をする（新しいタブ）"><span class="community-icon" aria-hidden="true">💬</span><span><b>Discordで、まちの話をする ↗</b><small>猫やまちのアイデアを、チーム1のチャンネルで。</small><small>ログインとチャンネルへの参加権限が必要です。</small></span></a>
             <div class="join-box">
               <label
                 ><input type="checkbox" id="joinWorld" /><span
@@ -600,7 +609,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.02</small></a
+        >家猫クエスト <small id="appVersion">ver2.03</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -609,7 +618,7 @@
           target="_blank"
           rel="noopener"
           >GitHub ↗</a
-        ><a href="https://github.com/tokmatsuno/ieneko2/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新履歴 ↗</a>
+        ><a href="https://discord.com/channels/1369281268977500170/1504436492242522314" target="_blank" rel="noopener" aria-label="Discord（新しいタブ）">Discord ↗</a><a href="https://github.com/tokmatsuno/ieneko2/blob/main/CHANGELOG.md" target="_blank" rel="noopener">更新履歴 ↗</a>
       </div>
     </footer>
     <dialog id="catDialog" aria-labelledby="catDialogTitle">
@@ -629,7 +638,8 @@
       <button id="automaticPose" class="text-link">回答から選ばれたポーズに戻す →</button>
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
-    <script src="version.js?v=2.02"></script>
+    <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
+    <script src="version.js?v=2.03"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
@@ -643,7 +653,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.02&amp;r=2"></script>
-    <script src="app.js?v=2.02"></script>
+    <script src="cat-studio.js?v=2.03&amp;r=2"></script>
+    <script src="app.js?v=2.03"></script>
   </body>
 </html>

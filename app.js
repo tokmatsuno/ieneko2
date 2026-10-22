@@ -511,6 +511,7 @@ function startJourney() {
   state.answers = [];
   state.cardPose = "";
   feedbackOpen = false;
+  $("#journey").classList.remove("is-feedback");
   persist();
   navigate("journey");
   setupPresence();
@@ -598,11 +599,8 @@ function finishSummon() {
 function summonCat() {
   if (summoning) return;
   summoning = true;
-  const look = appearance();
-  const clockSource="dist/cat-clock.png";
-  const tailPath="M786 1026C886 1010 963 884 991 704C1008 617 1020 542 979 501C955 475 918 478 887 503C849 536 871 599 862 661C859 738 829 792 790 835Z";
-  $("#summonArt").innerHTML = `<svg class="painted-clock-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1536" role="img" aria-label="前バージョンの絵を引き継いだ猫時計。瞳、尻尾、時計の針が動きます。"><defs><clipPath id="paintTailClip"><path d="${tailPath}"/></clipPath><mask id="paintBodyMask"><rect width="1024" height="1536" fill="white"/><path d="${tailPath}" fill="black"/></mask><clipPath id="paintEyeClip"><ellipse cx="455" cy="219" rx="20" ry="18"/><ellipse cx="584" cy="241" rx="20" ry="18"/></clipPath></defs><g class="paint-clock-tail"><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" clip-path="url(#paintTailClip)"/></g><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" mask="url(#paintBodyMask)"/><g class="paint-clock-eyes"><image class="clock-art-layer" href="${clockSource}" width="1024" height="1536" clip-path="url(#paintEyeClip)"/></g><path class="paint-clock-hour" d="M483 636v-27" stroke="#574532" stroke-width="7" stroke-linecap="round"/><path class="paint-clock-minute" d="M483 636v-39" stroke="#574532" stroke-width="4" stroke-linecap="round"/><circle cx="483" cy="636" r="6" fill="#b18b48"/></svg>`;
-  CatStudio.render(look,"clock").then(src=>{if(summoning)document.querySelectorAll(".clock-art-layer").forEach(el=>el.setAttribute("href",src));}).catch(()=>{});
+  const clockSource = "dist/cat-clock-retro-ver2.03.png";
+  $("#summonArt").innerHTML = `<svg class="retro-clock-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1536" role="img" aria-label="写真のような光沢のある黒い猫時計。大きな白い目の瞳、振り子の尻尾、時計の針が動きます。"><defs><clipPath id="retroTailClip"><rect x="440" y="990" width="150" height="546"/></clipPath><mask id="retroBodyMask"><rect width="1024" height="1536" fill="white"/><rect x="440" y="990" width="150" height="546" fill="black"/></mask><radialGradient id="retroPupil"><stop stop-color="#161b1b"/><stop offset="1" stop-color="#020303"/></radialGradient></defs><g class="retro-clock-tail"><image href="${clockSource}" width="1024" height="1536" clip-path="url(#retroTailClip)"/></g><image href="${clockSource}" width="1024" height="1536" mask="url(#retroBodyMask)"/><g class="retro-clock-pupils" fill="url(#retroPupil)"><path d="M405 199C426 228 426 278 405 309C383 278 384 228 405 199Z"/><path d="M621 199C642 228 642 278 621 309C599 278 600 228 621 199Z"/><ellipse cx="399" cy="231" rx="3" ry="12" fill="#fff" opacity=".38"/><ellipse cx="615" cy="231" rx="3" ry="12" fill="#fff" opacity=".38"/></g><g class="retro-clock-hour"><path d="M513 759V663" stroke="#172c24" stroke-width="16" stroke-linecap="round"/><path d="M513 749V674" stroke="#bca46d" stroke-width="3" stroke-linecap="round"/></g><g class="retro-clock-minute"><path d="M513 759V615" stroke="#172c24" stroke-width="10" stroke-linecap="round"/><path d="M513 749V628" stroke="#bca46d" stroke-width="2" stroke-linecap="round"/></g><circle cx="513" cy="759" r="16" fill="#a88945"/><circle cx="513" cy="759" r="9" fill="#e6d29c"/></svg>`;
   $("#summonDialog").showModal();
   summonTimer = setTimeout(finishSummon, 3000);
 }
@@ -610,6 +608,7 @@ function renderQuestion() {
   const q = QUESTS[state.step];
   selectedChoice = null;
   feedbackOpen = false;
+  $("#journey").classList.remove("is-feedback");
   document.title = `第${state.step + 1}地点 | 家猫クエスト`;
   $("#stepCount").textContent = `0${state.step + 1} / 05`;
   $("#chapterLabel").textContent = `CHAPTER 0${state.step + 1}`;
@@ -666,9 +665,12 @@ function confirmAnswer(index, record = true) {
   if (record) state.cardPose = "";
   persist();
   feedbackOpen = true;
+  $("#journey").classList.add("is-feedback");
   $("#choiceView").classList.add("hidden");
   $("#feedbackView").classList.remove("hidden");
-  $("#feedbackTitle").textContent = a
+  $("#feedbackTitle").textContent = state.kids ? "きょうの小さな一歩" : "今日の小さな一歩";
+  $("#feedbackCount").textContent = `0${state.step + 1} / 05`;
+  $("#feedbackReaction").textContent = a
     ? a.reaction
     : "「まだ決めなくても、いいにゃ。」";
   $("#feedbackText").textContent = a
@@ -694,6 +696,7 @@ function confirmAnswer(index, record = true) {
   $("#catBubble").textContent = a?.reaction || "ここで、ひと休み。";
   $("#companionMood").textContent = POSES[a?.pose || "resting"].name;
   $("#feedbackTitle").focus({ preventScroll: true });
+  $(".journey-layout").scrollIntoView({ block: "start", behavior: "instant" });
   if (record && state.optedIn)
     sendEvent({
       event: "answer",
@@ -1162,6 +1165,10 @@ async function init() {
   });
   $("#skipQuestion").addEventListener("click", () => confirmAnswer(-1));
   $("#nextQuestion").addEventListener("click", nextQuestion);
+  $("#changeAnswer").addEventListener("click", () => {
+    renderQuestion();
+    $("#questionTitle").focus();
+  });
   $("#previousQuestion").addEventListener("click", () =>
     visitQuestion(state.step - 1),
   );
