@@ -250,12 +250,12 @@ function showScreen(id) {
   if (id === "cats") renderCats($("#catSearch").value);
   if (id === "home" && state.answers.length) setPose(".hero-cat","hello");
   document.title = {
-    home: "家猫クエスト | あなたのペースで、まちとつながる。",
-    journey: `第${state.step + 1}地点 | 家猫クエスト`,
-    complete: "今日の家猫カード | 家猫クエスト",
-    world: "みんなの世界 | 家猫クエスト",
-    cats: "100匹の家猫図鑑 | 家猫クエスト",
-    research: "研究とデータ | 家猫クエスト",
+    home: "家猫の冒険 | あなたのペースで、まちとつながる。",
+    journey: `第${state.step + 1}地点 | 家猫の冒険`,
+    complete: "今日の家猫カード | 家猫の冒険",
+    world: "みんなの世界 | 家猫の冒険",
+    cats: "100匹の家猫図鑑 | 家猫の冒険",
+    research: "研究とデータ | 家猫の冒険",
   }[id];
   window.scrollTo({ top: 0, behavior: "instant" });
   const heading = $(`#${id} h1`);
@@ -360,7 +360,7 @@ function renderQuestion() {
   clearTimeout(blendPaintTimer);
   feedbackOpen = false;
   $("#journey").classList.remove("is-feedback");
-  document.title = `第${state.step + 1}地点 | 家猫クエスト`;
+  document.title = `第${state.step + 1}地点 | 家猫の冒険`;
   $("#stepCount").textContent = `0${state.step + 1} / 05`;
   $("#chapterNumber").textContent = String(state.step+1).padStart(2,'0');
   $("#chapterPlace").textContent = q.place;
@@ -441,6 +441,9 @@ function renderBlendValues(w){
     $("#blendHint"+i).textContent=allKept?'この割合でキープしています。':blocked?'残りの割合を自動調整します。':kept?'ほかを動かしてもキープ。ここは手直しできます。':'つまみを動かして、気持ちを調整。';
   });
   $("#blendSummary").textContent=['A','B','C'].map((v,i)=>`${v} ${p[i]}%`).join(' ・ ')+'　合計100%';
+  $("#blendBudgetBar").innerHTML=p.map((v,i)=>`<span data-share="${i}" style="width:${v}%">${v>=22?`${['A','B','C'][i]} ${v}%`:v>=8?['A','B','C'][i]:''}</span>`).join('');
+  $("#blendBudgetBar").setAttribute('aria-label',`気持ちの合計100%。A ${p[0]}%、B ${p[1]}%、C ${p[2]}%。`);
+  $("#blendBudgetLegend").innerHTML=p.map((v,i)=>`<span><i data-share="${i}"></i>${['A','B','C'][i]} <b>${v}%</b></span>`).join('');
   const names=held.map(i=>['A','B','C'][i]).join('・');
   $("#blendAdjustmentNote").textContent=allKept?'3つともキープ中。この配分で進めます。1つ外すと、その答えを自動調整に戻せます。':held.length===2?`${names}をキープ。${names}のつまみで手直しすると、残り1つが自動調整されます。`:held.length===1?`${names}をキープ。ほかの2つを手直しできます。`:'まず1つを調整。残りは自動で分けます。';
   $("#keepAllBlend").disabled=allKept;
@@ -702,7 +705,7 @@ async function downloadCard() {
     ctx.strokeStyle=t.gold; ctx.lineWidth=2;
     ctx.strokeRect(22,22,1036,1666);ctx.strokeRect(35,35,1010,1640);
     ctx.fillStyle=t.gold;ctx.font="500 26px sans-serif";
-    ctx.fillText("✦ 家猫クエスト / CAT ATELIER",70,94);
+    ctx.fillText("✦ 家猫の冒険 / CAT ATELIER",70,94);
     ctx.textAlign="right";ctx.font="500 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
     ctx.fillStyle=t.light;ctx.beginPath();ctx.ellipse(540,420,350,300,0,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle=t.gold;ctx.lineWidth=3;ctx.stroke();

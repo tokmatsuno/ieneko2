@@ -15,7 +15,8 @@ function map2Records_(book,name){var sh=book.getSheetByName(name);return sh&&sh.
 function map2Get_(e){
   var p=e.parameter||{},out;
   try{
-    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.11',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5,public_cat_schema:PublicCatData.SCHEMA,csv:'?api=ieneko2&mode=csv'};
+    if(p.mode==='beta'||p.mode==='beta-csv')return betaGet_(p);
+    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.14',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5,public_cat_schema:PublicCatData.SCHEMA,csv:'?api=ieneko2&mode=csv',beta_schema:BetaDataCore.SCHEMA,beta_csv:'?api=ieneko2&mode=beta-csv'};
     else if(p.mode==='receipt'){
       if(!/^[a-zA-Z0-9_-]{12,80}$/.test(p.id||''))throw Error('invalid_id');
       var book=map2Book_(),verified=map2Has_(book,p.id,'verification'),accepted=verified||map2Has_(book,p.id,'responses');

@@ -69,8 +69,72 @@ var PublicCatData=(function(){
   return{SCHEMA,CONSENT,columns,project,validate,envelope,csv};
 })();
 
+/* Shared contract for the explicitly synthetic five-town beta dataset. */
+(function(root){
+  'use strict';
+  const SCHEMA='ieneko-five-towns-beta-1',KIND='synthetic_beta',TEAM='2026年度東京大学シビックテックデザイン学講座Team 1';
+  const FIELDS=['schema','data_kind','sample_id','town_id','town_name','prefecture','municipality','x','y','quadrant','reference_cat_no','reference_cat_name',...Array.from({length:5},(_,q)=>['a','b','c'].map(k=>`q${q+1}_${k}`)).flat(),'support_matatabi','support_churu','support_tower','license','attribution'];
+  function csv(records){return '\uFEFF'+[FIELDS,...records.map(r=>FIELDS.map(k=>r[k]??''))].map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n';}
+  function validate(records,towns){
+    if(!Array.isArray(records))throw Error('beta_records_missing');
+    const ids=new Set();
+    return records.map(r=>{
+      const town=towns.find(t=>t.id===r.town_id);
+      if(!town||r.schema!==SCHEMA||r.data_kind!==KIND||r.town_name!==town.name||!/^beta214-[a-z]+-\d{3}$/.test(r.sample_id)||ids.has(r.sample_id))throw Error('beta_identity_invalid');
+      ids.add(r.sample_id);
+      for(let q=1;q<=5;q++){const w=['a','b','c'].map(k=>Number(r[`q${q}_${k}`]));if(w.some(v=>!Number.isFinite(v)||v<0||v>1)||Math.abs(w.reduce((a,b)=>a+b,0)-1)>1e-8)throw Error('beta_weights_invalid');}
+      if(!['x','y'].every(k=>Number.isFinite(Number(r[k]))&&Number(r[k])>=0&&Number(r[k])<=10)||![0,1,2,3].includes(Number(r.quadrant)))throw Error('beta_point_invalid');
+      if(!['support_matatabi','support_churu','support_tower'].every(k=>[0,1].includes(Number(r[k])))||r.license!=='CC BY 4.0'||r.attribution!==TEAM)throw Error('beta_metadata_invalid');
+      return Object.fromEntries(FIELDS.map(k=>[k,r[k]]));
+    });
+  }
+  function weights(r){return Array.from({length:5},(_,q)=>['a','b','c'].map(k=>Number(r[`q${q+1}_${k}`])));}
+  function summary(records){
+    const n=records.length,quadrants=[0,0,0,0],supports=[0,0,0],means=Array.from({length:5},()=>[0,0,0]);let x=0,y=0;
+    records.forEach(r=>{quadrants[+r.quadrant]++;x+=+r.x;y+=+r.y;['support_matatabi','support_churu','support_tower'].forEach((k,i)=>supports[i]+=+r[k]);weights(r).forEach((w,q)=>w.forEach((v,k)=>means[q][k]+=v));});
+    return{n,quadrants,supports,x:n?x/n:5,y:n?y/n:5,weights:means.map(w=>w.map(v=>n?v/n:0))};
+  }
+  function distance(a,b){return Math.sqrt(a.weights.reduce((sum,w,q)=>sum+w.reduce((v,n,k)=>v+(n-b.weights[q][k])**2,0),0)/15);}
+  const api={SCHEMA,KIND,TEAM,FIELDS,csv,validate,weights,summary,distance};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;
+  root.BetaDataCore=api;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
 const MAP2_ANCHORS = [[[4.8,6.2],[5.8,5.2],[4.4,7.8]],[[4.8,6.2],[8,4.8],[6,7]],[[2.8,8],[5.4,5.8],[7.2,5]],[[5.4,5.8],[8,4.8],[7.2,5]],[[4.8,6.2],[6.8,5.4],[7.2,5]]];
 const MAP2_REFERENCES = [{"no":1,"name":"実家ぬくぬく猫","x":8,"y":7},{"no":2,"name":"次の一歩まち猫","x":6,"y":8},{"no":3,"name":"おうち安心猫","x":7,"y":9},{"no":4,"name":"おうち長期滞在猫","x":6,"y":9},{"no":5,"name":"自由時間満喫猫","x":9,"y":6},{"no":6,"name":"安心ベース待ち猫","x":2,"y":7},{"no":7,"name":"ひなたで充電猫","x":8,"y":8},{"no":8,"name":"アプリ活用猫","x":9,"y":5},{"no":9,"name":"おすすめ発見猫","x":10,"y":7},{"no":10,"name":"いいね励み猫","x":10,"y":7},{"no":11,"name":"借りぐらし上手猫","x":9,"y":6},{"no":12,"name":"まず聞いてみる猫","x":10,"y":8},{"no":13,"name":"仮想世界おでかけ猫","x":10,"y":8},{"no":14,"name":"お取り寄せ上手猫","x":9,"y":6},{"no":15,"name":"投票きっかけ待ち猫","x":3,"y":7},{"no":16,"name":"相談先さがし猫","x":1,"y":8},{"no":17,"name":"声を届けたい猫","x":2,"y":7},{"no":18,"name":"ご近所大事猫","x":3,"y":6},{"no":19,"name":"どうせ…から一歩猫","x":3,"y":8},{"no":20,"name":"空気を読む猫","x":5,"y":7},{"no":21,"name":"きちんと従う猫","x":2,"y":8},{"no":22,"name":"支えを使う猫","x":1,"y":8},{"no":23,"name":"からだ相談猫","x":4,"y":7},{"no":24,"name":"見守られ安心猫","x":3,"y":8},{"no":25,"name":"箱入り安心猫","x":7,"y":8},{"no":26,"name":"ぬくぬく安心猫","x":6,"y":6},{"no":27,"name":"安定だいじ猫","x":5,"y":6},{"no":28,"name":"おまかせ上手猫","x":7,"y":6},{"no":29,"name":"がんばり背負い猫","x":4,"y":7},{"no":30,"name":"推しと生きる猫","x":8,"y":6},{"no":31,"name":"手ぶら身軽猫","x":7,"y":5},{"no":32,"name":"おうちゆったり猫","x":6,"y":6},{"no":33,"name":"さっとごはん猫","x":8,"y":6},{"no":34,"name":"快適チューニング猫","x":9,"y":6},{"no":35,"name":"ひとり気まま猫","x":6,"y":7},{"no":36,"name":"家庭を守る猫","x":8,"y":7},{"no":37,"name":"便利さ歓迎猫","x":10,"y":8},{"no":38,"name":"するっと選ぶ猫","x":8,"y":7},{"no":39,"name":"ぬるま湯ごきげん猫","x":7,"y":9},{"no":40,"name":"飼われ心地よし猫","x":6,"y":9},{"no":41,"name":"働き方見直し猫","x":4,"y":7},{"no":42,"name":"からだアップデート猫","x":9,"y":8},{"no":43,"name":"ロボ見守り猫","x":7,"y":7},{"no":44,"name":"暮らし整え猫","x":5,"y":6},{"no":45,"name":"通知にそわそわ猫","x":10,"y":7},{"no":46,"name":"アプリで出会う猫","x":9,"y":6},{"no":47,"name":"残業ぎゅうぎゅう猫","x":6.8,"y":7.4},{"no":48,"name":"シフト読めない猫","x":7.6,"y":6.8},{"no":49,"name":"通勤へとへと猫","x":7.2,"y":7},{"no":50,"name":"平日ひっそり猫","x":6.4,"y":6.2},{"no":51,"name":"呼び出し待機猫","x":6.9,"y":6.6},{"no":52,"name":"30分なら行く猫","x":5.8,"y":5.2},{"no":53,"name":"おむつ優先猫","x":6.2,"y":8.1},{"no":54,"name":"お迎えダッシュ猫","x":6.6,"y":7.3},{"no":55,"name":"見守り介護猫","x":5.4,"y":8.6},{"no":56,"name":"家族ケア背負い猫","x":4.8,"y":8.8},{"no":57,"name":"家族カレンダー猫","x":6,"y":7},{"no":58,"name":"子連れなら行く猫","x":6.8,"y":5.8},{"no":59,"name":"バス待ち長い猫","x":3.5,"y":7.2},{"no":60,"name":"段差慎重猫","x":2.8,"y":8},{"no":61,"name":"坂道ゆっくり猫","x":3.2,"y":7.8},{"no":62,"name":"夜道こわい猫","x":4.8,"y":7.4},{"no":63,"name":"雨雪お休み猫","x":5.5,"y":6.6},{"no":64,"name":"近場なら行く猫","x":6.2,"y":5.6},{"no":65,"name":"知らなかった猫","x":4,"y":7.2},{"no":66,"name":"通知埋もれ猫","x":8.8,"y":6.8},{"no":67,"name":"QRむずかしい猫","x":3.6,"y":7.4},{"no":68,"name":"紙なら安心猫","x":3.2,"y":6.3},{"no":69,"name":"大きな文字うれしい猫","x":4.2,"y":7},{"no":70,"name":"オンラインなら出る猫","x":9,"y":5.8},{"no":71,"name":"知り合いゼロ猫","x":5,"y":7.3},{"no":72,"name":"常連の輪こわい猫","x":4.4,"y":7.8},{"no":73,"name":"ひとり参加ためらい猫","x":5.6,"y":7.1},{"no":74,"name":"雑談ちょっと苦手猫","x":6,"y":7.7},{"no":75,"name":"何するのかわからない猫","x":4.6,"y":6.8},{"no":76,"name":"一回お試し猫","x":6.8,"y":5.4},{"no":77,"name":"参加費気になる猫","x":6.5,"y":6.7},{"no":78,"name":"交通費しぶしぶ猫","x":5.8,"y":6.9},{"no":79,"name":"手ぶら希望猫","x":6.9,"y":6},{"no":80,"name":"長時間ボランティアむずかしい猫","x":6.2,"y":6.8},{"no":81,"name":"予定変更心配猫","x":6.6,"y":6.4},{"no":82,"name":"負担見えると安心猫","x":5.4,"y":5.8},{"no":83,"name":"やさしい日本語猫","x":4,"y":7.6},{"no":84,"name":"多言語あるなら猫","x":4.3,"y":7.8},{"no":85,"name":"地域ルール未知猫","x":4.8,"y":7.2},{"no":86,"name":"文化ちがい慎重猫","x":5.2,"y":7.5},{"no":87,"name":"読み書きサポート猫","x":4.1,"y":8.2},{"no":88,"name":"通訳いるなら猫","x":4.5,"y":7.9},{"no":89,"name":"個人情報心配猫","x":7.8,"y":7.6},{"no":90,"name":"勧誘警戒猫","x":6.6,"y":7.8},{"no":91,"name":"安全第一猫","x":4.7,"y":8.4},{"no":92,"name":"初心者不安猫","x":5.2,"y":8},{"no":93,"name":"失敗こわい猫","x":5.8,"y":8.2},{"no":94,"name":"顔見知り橋渡し猫","x":4.8,"y":6.2},{"no":95,"name":"会議長すぎ猫","x":5.7,"y":6.6},{"no":96,"name":"役員こわい猫","x":4,"y":8},{"no":97,"name":"仕事量みえない猫","x":4.3,"y":7.5},{"no":98,"name":"成果みえない猫","x":5,"y":6.8},{"no":99,"name":"アイデアだけ参加猫","x":7.2,"y":5},{"no":100,"name":"単発スポット猫","x":8,"y":4.8}];
+const MAP2_BETA_SHEET = {"spreadsheet_id":"1_i_ra2qDpElIaAEK8ny7DmlzZtZ5I8QyhanYvVan4Es","url":"https://docs.google.com/spreadsheets/d/1_i_ra2qDpElIaAEK8ny7DmlzZtZ5I8QyhanYvVan4Es","sheets":{"データの読み方":39462356,"日吉町自治会（仮想）":1381767694,"浅草公園町会（仮想）":840073981,"小町二丁目自治会（仮想）":1742277117,"円山西町町内会（仮想）":1432432638,"大名2自治会（仮想）":1791170831}};
+const MAP2_BETA_TOWNS = [{"id":"hiyoshi","short":"横浜・日吉","name":"日吉町自治会（仮想）","prefecture":"神奈川県","municipality":"横浜市港北区","lat":35.553,"lon":139.646,"color":"#47775e","sheet":"日吉町自治会（仮想）","source":"https://hiyoshichou.jimdofree.com/ご案内/","source_label":"日吉町自治会 ご案内","case_title":"10分だけ、食卓のお手伝い","case_tool":2,"case_idea":"準備・片付けを10分ずつに分け、見学席と途中で帰れる案内を用意する。","adapt":"日吉では、顔見知りと一緒の見学回から試す。"},{"id":"asakusa","short":"東京・浅草","name":"浅草公園町会（仮想）","prefecture":"東京都","municipality":"台東区","lat":35.715,"lon":139.795,"color":"#b7765d","sheet":"浅草公園町会（仮想）","source":"https://www.city.taito.lg.jp/category/category_output/chokai/index.html","source_label":"台東区 町会一覧","case_title":"立ち寄るだけの、縁側ごはん","case_tool":1,"case_idea":"予約も役割も要らない立ち寄り席をつくり、お茶一杯から参加できる入口にする。","adapt":"日吉なら、公会堂の催しに見学用の小さな席を添える案へ。"},{"id":"komachi","short":"鎌倉・小町","name":"小町二丁目自治会（仮想）","prefecture":"神奈川県","municipality":"鎌倉市","lat":35.322,"lon":139.553,"color":"#b38a3b","sheet":"小町二丁目自治会（仮想）","source":"https://www.city.kamakura.kanagawa.jp/npo/documents/29furekon_kamakurahigashi.pdf","source_label":"鎌倉市 東地区地域懇談会報告","case_title":"得意をひと皿、おすそ分け","case_tool":0,"case_idea":"料理・写真・案内など、できることを一枚のカードで持ち寄り、短い役割と交換する。","adapt":"日吉では、当日参加でも一つ選べる役割カードから試す。"},{"id":"maruyama","short":"札幌・円山","name":"円山西町町内会（仮想）","prefecture":"北海道","municipality":"札幌市中央区","lat":43.045,"lon":141.31,"color":"#687fa0","sheet":"円山西町町内会（仮想）","source":"https://www.city.sapporo.jp/chuo/annai/shisetsu/shukaishisetu.html","source_label":"札幌市中央区 会館・集会施設","case_title":"あたたかい、待ち合わせ食卓","case_tool":2,"case_idea":"静かな席・一人席・会話できる席を選べるようにし、毎回同じ時間と場所で開く。","adapt":"日吉では、にぎやかな席と静かな席を選べる小さな会から。"},{"id":"daimyo","short":"福岡・大名","name":"大名2自治会（仮想）","prefecture":"福岡県","municipality":"福岡市中央区","lat":33.589,"lon":130.391,"color":"#946c9a","sheet":"大名2自治会（仮想）","source":"https://fukucomi.city.fukuoka.lg.jp/cache/pdf/20240618/1718694258.0634.pdf","source_label":"福岡市 大名校区情報","case_title":"夕方15分、はじめての台所","case_tool":1,"case_idea":"帰り道に15分だけ立ち寄れる回を設け、料理をしなくても一緒に味見できる入口にする。","adapt":"日吉では、帰宅の時間帯に合わせた短いお茶会として試す。"}];
+/* The beta book contains only generated public examples, separate from real responses. */
+function betaRecords_(){
+  var book=SpreadsheetApp.openById(MAP2_BETA_SHEET.spreadsheet_id),records=[];
+  MAP2_BETA_TOWNS.forEach(function(town){
+    var sheet=book.getSheetByName(town.sheet);if(!sheet)throw Error('beta_town_sheet_missing');
+    if(sheet.getLastRow()>1001)throw Error('beta_capacity');
+    var rows=sheet.getRange(1,1,Math.max(1,sheet.getLastRow()),32).getValues(),headers=rows.shift();
+    if(BetaDataCore.FIELDS.some(function(k){return headers.indexOf(k)<0;}))throw Error('beta_headers_invalid');
+    rows.filter(function(row){return row.some(function(v){return v!=='';});}).forEach(function(row){
+      var record={};headers.forEach(function(k,i){record[k]=row[i];});
+      if(record.town_id!==town.id)throw Error('beta_wrong_town');
+      records.push(record);
+    });
+  });
+  records=BetaDataCore.validate(records,MAP2_BETA_TOWNS);
+  records.forEach(function(r){
+    var w=BetaDataCore.weights(r),x=0,y=0;w.forEach(function(a,q){a.forEach(function(v,k){x+=v*MAP2_ANCHORS[q][k][0]/5;y+=v*MAP2_ANCHORS[q][k][1]/5;});});
+    if(Math.abs(x-Number(r.x))>0.000001||Math.abs(y-Number(r.y))>0.000001)throw Error('beta_coordinate_mismatch');
+    var closest=MAP2_REFERENCES.reduce(function(best,c){var d=Math.pow(c.x-x,2)+Math.pow(c.y-y,2);return!best||d<best.d-1e-9||Math.abs(d-best.d)<1e-9&&c.no<best.cat.no?{cat:c,d:d}:best;},null).cat;
+    if(Number(r.reference_cat_no)!==closest.no||r.reference_cat_name!==closest.name)throw Error('beta_reference_mismatch');
+  });
+  return records;
+}
+function betaGet_(params){
+  var records=betaRecords_();
+  if(params.town){if(!MAP2_BETA_TOWNS.some(function(t){return t.id===params.town;}))throw Error('beta_unknown_town');records=records.filter(function(r){return r.town_id===params.town;});}
+  if(params.sample_id)records=records.filter(function(r){return r.sample_id===params.sample_id;});
+  if(params.mode==='beta-csv')return ContentService.createTextOutput(BetaDataCore.csv(records)).setMimeType(ContentService.MimeType.CSV).downloadAsFile('ieneko-'+(params.town||'five-towns')+'-synthetic.csv');
+  return map2Response_({ok:true,service:'ienekomap2',schema:BetaDataCore.SCHEMA,data_kind:BetaDataCore.KIND,source:'google_sheets',spreadsheet_url:MAP2_BETA_SHEET.url,towns:MAP2_BETA_TOWNS,records:records,counts:MAP2_BETA_TOWNS.map(function(t){return{town_id:t.id,n:records.filter(function(r){return r.town_id===t.id;}).length};}),license:'CC BY 4.0',attribution:BetaDataCore.TEAM},params.callback);
+}
+
 /* Appended to the shared aggregation core and the CSV-derived answer anchors. */
 function doGet(e){return e&&e.parameter&&e.parameter.api==='ieneko2'?map2Get_(e):legacyDoGet(e);}
 function doPost(e){var input;try{input=JSON.parse(e&&e.postData&&e.postData.contents||'{}');}catch(_){input={};}return input.api==='ieneko2'?map2Post_(input):legacyDoPost(e);}
@@ -88,7 +152,8 @@ function map2Records_(book,name){var sh=book.getSheetByName(name);return sh&&sh.
 function map2Get_(e){
   var p=e.parameter||{},out;
   try{
-    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.11',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5,public_cat_schema:PublicCatData.SCHEMA,csv:'?api=ieneko2&mode=csv'};
+    if(p.mode==='beta'||p.mode==='beta-csv')return betaGet_(p);
+    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.14',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5,public_cat_schema:PublicCatData.SCHEMA,csv:'?api=ieneko2&mode=csv',beta_schema:BetaDataCore.SCHEMA,beta_csv:'?api=ieneko2&mode=beta-csv'};
     else if(p.mode==='receipt'){
       if(!/^[a-zA-Z0-9_-]{12,80}$/.test(p.id||''))throw Error('invalid_id');
       var book=map2Book_(),verified=map2Has_(book,p.id,'verification'),accepted=verified||map2Has_(book,p.id,'responses');

@@ -1,0 +1,19 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),read=n=>fs.readFileSync(path.join(__dirname,'..',n),'utf8');
+const core=require('../beta-data-core.js'),data=JSON.parse(read('ienekomap2/beta/data.json')),sheetConfig=JSON.parse(read('ienekomap2/beta/sheet-config.json'));
+const ctx=vm.createContext({window:{}});for(const f of ['quests.js','journey-model.js'])vm.runInContext(read(f),ctx);
+const model=ctx.window.JourneyModel,cats=model.parse(read('dist/ieneko-100.csv')).map(r=>({no:+r.No,name:r['猫ネーム'],x:+r.X,y:+r.Y})),quests=model.connect(ctx.window.IENEKO_QUESTS,cats);
+assert.equal(data.records.length,90);assert.equal(data.towns.length,5);assert.equal(new Set(data.records.map(r=>r.sample_id)).size,90);assert.equal(core.validate(data.records,data.towns).length,90);
+for(const t of data.towns){const records=data.records.filter(r=>r.town_id===t.id);assert.equal(records.length,18);assert(t.name.includes('仮想'));assert(t.source.startsWith('https://'));assert.equal(model.parse(read(`ienekomap2/beta/data/${t.id}-synthetic.csv`)).length,18);}
+for(const r of data.records){const p=model.point(core.weights(r),quests),ref=model.nearest(p,cats);assert(Math.abs(p.x-r.x)<=1e-6);assert(Math.abs(p.y-r.y)<=1e-6);assert.equal(r.quadrant,(p.y>=5?2:0)+(p.x>=5?1:0));assert.equal(r.reference_cat_no,ref.no);assert.equal(r.reference_cat_name,ref.name);assert(!('record_id'in r));assert(!('name'in r));}
+assert.equal(model.parse(core.csv(data.records)).length,90);assert.equal(core.csv(data.records),read('ienekomap2/beta/data/ieneko-five-towns-synthetic.csv'));
+const headers=[...core.FIELDS].reverse(),rows=Object.fromEntries(data.towns.map(t=>[t.sheet,[headers,...data.records.filter(r=>r.town_id===t.id).map(r=>headers.map(k=>r[k]))]])),reads=[];
+const server=vm.createContext({console,SpreadsheetApp:{openById:id=>{assert.equal(id,sheetConfig.spreadsheet_id,'beta only reads its separate public book');return{getSheetByName:name=>{reads.push(name);const values=rows[name];return values?{getLastRow:()=>values.length,getRange:()=>({getValues:()=>values.map(row=>row.slice())})}:null;}};}},ContentService:{MimeType:{CSV:'csv',JSON:'json',JAVASCRIPT:'js'},createTextOutput:text=>({text,toString(){return this.text;},setMimeType(mime){this.mime=mime;return this;},downloadAsFile(name){this.filename=name;return this;}})},legacyDoGet:()=> 'legacy',legacyDoPost:()=> 'legacy'});
+vm.runInContext(read('gas/IenekoMap2.gs'),server);const get=p=>server.map2Get_({parameter:p});
+const live=JSON.parse(get({mode:'beta'}));assert.equal(live.source,'google_sheets');assert.equal(live.records.length,90);assert.deepEqual(live.records,data.records);assert.equal(live.counts.length,5);assert(live.counts.every(c=>c.n===18));assert(reads.every(n=>n.includes('仮想')));
+const csv=get({mode:'beta-csv'});assert.equal(csv.mime,'csv');assert.equal(csv.text,core.csv(data.records));assert(csv.filename.includes('synthetic'));
+assert.equal(model.parse(get({mode:'beta-csv',town:'asakusa'}).text).length,18);assert.equal(JSON.parse(get({mode:'beta',sample_id:data.records[0].sample_id})).records.length,1);
+assert.equal(JSON.parse(get({mode:'beta',town:'responses'})).ok,false);
+const values=rows[data.towns[0].sheet],x=headers.indexOf('x'),original=values[1][x];values[1][x]=0;assert.equal(JSON.parse(get({mode:'beta'})).error,'beta_coordinate_mismatch');values[1][x]=original;
+const kind=headers.indexOf('data_kind');values[1][kind]='responses';assert.equal(JSON.parse(get({mode:'beta'})).ok,false);values[1][kind]=core.KIND;
+assert.equal(server.doGet({parameter:{}}),'legacy');
+console.log('PASS: 90 synthetic records across five separate town sheets, exact source-derived coordinates, CSV parity, live Sheet header mapping, isolated beta API, and rejection of tampered data.');

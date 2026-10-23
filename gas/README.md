@@ -1,5 +1,7 @@
 # 家猫MAP2 収集サービス
 
+ver2.14の `mode=beta` / `mode=beta-csv` は、公開専用の別スプレッドシートにある5つのまち・仮想90件を読み込みます。`beta-data-core.js` と `beta-service.js` を生成物へ追加。各行の `synthetic_beta`、設問配分、元CSVからの設計座標、基準猫を検証してから公開します。町別の `town`、1件の `sample_id` で抽出できます。実回答の `responses` / `verification` へ仮想データを書き込みません。公開シートIDとタブは `ienekomap2/beta/sheet-config.json` に記録しています。
+
 `IenekoMap2.gs` は `opendata-core.js`、`public-cat-data.js`、元CSV由来の設問参照座標・基準猫、`map2-service.js` を `node scripts/build-map-service.cjs` でまとめた生成物です。元CSVや収集仕様を変更したら再生成し、`--check` で一致を確認します。
 
 既存サービスへ追加する場合、従来の `doGet` と `doPost` の関数名だけを `legacyDoGet` と `legacyDoPost` に変更し、生成物を追加します。`api=ieneko2` の要求だけを新APIへ分岐し、従来の要求は元の関数へ渡します。既存プロジェクトのコード全文をこのリポジトリへ転載する必要はありません。新設する場合は、リポジトリの `Code.gs` と `IenekoMap2.gs` を同じプロジェクトへ登録します。

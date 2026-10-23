@@ -36,7 +36,10 @@ jobs:
           node --check map-data-client.js
           node --check public-cat-data.js
           node --check ienekomap2/map.js
+          node --check beta-data-core.js
+          node --check ienekomap2/beta/beta.js
           node scripts/build-cat-data.cjs --check
+          node scripts/build-beta-data.cjs --check
           node scripts/build-map-service.cjs --check
           node tests/cat-data.test.cjs
           node tests/cat-studio.test.cjs
@@ -46,6 +49,7 @@ jobs:
           node tests/answer-storage.test.cjs
           node tests/public-cats.test.cjs
           node tests/publication-client.test.cjs
+          node tests/beta-data.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
