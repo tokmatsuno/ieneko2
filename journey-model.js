@@ -11,6 +11,28 @@
     return Number.isInteger(choice)&&choice>=0&&choice<3?[0,1,2].map(i=>i===choice?1:0):null;
   }
   function normalize(value){const w=weights(value);return w?{choice:w.indexOf(Math.max(...w)),weights:w}:{choice:-1};}
+  // Use tenths of a percent so the displayed allocation also totals exactly 100%.
+  function mixUnits(value){
+    const raw=(weights(value)||[1/3,1/3,1/3]).map(v=>v*1000),units=raw.map(Math.floor);
+    const order=[0,1,2].sort((a,b)=>(raw[b]-units[b])-(raw[a]-units[a])||a-b);
+    for(let n=1000-units.reduce((a,b)=>a+b,0),i=0;i<n;i++)units[order[i%3]]++;
+    return units;
+  }
+  function percentages(value){return mixUnits(value).map(v=>v/10);}
+  function adjustWeights(value,index,percent,keepIndex=null){
+    if(!Number.isInteger(index)||index<0||index>2||!Number.isFinite(percent))return null;
+    const units=mixUnits(value),requested=Math.max(0,Math.min(1000,Math.round(percent*10)));
+    if(Number.isInteger(keepIndex)&&keepIndex>=0&&keepIndex<3&&keepIndex!==index){
+      units[index]=Math.min(requested,1000-units[keepIndex]);
+      units[3-index-keepIndex]=1000-units[keepIndex]-units[index];
+    }else{
+      const others=[0,1,2].filter(i=>i!==index),remaining=1000-requested,total=units[others[0]]+units[others[1]];
+      units[index]=requested;
+      units[others[0]]=Math.round(remaining*(total?units[others[0]]/total:0.5));
+      units[others[1]]=remaining-units[others[0]];
+    }
+    return units.map(v=>v/1000);
+  }
   function mixed(value){const w=weights(value);return Boolean(w&&Math.max(...w)<1-1e-8);}
   function point(answers,quests){
     const points=answers.map((a,i)=>{const w=weights(a);return w&&quests[i]?{x:w.reduce((v,n,k)=>v+n*quests[i].answers[k].x,0),y:w.reduce((v,n,k)=>v+n*quests[i].answers[k].y,0)}:null;}).filter(Boolean);
@@ -30,5 +52,5 @@
     const colors=['#47775e','#c69c4e','#bb755e'];
     return `<svg viewBox="0 0 360 160" role="img" aria-label="5つの問いでA・B・Cを選んだ割合。能力や性格の点数ではありません。">${labels.map((label,i)=>{const w=weights(answers[i]);let x=48;return `<text x="6" y="${24+i*23}" fill="currentColor" font-size="10">問${i+1}</text>${w?w.map((n,k)=>{const r=`<rect x="${x}" y="${13+i*23}" width="${n*290}" height="16" fill="${colors[k]}"><title>${label} ${['A','B','C'][k]} ${+(n*100).toFixed(1)}%</title></rect>`;x+=n*290;return r;}).join(''):`<text x="48" y="${24+i*23}" font-size="10" fill="currentColor">保留</text>`}`;}).join('')}${colors.map((c,i)=>`<rect x="${72+i*90}" y="141" width="10" height="10" fill="${c}"/><text x="${88+i*90}" y="150" font-size="10" fill="currentColor">答え${['A','B','C'][i]}</text>`).join('')}</svg>`;
   }
-  window.JourneyModel={weights,normalize,mixed,point,describe,nearest,parse,connect,scores,barsSVG,labels};
+  window.JourneyModel={weights,normalize,percentages,adjustWeights,mixed,point,describe,nearest,parse,connect,scores,barsSVG,labels};
 })();

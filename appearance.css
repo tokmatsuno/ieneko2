@@ -196,7 +196,15 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 .answer-card{--mix-color:#47775e;padding:8px 16px 10px;border:1px solid #d3dbc8;border-radius:20px;background:linear-gradient(120deg,#fffdf6,#f7f4ea);box-shadow:0 3px 0 #d7dbce}
 .answer-card[data-answer="1"]{--mix-color:#b38a3b}.answer-card[data-answer="2"]{--mix-color:#b7765d}
 .answer-card:focus-within{outline:2px solid var(--mix-color);outline-offset:3px}
-.answer-card:has([aria-pressed="true"]){border-color:#4d7b60;background:#ecf2e4}
+.answer-card:has(.answer-button[aria-pressed="true"]){border-color:#4d7b60;background:#ecf2e4}
+.answer-card.is-kept{border-color:var(--mix-color);box-shadow:0 3px 0 color-mix(in srgb,var(--mix-color) 40%,#d7dbce)}
+.mix-footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-top:-5px}
+.mix-footer .mix-endpoints{display:contents}
+.mix-footer .mix-endpoints span:first-child{grid-column:1;grid-row:1}.mix-footer .mix-endpoints span:last-child{grid-column:3;grid-row:1;text-align:right}
+.blend-keep{grid-column:2;grid-row:1;min-height:44px;padding:7px 11px;border:1px solid #cbd2bd;border-radius:22px;background:#fffdf4;color:#5b6b53;font:inherit;font-size:10px;cursor:pointer;white-space:nowrap}
+.blend-keep[aria-pressed="true"]{border-color:var(--mix-color);background:var(--mix-color);color:#fffdf4}
+.blend-keep:focus-visible{outline:2px solid var(--mix-color);outline-offset:3px}
+.blend-panel .blend-adjustment-note{padding:10px 13px;margin-bottom:12px;background:#eaf0e2;border:1px solid #cbd7bc;border-radius:10px;color:#365d47;font-weight:700}
 .answer-card .answer-button,.answer-card .answer-button:hover,.answer-card .answer-button[aria-pressed="true"]{padding:10px 0;min-height:65px;gap:12px;border:0;border-radius:10px;background:transparent;box-shadow:none;transform:none}
 .answer-card .answer-button:hover .answer-copy b{text-decoration:underline;text-underline-offset:4px}
 .answer-mix-label{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #d8ddce;padding-top:10px;font-size:11px;color:#64725d}

@@ -1,6 +1,27 @@
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),assert=require('node:assert/strict'),root=path.resolve(__dirname,'..');
 const c=vm.createContext({window:{},document:{},console});for(const n of ['quests.js','journey-model.js','cat-studio.js'])vm.runInContext(fs.readFileSync(path.join(root,n),'utf8'),c);
 const model=c.window.JourneyModel,studio=c.window.CatStudio,quests=c.window.IENEKO_QUESTS;
+const local=value=>Array.from(value),percent=value=>local(model.percentages(value));
+let edited=model.adjustWeights([1,1,1],0,60,0);
+assert.deepEqual(percent(edited),[60,20,20]);
+edited=model.adjustWeights(edited,1,25,0);
+assert.deepEqual(percent(edited),[60,25,15],'second edit preserves the first amount');
+edited=model.adjustWeights(edited,2,10,0);
+assert.deepEqual(percent(edited),[60,30,10],'third edit preserves the first amount');
+assert.deepEqual(percent(model.adjustWeights(edited,1,90,0)),[60,40,0],'limit to the remaining share');
+assert.deepEqual(percent(model.adjustWeights(edited,0,80,2)),[80,10,10],'switch the kept answer');
+assert.deepEqual(percent(model.adjustWeights([1,0,0],0,50,0)),[50,25,25],'moving 100% back distributes the rest');
+assert.deepEqual(percent(model.adjustWeights([1,0,0],1,30,0)),[100,0,0],'a kept 100% leaves no remaining share');
+assert.deepEqual(percent([1,1,1]),[33.4,33.3,33.3],'displayed tenths total 100%');
+assert.deepEqual(percent(model.adjustWeights([.6,.3,.1],2,20)),[53.3,26.7,20],'released keep restores proportional distribution');
+for(let keep=0;keep<3;keep++)for(let index=0;index<3;index++)for(const target of [0,.1,12.3,33.3,66.7,99.9,100]){
+ const original=[.123,.456,.421],result=local(model.adjustWeights(original,index,target,keep)),units=result.map(v=>Math.round(v*1000));
+ assert.equal(units.reduce((a,b)=>a+b,0),1000);assert(units.every(v=>v>=0&&v<=1000));
+ if(keep!==index)assert.equal(units[keep],Math.round(original[keep]*1000));
+ else assert.equal(units[index],Math.round(target*10));
+}
+assert.equal(model.adjustWeights([1,1,1],1,NaN),null);
+console.log('PASS: sequential percentage edits keep the first value, allow switching/releasing it, handle all slider orders and 0/100% limits, and display exact tenths.');
 const cats=model.parse(fs.readFileSync(path.join(root,'dist/ieneko-100.csv'),'utf8')).map(r=>({no:+r.No,name:r['猫ネーム'],x:+r.X,y:+r.Y}));model.connect(quests,cats);
 const pure=Array.from({length:5},()=>({choice:0})),mix=pure.map(a=>({...a}));mix[0]=model.normalize([.45,.55,0]);mix[1]=model.normalize([0,.4,.6]);mix[2]=model.normalize([.3,.2,.5]);mix[3]=model.normalize([.4,.4,.2]);mix[4]=model.normalize([.2,.3,.5]);
 const a=studio.derive(mix,quests),point=model.point(mix,quests);assert.equal(a.point.x,point.x);assert.equal(a.point.y,point.y);assert(a.blend.active);assert(!a.values.join().includes('undefined'));assert(studio.sources[a.finalPose]);

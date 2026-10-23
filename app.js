@@ -82,6 +82,7 @@ let cats = [],
   selectedPlace = 0,
   activeScreen = "home";
 let blendPaintTimer = null;
+let blendKeepIndex = null;
 let presenceTimer = null,
   worldTimer = null,
   worldRequest = 0;
@@ -355,6 +356,7 @@ function summonCat() {
 function renderQuestion() {
   const q = QUESTS[state.step];
   selectedChoice = null;
+  blendKeepIndex = null;
   clearTimeout(blendPaintTimer);
   feedbackOpen = false;
   $("#journey").classList.remove("is-feedback");
@@ -380,7 +382,7 @@ function renderQuestion() {
   $("#answerList").innerHTML = q.answers
     .map(
       (a, i) =>
-        `<div class="answer-card" data-answer="${i}"><button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b><span class="answer-letter">${["A","B","C"][i]}</span> ${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button><label class="answer-mix-label" for="blendInput${i}"><span>${["A","B","C"][i]}の気持ちの割合</span><output id="blendValue${i}" for="blendInput${i}"></output></label><input id="blendInput${i}" type="range" min="0" max="100" step="0.1" data-blend="${i}" aria-label="${esc(state.kids?a.kid:a.label)}の割合" aria-describedby="blendHelp"><div class="mix-endpoints" aria-hidden="true"><span>0%</span><span>100%</span></div></div>`,
+        `<div class="answer-card" data-answer="${i}"><button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b><span class="answer-letter">${["A","B","C"][i]}</span> ${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button><label class="answer-mix-label" for="blendInput${i}"><span>${["A","B","C"][i]}の気持ちの割合</span><output id="blendValue${i}" for="blendInput${i}"></output></label><input id="blendInput${i}" type="range" min="0" max="100" step="0.1" data-blend="${i}" aria-label="${esc(state.kids?a.kid:a.label)}の割合" aria-describedby="blendHelp blendAdjustmentNote"><div class="mix-footer"><div class="mix-endpoints" aria-hidden="true"><span>0%</span><span id="blendMax${i}">100%</span></div><button type="button" id="blendKeep${i}" class="blend-keep" data-blend-keep="${i}" aria-pressed="false">この割合をキープ</button></div></div>`,
     )
     .join("");
   const oldWeights = JourneyModel.weights(state.answers[state.step]) || [1/3,1/3,1/3];
@@ -395,6 +397,7 @@ function renderQuestion() {
 }
 function previewChoice(index) {
   clearTimeout(blendPaintTimer);
+  blendKeepIndex = null;
   selectedChoice = index;
   document.querySelectorAll(".answer-button").forEach((b, i) => {
     b.removeAttribute("data-mixed");
@@ -412,19 +415,28 @@ function previewChoice(index) {
   $("#companionMood").textContent = POSES[a.pose].name;
 }
 function renderBlendValues(w){
+  const p=JourneyModel.percentages(w),remaining=blendKeepIndex===null?100:Math.round((100-p[blendKeepIndex])*10)/10;
   document.querySelectorAll('[data-blend]').forEach((input,i)=>{
-    const label=`${+(w[i]*100).toFixed(1)}%`;
-    input.value=w[i]*100;input.setAttribute('aria-valuetext',label);
+    const label=`${p[i]}%`,max=blendKeepIndex===null||blendKeepIndex===i?100:remaining;
+    input.max=max;input.value=p[i];input.setAttribute('aria-valuetext',label);
     $("#blendValue"+i).textContent=label;
-    input.style.setProperty('--mix-fill',label);
+    input.style.setProperty('--mix-fill',`${max?p[i]/max*100:0}%`);
+    $("#blendMax"+i).textContent=`${max}%`;
+    const keep=$("#blendKeep"+i),kept=blendKeepIndex===i;
+    keep.setAttribute('aria-pressed',String(kept));
+    keep.textContent=kept?'キープ中 ✓':'この割合をキープ';
+    keep.setAttribute('aria-label',`${['A','B','C'][i]}の割合を${kept?'キープ解除':'キープ'}`);
+    input.closest('.answer-card').classList.toggle('is-kept',kept);
   });
-  $("#blendSummary").textContent=['A','B','C'].map((v,i)=>`${v} ${+(w[i]*100).toFixed(1)}%`).join(' ・ ')+'　合計100%';
+  $("#blendSummary").textContent=['A','B','C'].map((v,i)=>`${v} ${p[i]}%`).join(' ・ ')+'　合計100%';
+  $("#blendAdjustmentNote").textContent=blendKeepIndex===null?'まず1つを調整。ほかの割合は自動で分けます。':`${['A','B','C'][blendKeepIndex]}をキープ。ほかの2つで残り${remaining}%を調整できます。`;
 }
 function previewBlend(values) {
   const answer = JourneyModel.normalize(values), w = answer.weights;
   if(!w)return;
   selectedChoice = answer;
-  document.querySelectorAll('.answer-button').forEach((b,i)=>{b.setAttribute('aria-pressed','false');b.dataset.mixed='true';b.querySelector('.answer-check').textContent=`${+(w[i]*100).toFixed(1)}%`;});
+  const percentages=JourneyModel.percentages(w);
+  document.querySelectorAll('.answer-button').forEach((b,i)=>{b.setAttribute('aria-pressed','false');b.dataset.mixed='true';b.querySelector('.answer-check').textContent=`${percentages[i]}%`;});
   renderBlendValues(w);
   $("#confirmAnswer").disabled=false;
   $("#confirmAnswer").textContent='この配分で、一歩進む →';
@@ -1028,10 +1040,17 @@ async function init() {
   });
   $("#blendSliders").addEventListener("input",e=>{
     const input=e.target.closest('[data-blend]');if(!input)return;
-    const i=Number(input.dataset.blend),w=JourneyModel.weights(selectedChoice??state.answers[state.step])||[1/3,1/3,1/3],v=Number(input.value)/100,other=1-w[i];
-    previewBlend(w.map((n,k)=>k===i?v:other>1e-8?n*(1-v)/other:(1-v)/2));
+    const i=Number(input.dataset.blend),value=selectedChoice??state.answers[state.step];
+    if(blendKeepIndex===null)blendKeepIndex=i;
+    previewBlend(JourneyModel.adjustWeights(value,i,Number(input.value),blendKeepIndex));
   });
-  $("#blendPresets").addEventListener("click",e=>{const b=e.target.closest('[data-mid],[data-equal]');if(!b)return;if(b.hasAttribute('data-equal')){previewBlend([1,1,1]);return;}const [a,c]=b.dataset.mid.split(',').map(Number);previewBlend([0,1,2].map(i=>(i===a||i===c)?0.5:0));});
+  $("#blendSliders").addEventListener("click",e=>{
+    const button=e.target.closest('[data-blend-keep]');if(!button)return;
+    const i=Number(button.dataset.blendKeep);
+    blendKeepIndex=blendKeepIndex===i?null:i;
+    renderBlendValues(JourneyModel.weights(selectedChoice??state.answers[state.step])||[1/3,1/3,1/3]);
+  });
+  $("#blendPresets").addEventListener("click",e=>{const b=e.target.closest('[data-mid],[data-equal]');if(!b)return;blendKeepIndex=null;if(b.hasAttribute('data-equal')){previewBlend([1,1,1]);return;}const [a,c]=b.dataset.mid.split(',').map(Number);previewBlend([0,1,2].map(i=>(i===a||i===c)?0.5:0));});
   $("#confirmAnswer").addEventListener("click", () => {
     if (selectedChoice !== null) confirmAnswer(selectedChoice);
   });
