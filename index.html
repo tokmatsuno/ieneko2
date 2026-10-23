@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.12" />
-    <link rel="stylesheet" href="appearance.css?v=2.12&amp;r=3" />
+    <link rel="stylesheet" href="app.css?v=2.13" />
+    <link rel="stylesheet" href="appearance.css?v=2.13&amp;r=3" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -56,7 +56,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.12#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.13#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -112,6 +112,11 @@
           <span id="stepCount">01 / 05</span>
         </div>
         <div id="storyMap" class="route" aria-label="旅の進み具合"></div>
+        <div id="chapterBanner" class="chapter-banner" role="group" aria-label="CHAPTER 1 / 5">
+          <div class="chapter-number"><span id="chapterLabel">CHAPTER</span><strong id="chapterNumber">01</strong><small>/ 05</small></div>
+          <div class="chapter-copy"><p>猫と歩く、5つの章</p><h2 id="chapterPlace"></h2><span id="chapterTheme"></span></div>
+          <span class="chapter-paw" aria-hidden="true">🐾</span>
+        </div>
         <div class="journey-layout">
           <aside class="scene-panel">
             <div class="feedback-scene-label" aria-hidden="true"><span>A LITTLE STEP FOUND</span><b>一歩、みつけた。</b></div>
@@ -137,7 +142,7 @@
           </aside>
           <article class="question-panel">
             <div class="question-meta">
-              <span id="chapterLabel"></span
+              <span class="question-meta-label">この章の問い</span
               ><button
                 id="readQuestion"
                 class="icon-text"
@@ -152,7 +157,8 @@
               <p class="question-prompt">いまのあなたに、しっくりくるのは？</p>
               <section id="blendPanel" class="blend-panel" aria-labelledby="blendTitle">
                 <h3 id="blendTitle">ぴったりも、あいだも。割合で選ぼう。</h3>
-                <p id="blendHelp">最初に動かした割合をキープして、残り2つを手直しできます。「この割合をキープ」で切り替えも。キープ中のつまみ自体は、いつでも動かせます。3つで合計100%。答えを押すと、その気持ちが100%になります。</p>
+                <p id="blendHelp">A・B・Cをそれぞれキープできます。キープは「ほかから変えない」の印。自分のつまみでは手直しできます。3つともキープすると、配分を固定。合計は100%です。</p>
+                <div class="blend-keep-actions" role="group" aria-label="まとめてキープを操作"><button type="button" id="keepAllBlend" aria-pressed="false">✓ 3つともキープ</button><button type="button" id="releaseAllBlend">すべて解除</button></div>
                 <p id="blendAdjustmentNote" class="blend-adjustment-note" role="status"></p>
                 <div id="blendSliders" class="blend-sliders">
                   <div id="answerList" class="answer-list" role="group" aria-label="答えと割合の選択"></div>
@@ -238,7 +244,7 @@
             <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.12</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.13</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -260,7 +266,7 @@
               <p id="answerSaveStatus" class="answer-save-status" role="status">まだ共有先には保存していません。</p>
               <small>猫CSVは1匹から公開。氏名・保存用ID・日時・地域・イベント・位置情報は載せません。</small>
               <a id="answerPublishedCSV" class="text-link" href="ienekomap2/#open-data" hidden>公開CSVのダウンロードページを開く ↗</a>
-              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.12#open-data">集まった回答と公開CSVを見る ↗</a>
+              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.13#open-data">集まった回答と公開CSVを見る ↗</a>
             </form>
             <details class="result-graph"><summary>答えの配分をグラフで見る</summary><div id="resultGraph"></div><p>3つの答えの割合をそのまま図示します。能力や性格の点数ではありません。保留した問いは集計に含めません。</p></details>
             <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
@@ -640,7 +646,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.12</small></a
+        >家猫クエスト <small id="appVersion">ver2.13</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -670,15 +676,15 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.12"></script>
+    <script src="version.js?v=2.13"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.12"></script>
-    <script src="quests.js?v=2.12"></script>
-    <script src="journey-model.js?v=2.12"></script>
-    <script src="opendata-core.js?v=2.12"></script>
-    <script src="public-cat-data.js?v=2.12"></script>
-    <script src="map-data-client.js?v=2.12"></script>
+    <script src="cat-data.js?v=2.13"></script>
+    <script src="quests.js?v=2.13"></script>
+    <script src="journey-model.js?v=2.13"></script>
+    <script src="opendata-core.js?v=2.13"></script>
+    <script src="public-cat-data.js?v=2.13"></script>
+    <script src="map-data-client.js?v=2.13"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -690,7 +696,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.12&amp;r=2"></script>
-    <script src="app.js?v=2.12&amp;r=2"></script>
+    <script src="cat-studio.js?v=2.13&amp;r=2"></script>
+    <script src="app.js?v=2.13&amp;r=2"></script>
   </body>
 </html>

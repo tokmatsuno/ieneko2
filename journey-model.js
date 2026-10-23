@@ -19,18 +19,18 @@
     return units;
   }
   function percentages(value){return mixUnits(value).map(v=>v/10);}
-  function adjustWeights(value,index,percent,keepIndex=null){
+  function adjustWeights(value,index,percent,keeps=[]){
     if(!Number.isInteger(index)||index<0||index>2||!Number.isFinite(percent))return null;
     const units=mixUnits(value),requested=Math.max(0,Math.min(1000,Math.round(percent*10)));
-    if(Number.isInteger(keepIndex)&&keepIndex>=0&&keepIndex<3&&keepIndex!==index){
-      units[index]=Math.min(requested,1000-units[keepIndex]);
-      units[3-index-keepIndex]=1000-units[keepIndex]-units[index];
-    }else{
-      const others=[0,1,2].filter(i=>i!==index),remaining=1000-requested,total=units[others[0]]+units[others[1]];
-      units[index]=requested;
-      units[others[0]]=Math.round(remaining*(total?units[others[0]]/total:0.5));
-      units[others[1]]=remaining-units[others[0]];
-    }
+    const held=Array.isArray(keeps)?[0,1,2].map(i=>Boolean(keeps[i])):[0,1,2].map(i=>i===keeps);
+    const others=[0,1,2].filter(i=>i!==index),free=others.filter(i=>!held[i]);
+    // An explicit edit can revise its own kept amount; other kept amounts stay put.
+    if(held.every(Boolean)||!free.length)return units.map(v=>v/1000);
+    const fixed=others.filter(i=>held[i]).reduce((sum,i)=>sum+units[i],0);
+    units[index]=Math.min(requested,1000-fixed);
+    const remaining=1000-fixed-units[index],total=free.reduce((sum,i)=>sum+units[i],0);
+    units[free[0]]=free.length===1?remaining:Math.round(remaining*(total?units[free[0]]/total:0.5));
+    if(free.length===2)units[free[1]]=remaining-units[free[0]];
     return units.map(v=>v/1000);
   }
   function mixed(value){const w=weights(value);return Boolean(w&&Math.max(...w)<1-1e-8);}

@@ -22,6 +22,16 @@ for(let keep=0;keep<3;keep++)for(let index=0;index<3;index++)for(const target of
 }
 assert.equal(model.adjustWeights([1,1,1],1,NaN),null);
 console.log('PASS: sequential percentage edits keep the first value, allow switching/releasing it, handle all slider orders and 0/100% limits, and display exact tenths.');
+assert.deepEqual(percent(model.adjustWeights([.6,.3,.1],0,50,[true,true,false])),[50,30,20],'edit A itself while kept B stays put');
+assert.deepEqual(percent(model.adjustWeights([.6,.3,.1],2,20,[true,true,false])),[60,30,10],'two kept others leave no room for the remainder to move');
+assert.deepEqual(percent(model.adjustWeights([.6,.3,.1],0,80,[true,true,true])),[60,30,10],'all three kept freezes the allocation');
+assert.deepEqual(percent(model.adjustWeights([.6,.3,.1],0,55,[true,false,true])),[55,35,10],'release B to absorb an explicit edit of kept A');
+for(let mask=0;mask<8;mask++)for(let index=0;index<3;index++)for(const target of [0,.1,31.7,75,100]){
+ const keeps=[0,1,2].map(i=>Boolean(mask&(1<<i))),original=[.123,.456,.421],result=local(model.adjustWeights(original,index,target,keeps)),units=result.map(v=>Math.round(v*1000));
+ assert.equal(units.reduce((a,b)=>a+b,0),1000);assert(units.every(v=>v>=0&&v<=1000));
+ for(let i=0;i<3;i++)if(keeps[i]&&(i!==index||mask===7))assert.equal(units[i],Math.round(original[i]*1000));
+}
+console.log('PASS: all eight keep combinations, independent kept values, all-kept freeze and individual release with exact 100% totals.');
 const cats=model.parse(fs.readFileSync(path.join(root,'dist/ieneko-100.csv'),'utf8')).map(r=>({no:+r.No,name:r['猫ネーム'],x:+r.X,y:+r.Y}));model.connect(quests,cats);
 const pure=Array.from({length:5},()=>({choice:0})),mix=pure.map(a=>({...a}));mix[0]=model.normalize([.45,.55,0]);mix[1]=model.normalize([0,.4,.6]);mix[2]=model.normalize([.3,.2,.5]);mix[3]=model.normalize([.4,.4,.2]);mix[4]=model.normalize([.2,.3,.5]);
 const a=studio.derive(mix,quests),point=model.point(mix,quests);assert.equal(a.point.x,point.x);assert.equal(a.point.y,point.y);assert(a.blend.active);assert(!a.values.join().includes('undefined'));assert(studio.sources[a.finalPose]);
