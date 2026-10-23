@@ -603,6 +603,7 @@ function renderCats(query = "") {
 function renderComplete() {
   const c = chooseCat();
   if (!c) return;
+  renderAnswerSaveState();
   const p = journeyPoint(), look = cardAppearance(), pose = look.finalPose;
   $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
   setPose("#finishedCatImage", pose, look);
@@ -647,7 +648,7 @@ function renderComplete() {
     ? state.optedIn
       ? "共有参加がオンです。"
       : "共有参加はオフです。"
-    : "いまはこの端末の足あとだけを表示します。共有機能は接続準備中です。";
+    : "ニックネームと物語の地点の共有は準備中です。回答の保存は、上の「この回答をデータに保存する」から利用できます。";
 }
 async function downloadCard() {
   const button = $("#downloadCard"),
@@ -817,6 +818,56 @@ function setAtlas(on) {
   $("#townTab").setAttribute("aria-pressed", String(!on));
   $("#atlasTab").setAttribute("aria-pressed", String(on));
 }
+let answerSaving = false;
+function answerCollectionFields() {
+  return {
+    weights: state.answers.map(a => JourneyModel.weights(a)),
+    region: $("#answerRegion").value.trim(),
+    event: $("#answerEvent").value.trim(),
+    grid: null,
+    supports: [...document.querySelectorAll('input[name="answerSupport"]:checked')].map(i => Number(i.value)),
+    consent: "aggregate-ccby-v1",
+    test: new URLSearchParams(location.search).get("test") === "1",
+  };
+}
+function renderAnswerSaveState() {
+  if (answerSaving) return;
+  const fields = answerCollectionFields(), prior = MapDataClient.previous(fields);
+  $("#answerTestNotice").hidden = !fields.test;
+  $("#saveAnswerData").disabled = state.answers.length !== 5 || !$("#answerConsent").checked;
+  $("#saveAnswerData").textContent = prior?.synced ? "保存済みの回答を確認する ↻" : "この回答をデータに保存する ↗";
+  $("#answerSaveStatus").dataset.state = prior?.synced ? "saved" : "unsaved";
+  $("#answerSaveStatus").textContent = prior?.synced
+    ? `前回、${fields.test ? "検証用シート" : "Googleスプレッドシート"}への保存を確認しました。保存確認番号：${prior.id}`
+    : prior ? "この端末に回答が残っています。共有先への保存をもう一度確認してください。" : "まだ共有先には保存していません。";
+}
+async function saveAnswerData(e) {
+  e.preventDefault();
+  if (answerSaving || state.answers.length !== 5 || !$("#answerConsent").checked) return;
+  const fields = answerCollectionFields(), controls = [...$("#answerCollection").elements];
+  answerSaving = true;
+  controls.forEach(input => { input.disabled = true; });
+  $("#saveAnswerData").textContent = "保存を確認しています…";
+  $("#answerSaveStatus").dataset.state = "pending";
+  $("#answerSaveStatus").textContent = "Googleスプレッドシートへ送信し、保存された回答を確認しています…";
+  try {
+    const accepted = await MapDataClient.contribute(fields, QUESTS.map(q => q.answers.map(a => [a.x, a.y])));
+    $("#answerSaveStatus").dataset.state = "saved";
+    $("#answerSaveStatus").textContent = (accepted.test
+      ? "検証用シートへの保存を確認しました。本番の回答・公開CSVには含めません。"
+      : "Googleスプレッドシートへの保存を確認しました。回答は1件ずつ蓄積され、5件以上の集計が公開CSVに反映されます。") + ` 保存確認番号：${accepted.id}`;
+    $("#saveAnswerData").textContent = "保存済みの回答を確認する ↻";
+  } catch (error) {
+    $("#answerSaveStatus").dataset.state = "error";
+    $("#answerSaveStatus").textContent = error.message;
+    $("#saveAnswerData").textContent = "同じ回答をもう一度保存する ↻";
+  } finally {
+    answerSaving = false;
+    controls.forEach(input => { input.disabled = false; });
+    $("#saveAnswerData").disabled = !$("#answerConsent").checked;
+    if (JSON.stringify(fields) !== JSON.stringify(answerCollectionFields())) renderAnswerSaveState();
+  }
+}
 function gasEndpoint() {
   return String(config.gasUrl || "").trim();
 }
@@ -938,6 +989,17 @@ async function init() {
     return;
   }
   renderResearch();
+  $("#answerEvent").value = (new URLSearchParams(location.search).get("event") || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);
+  document.querySelectorAll('a[href^="ienekomap2/"]').forEach(link => {
+    const url = new URL(link.getAttribute("href"), location.href);
+    url.searchParams.set("v", window.IENEKO_RELEASE.version);
+    if (new URLSearchParams(location.search).get("test") === "1") url.searchParams.set("test", "1");
+    if ($("#answerEvent").value) url.searchParams.set("event", $("#answerEvent").value);
+    link.href = url.href;
+  });
+  $("#answerCollection").addEventListener("submit", saveAnswerData);
+  $("#answerCollection").addEventListener("change", renderAnswerSaveState);
+  $("#answerCollection").addEventListener("input", renderAnswerSaveState);
   $("#playerName").value = state.name;
   $("#joinWorld").checked = state.optedIn;
   $(".join-box").classList.toggle("is-enabled", state.optedIn);

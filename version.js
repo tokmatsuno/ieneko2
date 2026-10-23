@@ -1,5 +1,5 @@
 window.IENEKO_RELEASE = Object.freeze({
-  version: "2.09",
+  version: "2.10",
   team: "2026年度東京大学シビックテックデザイン学講座Team 1",
-  summary: "家猫MAP2に公開CSVのダウンロード案内と専用ボタン、利用条件を明記",
+  summary: "結果画面からGAS経由で回答をGoogleスプレッドシートへ保存し、受付を確認",
 });

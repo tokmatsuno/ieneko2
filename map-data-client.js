@@ -30,9 +30,17 @@ var MapDataClient=(function(){
   }
   async function submit(record){
     const health=await get({mode:'health'});if(health.service!=='ienekomap2'||!health.ready)throw Error('共有先の準備ができていません。この端末の記録は残っています。');
-    await fetch(url(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...record,api:'ieneko2'})});
+    try{await fetch(url(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...record,api:'ieneko2'})});}
+    catch{throw Error('共有先へ送信できませんでした。この端末には回答が残っています。通信環境を確認し、もう一度保存してください。');}
     for(let i=0;i<3;i++){const receipt=await get({mode:'receipt',id:record.id});if(receipt.accepted)return{...record,synced:true,test:receipt.test};if(i<2)await new Promise(r=>setTimeout(r,700));}
     throw Error('共有先への保存を確認できませんでした。この端末には残しています。');
   }
-  return{local,save,get,submit};
+  function signature(fields){return JSON.stringify([fields.weights?.map(w=>w?.map(n=>Number(n.toFixed(12)))??null),String(fields.region||'').trim(),String(fields.event||'').trim(),fields.grid||null,[...new Set(fields.supports||[])].sort(),fields.test===true]);}
+  function previous(fields){return local().find(r=>signature(r)===signature(fields));}
+  async function contribute(fields,anchors){
+    const prior=previous(fields),record=OpenDataCore.record({...fields,id:prior?.id||crypto.randomUUID()},anchors);
+    save({...record,synced:prior?.synced||false});
+    const accepted=await submit(record);save({...accepted,confirmedAt:Date.now()});return accepted;
+  }
+  return{local,save,get,submit,contribute,previous};
 })();

@@ -45,7 +45,7 @@
   function setZone(x,y,group=null){zone={x:Math.max(0,Math.min(10,x)),y:Math.max(0,Math.min(10,y))};selectedGroup=group;$('#zoneX').value=zone.x;$('#zoneY').value=zone.y;renderDesign();renderZone();}
   function renderZone(){
     const near=nearest(),c=near[0],group=selectedGroup,quad=studio.quadrants[(zone.y>=5?2:0)+(zone.x>=5?1:0)],groups=group?[group]:filtered.filter(g=>g.zone_x===Math.min(4,Math.floor(zone.x/2))&&g.zone_y===Math.min(4,Math.floor(zone.y/2))),n=groups.reduce((v,g)=>v+g.n,0),supportN=groups.reduce((v,g)=>v+g.support_n,0),support=groups.reduce((v,g)=>v.map((n,i)=>n+g.support_counts[i]),[0,0,0]);
-    $('#zonePanel').innerHTML=`<p class="eyebrow">A DOOR FOR THIS ZONE</p><h3>${quad.title}</h3><div class="zone-art"><img id="zoneCat" src="${esc(studio.sourceFor(studio.poseFor(zone,c.no)))}" alt="このゾーンに近い基準猫のイメージ"></div><span class="zone-coordinate">X ${zone.x.toFixed(2)} / Y ${zone.y.toFixed(2)}</span><p>${group?`${esc(group.region||'地域未選択')} / ${esc(group.month)} / ${group.n}件の集計`:`このゾーンの公開回答：${n}件${kind==='sample'?'（サンプル）':''}`}</p><div class="zone-reference"><p>近い基準猫：No.${c.no} <a href="../?v=2.09&amp;cat=${c.no}#cats">${esc(c.name)} ↗</a></p><p class="count-note">${near.map(c=>`No.${c.no} ${esc(c.name)}`).join(' ・ ')}</p></div><div class="preference-bars">${supportN?support.map((v,i)=>`<div class="preference-bar"><span>${supportNames[i]}</span><i style="width:${Math.max(2,v/supportN*100)}%"></i><span>${Math.round(v/supportN*100)}%</span></div>`).join(''):'<p>入口の希望が集まると、遊び・おやつ・環境の比率を比較できます。</p>'}</div><p class="count-note">${supportN?`入口を1つ以上選んだ${supportN}件が分母。複数選択。効果測定ではありません。`:'下の提案は、近い基準猫の設計案から。回答者の性格や属性は推定しません。'}</p>`;
+    $('#zonePanel').innerHTML=`<p class="eyebrow">A DOOR FOR THIS ZONE</p><h3>${quad.title}</h3><div class="zone-art"><img id="zoneCat" src="${esc(studio.sourceFor(studio.poseFor(zone,c.no)))}" alt="このゾーンに近い基準猫のイメージ"></div><span class="zone-coordinate">X ${zone.x.toFixed(2)} / Y ${zone.y.toFixed(2)}</span><p>${group?`${esc(group.region||'地域未選択')} / ${esc(group.month)} / ${group.n}件の集計`:`このゾーンの公開回答：${n}件${kind==='sample'?'（サンプル）':''}`}</p><div class="zone-reference"><p>近い基準猫：No.${c.no} <a href="../?v=2.10&amp;cat=${c.no}#cats">${esc(c.name)} ↗</a></p><p class="count-note">${near.map(c=>`No.${c.no} ${esc(c.name)}`).join(' ・ ')}</p></div><div class="preference-bars">${supportN?support.map((v,i)=>`<div class="preference-bar"><span>${supportNames[i]}</span><i style="width:${Math.max(2,v/supportN*100)}%"></i><span>${Math.round(v/supportN*100)}%</span></div>`).join(''):'<p>入口の希望が集まると、遊び・おやつ・環境の比率を比較できます。</p>'}</div><p class="count-note">${supportN?`入口を1つ以上選んだ${supportN}件が分母。複数選択。効果測定ではありません。`:'下の提案は、近い基準猫の設計案から。回答者の性格や属性は推定しません。'}</p>`;
     const token=++artToken;let painting;
     if(group&&group.weights){const answers=group.weights.map(w=>w?model.normalize(w):{choice:-1}),look=studio.derive(answers,quests,zone);painting=studio.render(look,look.finalPose,500);}
     else painting=studio.renderReference(c,studio.poseFor(zone,c.no),500);
@@ -75,7 +75,7 @@
   }
   async function checkService(){try{const health=await MapDataClient.get({mode:'health'});$('#serviceStatus').textContent=health.service==='ienekomap2'&&health.ready?'共有の受付に接続しています。保存の返答を確認してから完了を表示します。':'共有の受付は準備中です。この端末での保存とJSON出力は利用できます。';}catch{$('#serviceStatus').textContent='共有の受付は接続未確認です。この端末の記録を先に残し、保存できたかを確かめます。';}}
   function ownSummary(){
-    $('#ownSummary').innerHTML=canContribute?'<p>5つの問いを歩いた、きょうの配分。</p>'+model.barsSVG(ownAnswers)+`<p class="small">設計座標 X ${ownPoint.x.toFixed(2)} / Y ${ownPoint.y.toFixed(2)}</p>`:'<p>まずは、猫と5つの問いを歩いてみよう。</p><a href="../?v=2.09#home">猫と、まちへ出る ↗</a>';
+    $('#ownSummary').innerHTML=canContribute?'<p>5つの問いを歩いた、きょうの配分。</p>'+model.barsSVG(ownAnswers)+`<p class="small">設計座標 X ${ownPoint.x.toFixed(2)} / Y ${ownPoint.y.toFixed(2)}</p>`:'<p>まずは、猫と5つの問いを歩いてみよう。</p><a href="../?v=2.10#home">猫と、まちへ出る ↗</a>';
     $('#sendContribution').disabled=!canContribute;$('#downloadOwn').disabled=!canContribute;$('#testNotice').hidden=!testMode;
     $('#eventCode').value=(new URLSearchParams(location.search).get('event')||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32);
   }
@@ -84,10 +84,8 @@
     try{
       const supports=[...document.querySelectorAll('input[name=support]:checked')].map(i=>Number(i.value));
       const fields={weights:ownAnswers.map(a=>model.weights(a)),region:$('#areaName').value.trim(),event:$('#eventCode').value.trim(),grid:selectedCell,supports,consent:'aggregate-ccby-v1',test:testMode};
-      const prior=MapDataClient.local().find(r=>r.test===testMode&&JSON.stringify([r.weights,r.region,r.event,r.grid,r.supports])===JSON.stringify([fields.weights,fields.region,fields.event,fields.grid,fields.supports]));
-      const record=core.record({...fields,id:prior?.id||crypto.randomUUID()},anchors);
-      MapDataClient.save({...record,synced:prior?.synced||false});$('#collectionStatus').textContent='この端末に保存しました。共有先への保存を確認しています…';
-      const accepted=await MapDataClient.submit(record);MapDataClient.save(accepted);$('#collectionStatus').textContent=accepted.test?'検証用シートへの保存を確認しました。本番の公開集計には含めません。':'共有先への保存を確認しました。同じ地域・月・イベント・ゾーンに5件以上集まると、匿名の集計に反映します。';if(!accepted.test)await loadShared();
+      $('#collectionStatus').textContent='Googleスプレッドシートへの保存を確認しています…';
+      const accepted=await MapDataClient.contribute(fields,anchors);$('#collectionStatus').textContent=accepted.test?'検証用シートへの保存を確認しました。本番の公開集計には含めません。':'Googleスプレッドシートへの保存を確認しました。回答は1件ずつ蓄積されます。同じ地域・月・イベント・ゾーンに5件以上集まると、公開CSVにも集計が反映されます。';if(!accepted.test)await loadShared();
     }catch(err){$('#collectionStatus').textContent=err.message;}finally{button.disabled=!canContribute;}
   });
   $('#downloadOwn').addEventListener('click',()=>download(JSON.stringify({schema:'ieneko-own-answer-1.0',answers:ownAnswers,point:ownPoint,question_labels:model.labels},null,2),'ieneko-my-answers.json','application/json'));
