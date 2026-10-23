@@ -991,7 +991,6 @@ async function init() {
   }
   renderResearch();
   $("#answerEvent").value = (new URLSearchParams(location.search).get("event") || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);
-  $("#answerPublishedCSV").href=MapDataClient.endpoint({mode:'csv',...(new URLSearchParams(location.search).get('test')==='1'?{proof:'1'}:{})}).href;
   document.querySelectorAll('a[href^="ienekomap2/"]').forEach(link => {
     const url = new URL(link.getAttribute("href"), location.href);
     url.searchParams.set("v", window.IENEKO_RELEASE.version);
