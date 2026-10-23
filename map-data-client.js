@@ -4,11 +4,24 @@ var MapDataClient=(function(){
   function local(){try{return JSON.parse(localStorage.getItem(KEY)||'[]').filter(r=>r&&typeof r.id==='string').slice(-200);}catch{return[];}}
   function save(record){const rows=local().filter(r=>r.id!==record.id);rows.push(record);localStorage.setItem(KEY,JSON.stringify(rows.slice(-200)));}
   function url(){return window.IENEKO_CONFIG?.openDataUrl||'';}
-  function get(params){
+  function endpoint(params){const u=new URL(url());u.searchParams.set('api','ieneko2');Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));return u;}
+  async function json(params){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    try{const response=await fetch(endpoint(params).href,{mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('共有先の応答を確認できませんでした。');return await response.json();}
+    finally{clearTimeout(timer);}
+  }
+  async function get(params){
+    if(!url())throw Error('共有先が未設定です。');
+    let data;try{data=await json(params);}catch{data=await jsonp(params);}
+    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('共有先の応答形式を確認できませんでした。');
+    if(data.ok===false)throw Error(data.error||'共有先を確認できませんでした。');
+    return data;
+  }
+  function jsonp(params){
     return new Promise((resolve,reject)=>{
       if(!url()){reject(Error('共有先が未設定です。'));return;}
       const callback='ienekoMap2_'+Math.random().toString(36).slice(2),script=document.createElement('script');
-      const u=new URL(url());u.searchParams.set('api','ieneko2');Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));u.searchParams.set('callback',callback);
+      const u=endpoint(params);u.searchParams.set('callback',callback);
       const clean=()=>{clearTimeout(timer);script.remove();delete window[callback];};
       window[callback]=data=>{clean();if(data?.ok===false)reject(Error(data.error||'共有先を確認できませんでした。'));else resolve(data);};
       const timer=setTimeout(()=>{clean();reject(Error('共有先の応答を確認できませんでした。'));},20000);

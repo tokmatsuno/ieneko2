@@ -41,6 +41,7 @@ jobs:
           node tests/cat-studio.test.cjs
           node tests/continuous.test.cjs
           node tests/opendata.test.cjs
+          node tests/map-data-client.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
