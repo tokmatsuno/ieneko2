@@ -38,6 +38,7 @@ jobs:
           node --check ienekomap2/map.js
           node --check beta-data-core.js
           node --check ienekomap2/beta/beta.js
+          node --check gas/migration-proxy.js
           node scripts/build-cat-data.cjs --check
           node scripts/build-beta-data.cjs --check
           node scripts/build-map-service.cjs --check
@@ -50,6 +51,7 @@ jobs:
           node tests/public-cats.test.cjs
           node tests/publication-client.test.cjs
           node tests/beta-data.test.cjs
+          node tests/migration-proxy.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

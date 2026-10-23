@@ -4,21 +4,23 @@
 
 公開アプリ: https://tokmatsuno.github.io/ieneko2/
 
-## 現在のバージョン: ver2.14
+## 現在のバージョン: ver2.15
 
-フッターに「2026年度東京大学シビックテックデザイン学講座Team 1」と `ver2.14` を表示します。版番号は `version.js`、更新履歴は [CHANGELOG.md](CHANGELOG.md) に記録。以後のコミット件名も `verX.XX: 更新内容` とします。
+フッターに「2026年度東京大学シビックテックデザイン学講座Team 1」と `ver2.15` を表示します。版番号は `version.js`、更新履歴は [CHANGELOG.md](CHANGELOG.md) に記録。以後のコミット件名も `verX.XX: 更新内容` とします。
+
+ver2.15でGoogleスプレッドシートとApps Scriptを個人Googleアカウントへ移行しました。移行時の実回答3件・既存の検証用6件は、保存ID・公開番号・同意内容を含む全項目を新しい非公開シートから読み返して照合。仮想90件の5シートと旧版の7シートも元データと一致しています。新しい公開URLへの保存・再送・公開JSON・実際のCSVを検証用データで照合し、設定とシートの参照先を更新しました。旧サービスURLも同じ新サービスへ中継するため、旧版の画面からの送信先も移行先へそろいます。元ファイルは復旧用に保持しています。
 
 ver2.14ではアプリ名を「家猫の冒険」に変更。各問のA・B・Cを1本の色分けバーで示し、合計100%を分けることを可視化しています。
 
-新アプリ [突撃隣の家猫ごはん / 家猫MAPベータ版](https://tokmatsuno.github.io/ieneko2/ienekomap2/beta/?v=2.14) は、日吉町自治会・浅草公園町会・小町二丁目自治会・円山西町町内会・大名2自治会に「仮想」を付けた5つのまちを比較します。各18件、合計90件はすべて生成した仮想回答です。実回答・団体参加・施策実績ではありません。別の公開専用Googleスプレッドシートで1シート1まちとし、GASの `mode=beta` / `mode=beta-csv` がシートからJSON・CSVを生成します。全件・まち別・1件のCSV、設計座標の90点、地域の地図、他のまちの仮想案を保存する検討メモに対応。実回答の保存先とは分離しています。
+新アプリ [突撃隣の家猫ごはん / 家猫MAPベータ版](https://tokmatsuno.github.io/ieneko2/ienekomap2/beta/?v=2.15) は、日吉町自治会・浅草公園町会・小町二丁目自治会・円山西町町内会・大名2自治会に「仮想」を付けた5つのまちを比較します。各18件、合計90件はすべて生成した仮想回答です。実回答・団体参加・施策実績ではありません。別の公開専用Googleスプレッドシートで1シート1まちとし、GASの `mode=beta` / `mode=beta-csv` がシートからJSON・CSVを生成します。全件・まち別・1件のCSV、設計座標の90点、地域の地図、他のまちの仮想案を保存する検討メモに対応。実回答の保存先とは分離しています。
 
-公開シート: https://docs.google.com/spreadsheets/d/1_i_ra2qDpElIaAEK8ny7DmlzZtZ5I8QyhanYvVan4Es
+公開シート: https://docs.google.com/spreadsheets/d/16vVKKdrbz3br5z2wlTaesmrjxJb10f59AlV7gx7QhYg
 
 ver2.13ではCHAPTERを章番号・場所・テーマの大きな見出しとして表示。A・B・Cは個別にキープでき、3つともキープする操作と一括解除を追加しました。キープはほかのつまみからの変更を防ぎます。キープ中のつまみ自体は手直しでき、残りが自動調整されます。3つともキープすると、すべてのつまみが停止します。1つ解除すると、その割合を残りの調整先として使えます。
 
 ver2.12では、最初に動かした答えの割合をキープし、ほかの2つを合計100%の範囲で手直しできます。キープする答えの切り替え・解除、0.1%単位の調整に対応します。問いの移動・答えの選択・配分プリセットではキープをリセットします。
 
-ver2.11の完成条件は、公開に同意した猫がGoogleスプレッドシートへ保存され、1匹1行のCSVを公開URLから取得できることです。結果画面とMAP2から猫単位の公開へ同意して送信すると、保存確認、公開JSON、実際のCSVの該当行を照合してから完了を表示します。公開CSVの直接URLは [MAP2のダウンロード欄](https://tokmatsuno.github.io/ieneko2/ienekomap2/?v=2.14#open-data) に掲載。ファイル名は `ieneko-cats.csv`、データ辞書は [public-cats-dictionary.json](ienekomap2/public-cats-dictionary.json) です。再送には同じ保存IDを使います。公開番号は保存IDと別のランダムUUIDです。
+ver2.11の完成条件は、公開に同意した猫がGoogleスプレッドシートへ保存され、1匹1行のCSVを公開URLから取得できることです。結果画面とMAP2から猫単位の公開へ同意して送信すると、保存確認、公開JSON、実際のCSVの該当行を照合してから完了を表示します。公開CSVの直接URLは [MAP2のダウンロード欄](https://tokmatsuno.github.io/ieneko2/ienekomap2/?v=2.15#open-data) に掲載。ファイル名は `ieneko-cats.csv`、データ辞書は [public-cats-dictionary.json](ienekomap2/public-cats-dictionary.json) です。再送には同じ保存IDを使います。公開番号は保存IDと別のランダムUUIDです。
 
 猫CSVは猫の種類・設計座標・5問の配分・入口の選択を1匹から公開します。氏名・ニックネーム・保存ID・日時・地域・イベント・位置情報は含めません。旧版の集計だけの同意は個別公開へ流用しません。地域・月・イベント・ゾーン別の集計は引き続き5件以上で公開します。`?test=1` の猫は、別の検証用CSV（`data_kind=verification`）に入り、本番の猫CSVとは分離します。
 
@@ -36,8 +38,8 @@ ver2.06では割合操作の折りたたみを廃止しました。各答えの�
 
 ## ver2.05: あいだの回答と家猫MAP2
 
-- アプリ: https://tokmatsuno.github.io/ieneko2/?v=2.14
-- 家猫MAP2: https://tokmatsuno.github.io/ieneko2/ienekomap2/?v=2.14
+- アプリ: https://tokmatsuno.github.io/ieneko2/?v=2.15
+- 家猫MAP2: https://tokmatsuno.github.io/ieneko2/ienekomap2/?v=2.15
 
 3つの選択肢をそのまま選ぶほか、各答えのスライダーで、A・B・Cの割合を0.1ポイント刻みで調整できます。初回はほかの2つを比例調整。ver2.12では最初の割合をキープし、残り2つだけを調整して合計100%を維持します。二択の中間へ移動するボタンも用意しました。端末内の保存は従来の選択肢番号も読み込めます。
 

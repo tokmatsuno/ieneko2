@@ -1,5 +1,9 @@
 # 家猫MAP2 収集サービス
 
+ver2.15で保存先と実行環境を個人Googleアカウントへ移行しました。`config.js` の `openDataUrl` が新サービス、`ienekomap2/beta/sheet-config.json` が新しい公開ベータ用シートを参照します。実回答のシートIDとDiscordの接続設定は非公開のScript Propertiesで管理し、リポジトリへ保存しません。移行時の実回答3件・既存の検証用6件を新しい非公開シートから読み返し、保存ID・公開番号・同意内容を含めて完全一致を確認。旧版の7シート、仮想90件の5シートも照合しました。
+
+旧サービスの既存URLはバージョン18へ更新し、`migration-proxy.js` で新サービスへ中継します。転送先は旧GASの非公開Script Propertiesにある `IENEKO_MIGRATION_TARGET` です。旧側の `doGet` と `doPost` だけを `migrationProxy_(e,'get')` / `migrationProxy_(e,'post')` へ変更し、元のコードと設定は復旧用に保持しています。旧URLと新URLの公開CSV・仮想90件・旧来の共有APIが一致し、同じ保存IDを旧URLへ再送しても新保存先に重複追加しないことを確認しました。新サービスは個人Googleアカウントで実行し、旧アカウントのシートを参照しません。一時的な移行用関数と回答データは公開したコードから除いています。
+
 ver2.14の `mode=beta` / `mode=beta-csv` は、公開専用の別スプレッドシートにある5つのまち・仮想90件を読み込みます。`beta-data-core.js` と `beta-service.js` を生成物へ追加。各行の `synthetic_beta`、設問配分、元CSVからの設計座標、基準猫を検証してから公開します。町別の `town`、1件の `sample_id` で抽出できます。実回答の `responses` / `verification` へ仮想データを書き込みません。公開シートIDとタブは `ienekomap2/beta/sheet-config.json` に記録しています。
 
 `IenekoMap2.gs` は `opendata-core.js`、`public-cat-data.js`、元CSV由来の設問参照座標・基準猫、`map2-service.js` を `node scripts/build-map-service.cjs` でまとめた生成物です。元CSVや収集仕様を変更したら再生成し、`--check` で一致を確認します。
