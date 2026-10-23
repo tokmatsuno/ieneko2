@@ -9,6 +9,11 @@
   const ownAnswers=Array.isArray(own.answers)?own.answers.slice(0,5).map(a=>model.normalize(a)):[],canContribute=ownAnswers.length===5;
   const ownPoint=model.point(ownAnswers,quests),testMode=new URLSearchParams(location.search).get('test')==='1';
   const data={shared:[],sample:makeSamples(),imported:[]};let kind='shared',importedKind='imported',filtered=[],selectedGroup=null,zone={x:ownPoint.x,y:ownPoint.y},geoMap=null,geoLayer=null,collectionMap=null,cellLayer=null,selectedCell=null,artToken=0,sharedError='';
+  let publicCats=[],publicCatPaintToken=0;
+  async function loadPublicCats(){
+    try{const response=await MapDataClient.get({mode:'cats',...(testMode?{proof:'1'}:{})});if(response.schema!==PublicCatData.SCHEMA||response.data_kind!==(testMode?'verification':'responses'))throw Error('公開猫のデータ形式を確認できませんでした。');publicCats=PublicCatData.validate(response.cats);const paintToken=++publicCatPaintToken;$('#publicCatTopCount').textContent=`${testMode?'検証用 / ':''}${publicCats.length}匹を公開中 / CC BY 4.0`;$('#publicCatCount').textContent=`${testMode?'検証用の':''}公開された猫：${publicCats.length}匹。1匹につきCSVの1行です。`;$('#publicCatList').innerHTML=publicCats.slice(-8).reverse().map((c,i)=>`<article><img data-public-cat-art="${i}" src="${esc(studio.sourceFor('hello'))}" alt="公開された猫 ${esc(c.reference_cat_name)}"><b>${esc(c.reference_cat_name)}</b><small>X ${c.x.toFixed(2)} / Y ${c.y.toFixed(2)}</small><a href="${esc(MapDataClient.endpoint({mode:'csv',public_id:c.public_id,...(testMode?{proof:'1'}:{})}).href)}" target="_blank" rel="noopener">この猫のCSV ↓</a></article>`).join('');publicCats.slice(-8).reverse().forEach((c,i)=>{const look=studio.derive(c.weights.map(w=>w?model.normalize(w):{choice:-1}),quests,{x:c.x,y:c.y});studio.render(look,look.finalPose,220).then(src=>{const img=document.querySelector(`[data-public-cat-art="${i}"]`);if(img&&paintToken===publicCatPaintToken)img.src=src;}).catch(()=>{});});return true;}
+    catch(err){$('#publicCatCount').textContent='公開猫を取得できませんでした。'+err.message;return false;}
+  }
   function safeURL(value){try{const u=new URL(value);return['http:','https:'].includes(u.protocol)?u.href:'';}catch{return'';}}
   function download(content,name,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
   function makeSamples(){
@@ -30,7 +35,7 @@
     $('#responseCount').innerHTML=`${n}<small>${(kind==='sample'||kind==='imported'&&importedKind==='sample')?'サンプル件':'件'}</small>`;$('#cellCount').innerHTML=`${cells.size}<small>メッシュ</small>`;
     const support=filtered.reduce((v,g)=>v.map((n,i)=>n+g.support_counts[i]),[0,0,0]);$('#leadingSupport').textContent=Math.max(...support)>0?supportNames[support.indexOf(Math.max(...support))]:'集計待ち';
     $('#dataBadge').className='badge'+((kind==='sample'||kind==='imported'&&importedKind==='sample')?' sample':'');$('#dataBadge').textContent=kind==='sample'?'架空のサンプル':kind==='imported'?(importedKind==='sample'?'読み込んだサンプル':'読み込んだ集計'):'共有の回答集計';
-    $('#dataMessage').textContent=kind==='sample'?'使い方を試すための架空の回答です。実際の参加者の記録ではありません。保存するファイルにもsampleと明記します。':kind==='imported'?(importedKind==='sample'?'読み込んだサンプルです。実際の参加者の記録ではありません。':'読み込んだ公開集計を表示しています。共有先の記録は書き換えません。'):sharedError||(!data.shared.length?'公開基準を満たす集計はまだありません。5件以上まとまった地域・月・イベント・ゾーンから表示します。基準猫の地図や、サンプルは今すぐ試せます。':'同意を得た回答の公開集計です。参加者の自己選択による記録で、住民全体の分布ではありません。');
+    $('#dataMessage').textContent=kind==='sample'?'使い方を試すための架空の回答です。実際の参加者の記録ではありません。保存するファイルにもsampleと明記します。':kind==='imported'?(importedKind==='sample'?'読み込んだサンプルです。実際の参加者の記録ではありません。':'読み込んだ公開集計を表示しています。共有先の記録は書き換えません。'):sharedError||(!data.shared.length?'地域別の公開集計はまだありません。5件以上まとまった地域・月・イベント・ゾーンから表示します。基準猫の地図や、サンプルは今すぐ試せます。':'同意を得た回答の公開集計です。参加者の自己選択による記録で、住民全体の分布ではありません。');
     renderDesign();renderZone();if(geoMap)renderGeo();
   }
   function renderDesign(){
@@ -45,7 +50,7 @@
   function setZone(x,y,group=null){zone={x:Math.max(0,Math.min(10,x)),y:Math.max(0,Math.min(10,y))};selectedGroup=group;$('#zoneX').value=zone.x;$('#zoneY').value=zone.y;renderDesign();renderZone();}
   function renderZone(){
     const near=nearest(),c=near[0],group=selectedGroup,quad=studio.quadrants[(zone.y>=5?2:0)+(zone.x>=5?1:0)],groups=group?[group]:filtered.filter(g=>g.zone_x===Math.min(4,Math.floor(zone.x/2))&&g.zone_y===Math.min(4,Math.floor(zone.y/2))),n=groups.reduce((v,g)=>v+g.n,0),supportN=groups.reduce((v,g)=>v+g.support_n,0),support=groups.reduce((v,g)=>v.map((n,i)=>n+g.support_counts[i]),[0,0,0]);
-    $('#zonePanel').innerHTML=`<p class="eyebrow">A DOOR FOR THIS ZONE</p><h3>${quad.title}</h3><div class="zone-art"><img id="zoneCat" src="${esc(studio.sourceFor(studio.poseFor(zone,c.no)))}" alt="このゾーンに近い基準猫のイメージ"></div><span class="zone-coordinate">X ${zone.x.toFixed(2)} / Y ${zone.y.toFixed(2)}</span><p>${group?`${esc(group.region||'地域未選択')} / ${esc(group.month)} / ${group.n}件の集計`:`このゾーンの公開回答：${n}件${kind==='sample'?'（サンプル）':''}`}</p><div class="zone-reference"><p>近い基準猫：No.${c.no} <a href="../?v=2.10&amp;cat=${c.no}#cats">${esc(c.name)} ↗</a></p><p class="count-note">${near.map(c=>`No.${c.no} ${esc(c.name)}`).join(' ・ ')}</p></div><div class="preference-bars">${supportN?support.map((v,i)=>`<div class="preference-bar"><span>${supportNames[i]}</span><i style="width:${Math.max(2,v/supportN*100)}%"></i><span>${Math.round(v/supportN*100)}%</span></div>`).join(''):'<p>入口の希望が集まると、遊び・おやつ・環境の比率を比較できます。</p>'}</div><p class="count-note">${supportN?`入口を1つ以上選んだ${supportN}件が分母。複数選択。効果測定ではありません。`:'下の提案は、近い基準猫の設計案から。回答者の性格や属性は推定しません。'}</p>`;
+    $('#zonePanel').innerHTML=`<p class="eyebrow">A DOOR FOR THIS ZONE</p><h3>${quad.title}</h3><div class="zone-art"><img id="zoneCat" src="${esc(studio.sourceFor(studio.poseFor(zone,c.no)))}" alt="このゾーンに近い基準猫のイメージ"></div><span class="zone-coordinate">X ${zone.x.toFixed(2)} / Y ${zone.y.toFixed(2)}</span><p>${group?`${esc(group.region||'地域未選択')} / ${esc(group.month)} / ${group.n}件の集計`:`このゾーンの公開回答：${n}件${kind==='sample'?'（サンプル）':''}`}</p><div class="zone-reference"><p>近い基準猫：No.${c.no} <a href="../?v=2.11&amp;cat=${c.no}#cats">${esc(c.name)} ↗</a></p><p class="count-note">${near.map(c=>`No.${c.no} ${esc(c.name)}`).join(' ・ ')}</p></div><div class="preference-bars">${supportN?support.map((v,i)=>`<div class="preference-bar"><span>${supportNames[i]}</span><i style="width:${Math.max(2,v/supportN*100)}%"></i><span>${Math.round(v/supportN*100)}%</span></div>`).join(''):'<p>入口の希望が集まると、遊び・おやつ・環境の比率を比較できます。</p>'}</div><p class="count-note">${supportN?`入口を1つ以上選んだ${supportN}件が分母。複数選択。効果測定ではありません。`:'下の提案は、近い基準猫の設計案から。回答者の性格や属性は推定しません。'}</p>`;
     const token=++artToken;let painting;
     if(group&&group.weights){const answers=group.weights.map(w=>w?model.normalize(w):{choice:-1}),look=studio.derive(answers,quests,zone);painting=studio.render(look,look.finalPose,500);}
     else painting=studio.renderReference(c,studio.poseFor(zone,c.no),500);
@@ -69,13 +74,13 @@
   async function downloadPublicCSV(){
     const buttons=[...document.querySelectorAll('[data-public-csv]')],statuses=[...document.querySelectorAll('[data-public-csv-status]')];
     const status=text=>statuses.forEach(p=>{p.textContent=text;});
-    buttons.forEach(b=>{b.disabled=true;});status('最新の公開集計を確認しています…');
-    try{if(!await loadShared())throw Error('公開データを取得できませんでした。通信環境を確認し、もう一度お試しください。');download(core.csv(data.shared,'responses'),'ienekomap2-opendata.csv','text/csv;charset=utf-8');status(data.shared.length?`公開データ${data.shared.length}集計行のCSVをダウンロードしました。サンプルや表示フィルターは含めません。`:'現在、5件以上の公開基準を満たす集計は0行です。項目名だけのCSVをダウンロードしました。');}
+    buttons.forEach(b=>{b.disabled=true;});status('最新の公開猫とCSVを確認しています…');
+    try{if(!await loadPublicCats())throw Error('公開猫を取得できませんでした。通信環境を確認し、もう一度お試しください。');download(PublicCatData.csv(publicCats,testMode),testMode?'ieneko-cats-verification.csv':'ieneko-cats.csv','text/csv;charset=utf-8');status(publicCats.length?`${testMode?'検証用の':''}公開猫${publicCats.length}匹を、${publicCats.length}行のCSVでダウンロードしました。`:'公開された猫はまだ0匹です。項目名だけのCSVをダウンロードしました。結果画面で公開した猫が、1匹から反映されます。');}
     catch(err){status(err.message);}finally{buttons.forEach(b=>{b.disabled=false;});}
   }
   async function checkService(){try{const health=await MapDataClient.get({mode:'health'});$('#serviceStatus').textContent=health.service==='ienekomap2'&&health.ready?'共有の受付に接続しています。保存の返答を確認してから完了を表示します。':'共有の受付は準備中です。この端末での保存とJSON出力は利用できます。';}catch{$('#serviceStatus').textContent='共有の受付は接続未確認です。この端末の記録を先に残し、保存できたかを確かめます。';}}
   function ownSummary(){
-    $('#ownSummary').innerHTML=canContribute?'<p>5つの問いを歩いた、きょうの配分。</p>'+model.barsSVG(ownAnswers)+`<p class="small">設計座標 X ${ownPoint.x.toFixed(2)} / Y ${ownPoint.y.toFixed(2)}</p>`:'<p>まずは、猫と5つの問いを歩いてみよう。</p><a href="../?v=2.10#home">猫と、まちへ出る ↗</a>';
+    $('#ownSummary').innerHTML=canContribute?'<p>5つの問いを歩いた、きょうの配分。</p>'+model.barsSVG(ownAnswers)+`<p class="small">設計座標 X ${ownPoint.x.toFixed(2)} / Y ${ownPoint.y.toFixed(2)}</p>`:'<p>まずは、猫と5つの問いを歩いてみよう。</p><a href="../?v=2.11#home">猫と、まちへ出る ↗</a>';
     $('#sendContribution').disabled=!canContribute;$('#downloadOwn').disabled=!canContribute;$('#testNotice').hidden=!testMode;
     $('#eventCode').value=(new URLSearchParams(location.search).get('event')||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32);
   }
@@ -83,9 +88,9 @@
     e.preventDefault();if(!canContribute||!$('#openConsent').checked)return;const button=$('#sendContribution');button.disabled=true;
     try{
       const supports=[...document.querySelectorAll('input[name=support]:checked')].map(i=>Number(i.value));
-      const fields={weights:ownAnswers.map(a=>model.weights(a)),region:$('#areaName').value.trim(),event:$('#eventCode').value.trim(),grid:selectedCell,supports,consent:'aggregate-ccby-v1',test:testMode};
+      const fields={weights:ownAnswers.map(a=>model.weights(a)),region:$('#areaName').value.trim(),event:$('#eventCode').value.trim(),grid:selectedCell,supports,consent:'public-cat-ccby-v1',test:testMode};
       $('#collectionStatus').textContent='Googleスプレッドシートへの保存を確認しています…';
-      const accepted=await MapDataClient.contribute(fields,anchors);$('#collectionStatus').textContent=accepted.test?'検証用シートへの保存を確認しました。本番の公開集計には含めません。':'Googleスプレッドシートへの保存を確認しました。回答は1件ずつ蓄積されます。同じ地域・月・イベント・ゾーンに5件以上集まると、公開CSVにも集計が反映されます。';if(!accepted.test)await loadShared();
+      const accepted=await MapDataClient.contribute(fields,anchors);$('#collectionStatus').textContent=(accepted.test?'検証用の保存と猫CSVへの反映を確認しました。':'保存と公開猫CSVへの反映を確認しました。この猫が1行として公開されました。')+' 公開番号：'+accepted.public_id;await Promise.all([loadShared(),loadPublicCats()]);
     }catch(err){$('#collectionStatus').textContent=err.message;}finally{button.disabled=!canContribute;}
   });
   $('#downloadOwn').addEventListener('click',()=>download(JSON.stringify({schema:'ieneko-own-answer-1.0',answers:ownAnswers,point:ownPoint,question_labels:model.labels},null,2),'ieneko-my-answers.json','application/json'));
@@ -93,7 +98,7 @@
   $('#clearCell').addEventListener('click',()=>{selectedCell=null;if(cellLayer){cellLayer.remove();cellLayer=null;}$('#cellLabel').textContent='地域のメッシュは未選択です。';});
   $('#dataSource').addEventListener('change',()=>{kind=$('#dataSource').value;selectedGroup=null;setOptions();render();});
   for(const id of ['#regionFilter','#eventFilter','#monthFilter'])$(id).addEventListener('change',render);
-  $('#showBase').addEventListener('change',renderDesign);$('#refreshData').addEventListener('click',loadShared);
+  $('#showBase').addEventListener('change',renderDesign);$('#refreshData').addEventListener('click',()=>Promise.all([loadShared(),loadPublicCats()]));
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
   for(const id of ['#zoneX','#zoneY'])$(id).addEventListener('input',()=>setZone(Number($('#zoneX').value),Number($('#zoneY').value)));
   function activateMapTarget(target){const base=target.closest('[data-base]'),group=target.closest('[data-group]');if(base){const c=cats.find(c=>c.no===Number(base.dataset.base));if(c)setZone(c.x,c.y);return true;}if(group){const g=filtered[Number(group.dataset.group)];if(g)setZone(g.mean_x,g.mean_y,g);return true;}return false;}
@@ -102,6 +107,7 @@
   $('#geoMap').addEventListener('click',e=>{const b=e.target.closest('[data-geo-group]');if(!b)return;const g=filtered[Number(b.dataset.geoGroup)];if(g){setZone(g.mean_x,g.mean_y,g);$('#zonePanel').scrollIntoView({block:'nearest',behavior:'smooth'});}});
   $('#exportCSV').addEventListener('click',()=>{download(core.csv(filtered,kind==='sample'?'sample':kind==='imported'?importedKind:'responses'),`ienekomap2-${kind}-aggregate.csv`,'text/csv;charset=utf-8');$('#exportStatus').textContent=`${filtered.length}集計行を保存しました。個々の回答や記録IDは含めません。`;});
   document.querySelectorAll('[data-public-csv]').forEach(b=>b.addEventListener('click',downloadPublicCSV));
+  $('#exportAggregateCSV').addEventListener('click',async()=>{if(!await loadShared()){$('#exportStatus').textContent='地域別の集計を取得できませんでした。';return;}download(core.csv(data.shared),'ienekomap2-aggregate.csv','text/csv;charset=utf-8');$('#exportStatus').textContent=`5件以上で公開された地域別の集計${data.shared.length}行を保存しました。猫1匹1行のCSVは上のボタンから取得できます。`;});
   $('#exportGeoJSON').addEventListener('click',()=>{download(JSON.stringify(core.geojson(filtered,kind==='sample'?'sample':kind==='imported'?importedKind:'responses'),null,2),`ienekomap2-${kind}-aggregate.geojson`,'application/geo+json');$('#exportStatus').textContent='GeoJSONを保存しました。地理点はメッシュ中心で、位置を選んでいない集計はgeometry:nullです。';});
   $('#downloadBrief').addEventListener('click',()=>{const c=nearest()[0],n=filtered.filter(g=>g.zone_x===Math.min(4,Math.floor(zone.x/2))&&g.zone_y===Math.min(4,Math.floor(zone.y/2))).reduce((v,g)=>v+g.n,0);const text=`# 家猫MAP2 地域の小さな実験メモ\n\nデータ区分: ${kind}\nフィルター: 地域 ${$('#regionFilter').value||'全体'} / イベント ${$('#eventFilter').value||'全体'} / 月 ${$('#monthFilter').value||'全体'}\n選択ゾーン: X ${zone.x.toFixed(2)} / Y ${zone.y.toFixed(2)}\nこのゾーンの公開回答件数: ${n}\n参照猫: No.${c.no} ${c.name}\n\n## 試せる入口\n\nまたたび（遊びのツール）: ${c.matatabi}\n\nちゅーる（おやつ）: ${c.churu}\n\nキャットタワー（環境）: ${c.tower}\n\n注意: ${c.risk}\n\n出典: ${c.source}\n${safeURL(c.url)}\n\n## 実験の記録欄\n\nどこで・誰に声をかけるか:\n小さく試す期間・役割:\n参加したい人が選べること:\n反応をどう確認するか:\n見直す点:\n\n提案は元データに基づく仮説で、効果の実証ではありません。回答は自己選択サンプルです。人数や住民全体の分布は推定しません。\n\n${core.TEAM}\nhttps://tokmatsuno.github.io/ieneko2/ienekomap2/\n`;download(text,'ienekomap2-zone-brief.txt','text/plain;charset=utf-8');});
   $('#importData').addEventListener('change',async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('5MB以下の集計ファイルを選んでください。');const text=await file.text();let groups;
@@ -110,6 +116,8 @@
     data.imported=core.validateGroups(groups);$('#dataSource option[value=imported]').disabled=false;$('#dataSource').value='imported';kind='imported';selectedGroup=null;setOptions();render();$('#exportStatus').textContent=`${data.imported.length}集計行を読み込みました。共有先には送っていません。`;
   }catch(err){$('#exportStatus').textContent=err.message;}finally{e.target.value='';}});
   const api=new URL(window.IENEKO_CONFIG.openDataUrl);api.searchParams.set('api','ieneko2');api.searchParams.set('mode','aggregate');$('#publicAPI').href=api.href;
+  $('#publicCSVDirect').href=MapDataClient.endpoint({mode:'csv',...(testMode?{proof:'1'}:{})}).href;
+  if(testMode){$('#publicCSVFileName').textContent='ファイル名：ieneko-cats-verification.csv';$('#publicCatCount').textContent='検証用の公開猫を確認しています。';document.querySelectorAll('[data-public-csv]').forEach(b=>{b.textContent='検証用の猫CSVをダウンロード ↓';});}
   if(window.IENEKO_RELEASE){$('#mapVersion').textContent='ver'+window.IENEKO_RELEASE.version;$('#teamCredit').textContent=window.IENEKO_RELEASE.team;}
-  $('#zoneX').value=zone.x;$('#zoneY').value=zone.y;ownSummary();setOptions();render();loadShared();checkService();
+  $('#zoneX').value=zone.x;$('#zoneY').value=zone.y;ownSummary();setOptions();render();loadShared();loadPublicCats();checkService();
 })();

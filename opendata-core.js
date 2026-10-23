@@ -4,7 +4,7 @@ var OpenDataCore=(function(){
   function normalizeWeights(value){if(value===null)return null;if(!Array.isArray(value)||value.length!==3||value.some(v=>typeof v!=='number'||!Number.isFinite(v)||v<0||v>1.000001))throw Error('回答の配分が正しくありません。');const sum=value.reduce((a,b)=>a+b,0);if(sum<.999||sum>1.001)throw Error('回答の配分は合計100%にしてください。');return value.map(v=>v/sum);}
   function grid(lat,lon){if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<20||lat>46||lon<122||lon>154)throw Error('地図上で日本国内の活動地域を選んでください。');return{lat:Math.round((Math.floor(lat*100)/100+.005)*1000)/1000,lon:Math.round((Math.floor(lon*100)/100+.005)*1000)/1000};}
   function record(input,anchors,now=new Date()){
-    if(input?.consent!=='aggregate-ccby-v1')throw Error('公開集計への同意を確認してください。');
+    if(!['aggregate-ccby-v1','public-cat-ccby-v1'].includes(input?.consent))throw Error('公開への同意を確認してください。');
     if(!/^[a-zA-Z0-9_-]{12,80}$/.test(input.id||''))throw Error('記録IDが正しくありません。');
     if(!Array.isArray(input.weights)||input.weights.length!==5)throw Error('5つの問いの回答が必要です。');
     const weights=input.weights.map(normalizeWeights),points=weights.map((w,i)=>w?{x:w.reduce((v,n,k)=>v+n*anchors[i][k][0],0),y:w.reduce((v,n,k)=>v+n*anchors[i][k][1],0)}:null).filter(Boolean);
@@ -14,7 +14,7 @@ var OpenDataCore=(function(){
     if(!/^[a-zA-Z0-9_-]{0,32}$/.test(event))throw Error('イベントIDは半角英数字・ハイフン・下線で32文字以内です。');
     const cell=input.grid===null||input.grid===undefined?null:grid(Number(input.grid.lat),Number(input.grid.lon));
     const supports=Array.isArray(input.supports)?[...new Set(input.supports.filter(v=>Number.isInteger(v)&&v>=0&&v<3))]:[];
-    return{id:input.id,month:new Date(now.getTime()+9*3600000).toISOString().slice(0,7),region,event,x,y,weights,grid:cell,supports,consent:'aggregate-ccby-v1',test:input.test===true};
+    return{id:input.id,month:new Date(now.getTime()+9*3600000).toISOString().slice(0,7),region,event,x,y,weights,grid:cell,supports,consent:input.consent,test:input.test===true};
   }
   function aggregate(records,min=K){
     const bins=new Map();

@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.10" />
-    <link rel="stylesheet" href="appearance.css?v=2.10&amp;r=3" />
+    <link rel="stylesheet" href="app.css?v=2.11" />
+    <link rel="stylesheet" href="appearance.css?v=2.11&amp;r=3" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -56,7 +56,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.10#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.11#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -237,7 +237,7 @@
             <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.10</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.11</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -248,17 +248,18 @@
             <form id="answerCollection" class="answer-collection" aria-labelledby="answerCollectionTitle">
               <p class="eyebrow">YOUR ANSWER, OUR NEXT IDEA</p>
               <h3 id="answerCollectionTitle">この回答を、まちづくりのデータに。</h3>
-              <p>5問の回答を、共有のGoogleスプレッドシートに1件ずつ保存します。氏名・ニックネーム・GPSは送りません。</p>
+              <p>この猫をGoogleスプレッドシートに保存し、1匹1行のCSVとして公開します。猫の種類・設計座標・5問の配分・選んだ入口が、だれでも再利用できるデータになります。</p>
               <details><summary>地域や、参加したくなる入口を添える（任意）</summary>
                 <div class="answer-area-fields"><label>活動したい市区町村<input id="answerRegion" maxlength="24" placeholder="例：千代田区" autocomplete="off"></label><label>イベントID<input id="answerEvent" maxlength="32" pattern="[a-zA-Z0-9_-]*" placeholder="会場の案内がある場合のみ" autocomplete="off"></label></div>
                 <fieldset class="answer-supports"><legend>どんな入口なら参加したくなる？（複数可）</legend><label><input type="checkbox" name="answerSupport" value="0">🌿 またたび：遊びのツール</label><label><input type="checkbox" name="answerSupport" value="1">🍪 ちゅーる：小さな楽しみ</label><label><input type="checkbox" name="answerSupport" value="2">🏡 キャットタワー：安心できる環境</label></fieldset>
               </details>
-              <label class="answer-consent"><input id="answerConsent" type="checkbox" required><span>回答と任意の項目を匿名で保存し、5件以上の集計を<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>で公開することに同意します。</span></label>
-              <p id="answerTestNotice" class="answer-test" hidden>保存動作の検証用です。本番の回答・公開CSVには含めません。</p>
-              <button id="saveAnswerData" class="button primary" type="submit" disabled>この回答をデータに保存する ↗</button>
+              <label class="answer-consent"><input id="answerConsent" type="checkbox" required><span>猫の種類・設計座標・5問の配分・選んだ入口を、1匹単位で<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>のオープンデータとして公開することに同意します。任意の地域・イベントは5件以上の集計だけで公開します。</span></label>
+              <p id="answerTestNotice" class="answer-test" hidden>検証用です。この猫は検証用CSVに公開され、本番の猫CSVには含めません。</p>
+              <button id="saveAnswerData" class="button primary" type="submit" disabled>この猫をオープンデータにする ↗</button>
               <p id="answerSaveStatus" class="answer-save-status" role="status">まだ共有先には保存していません。</p>
-              <small>スプレッドシートには1件から蓄積。公開CSVは5件以上の匿名集計です。</small>
-              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.10#open-data">集まった回答と公開CSVを見る ↗</a>
+              <small>猫CSVは1匹から公開。氏名・保存用ID・日時・地域・イベント・位置情報は載せません。</small>
+              <a id="answerPublishedCSV" class="text-link" href="#" target="_blank" rel="noopener" hidden>公開された猫のCSVをダウンロード ↓</a>
+              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.11#open-data">集まった回答と公開CSVを見る ↗</a>
             </form>
             <details class="result-graph"><summary>答えの配分をグラフで見る</summary><div id="resultGraph"></div><p>3つの答えの割合をそのまま図示します。能力や性格の点数ではありません。保留した問いは集計に含めません。</p></details>
             <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
@@ -638,7 +639,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫クエスト <small id="appVersion">ver2.10</small></a
+        >家猫クエスト <small id="appVersion">ver2.11</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -668,14 +669,15 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.10"></script>
+    <script src="version.js?v=2.11"></script>
     <script src="config.js"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.10"></script>
-    <script src="quests.js?v=2.10"></script>
-    <script src="journey-model.js?v=2.10"></script>
-    <script src="opendata-core.js?v=2.10"></script>
-    <script src="map-data-client.js?v=2.10"></script>
+    <script src="cat-data.js?v=2.11"></script>
+    <script src="quests.js?v=2.11"></script>
+    <script src="journey-model.js?v=2.11"></script>
+    <script src="opendata-core.js?v=2.11"></script>
+    <script src="public-cat-data.js?v=2.11"></script>
+    <script src="map-data-client.js?v=2.11"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -687,7 +689,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.10&amp;r=2"></script>
-    <script src="app.js?v=2.10"></script>
+    <script src="cat-studio.js?v=2.11&amp;r=2"></script>
+    <script src="app.js?v=2.11"></script>
   </body>
 </html>

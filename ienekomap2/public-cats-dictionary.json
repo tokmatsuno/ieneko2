@@ -1,0 +1,29 @@
+{
+  "schema": "ieneko-public-cats-1.0",
+  "version": "2.11",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "2026年度東京大学シビックテックデザイン学講座Team 1",
+  "unit": "One explicitly consented cat per CSV row; available from the first cat, no minimum group size.",
+  "consent": "public-cat-ccby-v1. Earlier aggregate-only consent is excluded.",
+  "csv_api": "config.js openDataUrl + ?api=ieneko2&mode=csv",
+  "json_api": "config.js openDataUrl + ?api=ieneko2&mode=cats",
+  "verification": "Append &proof=1 for a separate, explicitly labeled verification dataset. It never appears in the real dataset.",
+  "excluded": ["private record ID", "name", "nickname", "response date and time", "month", "municipality", "event", "latitude", "longitude", "location"],
+  "method": "X/Y is the mean of answered question coordinates weighted by A/B/C shares, with unchanged coordinates from the original 100-cat reference CSV. The nearest reference cat uses Euclidean distance and lowest cat number to break ties. All skipped uses (5,5). No psychological scale or representative population claim.",
+  "fields": {
+    "schema": "ieneko-public-cats-1.0",
+    "data_kind": "responses for published cats, verification for the separate test CSV",
+    "public_id": "Random public UUID, separate from the private storage ID; stable on retry",
+    "reference_cat_no": "Nearest reference cat number, 1..100",
+    "reference_cat_name": "Name of the nearest reference cat",
+    "x": "Authored design X coordinate, 0..10",
+    "y": "Authored design Y coordinate, 0..10; not geographic latitude",
+    "quadrant": "grove, sun, moon, rose: authored scenes using the center (5,5)",
+    "q1_a..q5_c": "A/B/C answer shares for each question, 0..1, sum 1 per answered question. All three empty for a skipped question. These shares reproduce the answer-driven cat appearance in the app.",
+    "matatabi": "1 if playful tools selected, otherwise 0",
+    "churu": "1 if small rewards or enjoyable invitations selected, otherwise 0",
+    "tower": "1 if enabling environment selected, otherwise 0",
+    "license": "CC-BY-4.0 for the consented cat data; artwork, reference data and cited works retain their separate terms",
+    "attribution": "Creator attribution"
+  }
+}

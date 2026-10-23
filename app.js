@@ -648,7 +648,7 @@ function renderComplete() {
     ? state.optedIn
       ? "共有参加がオンです。"
       : "共有参加はオフです。"
-    : "ニックネームと物語の地点の共有は準備中です。回答の保存は、上の「この回答をデータに保存する」から利用できます。";
+    : "ニックネームと物語の地点の共有は準備中です。回答の保存は、上の猫の公開ボタンから利用できます。";
 }
 async function downloadCard() {
   const button = $("#downloadCard"),
@@ -826,7 +826,7 @@ function answerCollectionFields() {
     event: $("#answerEvent").value.trim(),
     grid: null,
     supports: [...document.querySelectorAll('input[name="answerSupport"]:checked')].map(i => Number(i.value)),
-    consent: "aggregate-ccby-v1",
+    consent: "public-cat-ccby-v1",
     test: new URLSearchParams(location.search).get("test") === "1",
   };
 }
@@ -835,10 +835,10 @@ function renderAnswerSaveState() {
   const fields = answerCollectionFields(), prior = MapDataClient.previous(fields);
   $("#answerTestNotice").hidden = !fields.test;
   $("#saveAnswerData").disabled = state.answers.length !== 5 || !$("#answerConsent").checked;
-  $("#saveAnswerData").textContent = prior?.synced ? "保存済みの回答を確認する ↻" : "この回答をデータに保存する ↗";
+  $("#saveAnswerData").textContent = prior?.published ? "公開済みの猫を確認する ↻" : "この猫をオープンデータにする ↗";
   $("#answerSaveStatus").dataset.state = prior?.synced ? "saved" : "unsaved";
   $("#answerSaveStatus").textContent = prior?.synced
-    ? `前回、${fields.test ? "検証用シート" : "Googleスプレッドシート"}への保存を確認しました。保存確認番号：${prior.id}`
+    ? `前回、${fields.test ? "検証用の" : ""}保存と公開CSVへの反映を確認しました。公開番号：${prior.public_id}`
     : prior ? "この端末に回答が残っています。共有先への保存をもう一度確認してください。" : "まだ共有先には保存していません。";
 }
 async function saveAnswerData(e) {
@@ -849,14 +849,15 @@ async function saveAnswerData(e) {
   controls.forEach(input => { input.disabled = true; });
   $("#saveAnswerData").textContent = "保存を確認しています…";
   $("#answerSaveStatus").dataset.state = "pending";
-  $("#answerSaveStatus").textContent = "Googleスプレッドシートへ送信し、保存された回答を確認しています…";
+  $("#answerSaveStatus").textContent = "Googleスプレッドシートへの保存と、公開CSVへの反映を確認しています…";
   try {
     const accepted = await MapDataClient.contribute(fields, QUESTS.map(q => q.answers.map(a => [a.x, a.y])));
     $("#answerSaveStatus").dataset.state = "saved";
     $("#answerSaveStatus").textContent = (accepted.test
-      ? "検証用シートへの保存を確認しました。本番の回答・公開CSVには含めません。"
-      : "Googleスプレッドシートへの保存を確認しました。回答は1件ずつ蓄積され、5件以上の集計が公開CSVに反映されます。") + ` 保存確認番号：${accepted.id}`;
-    $("#saveAnswerData").textContent = "保存済みの回答を確認する ↻";
+      ? "検証用シートへの保存と、検証用CSVへの反映を確認しました。"
+      : "Googleスプレッドシートへの保存と、公開CSVへの反映を確認しました。この猫がCSVの1行になりました。") + ` 公開番号：${accepted.public_id}`;
+    $("#saveAnswerData").textContent = "公開済みの猫を確認する ↻";
+    $("#answerPublishedCSV").hidden=false;
   } catch (error) {
     $("#answerSaveStatus").dataset.state = "error";
     $("#answerSaveStatus").textContent = error.message;
@@ -990,6 +991,7 @@ async function init() {
   }
   renderResearch();
   $("#answerEvent").value = (new URLSearchParams(location.search).get("event") || "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);
+  $("#answerPublishedCSV").href=MapDataClient.endpoint({mode:'csv',...(new URLSearchParams(location.search).get('test')==='1'?{proof:'1'}:{})}).href;
   document.querySelectorAll('a[href^="ienekomap2/"]').forEach(link => {
     const url = new URL(link.getAttribute("href"), location.href);
     url.searchParams.set("v", window.IENEKO_RELEASE.version);

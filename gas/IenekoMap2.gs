@@ -5,7 +5,7 @@ var OpenDataCore=(function(){
   function normalizeWeights(value){if(value===null)return null;if(!Array.isArray(value)||value.length!==3||value.some(v=>typeof v!=='number'||!Number.isFinite(v)||v<0||v>1.000001))throw Error('回答の配分が正しくありません。');const sum=value.reduce((a,b)=>a+b,0);if(sum<.999||sum>1.001)throw Error('回答の配分は合計100%にしてください。');return value.map(v=>v/sum);}
   function grid(lat,lon){if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<20||lat>46||lon<122||lon>154)throw Error('地図上で日本国内の活動地域を選んでください。');return{lat:Math.round((Math.floor(lat*100)/100+.005)*1000)/1000,lon:Math.round((Math.floor(lon*100)/100+.005)*1000)/1000};}
   function record(input,anchors,now=new Date()){
-    if(input?.consent!=='aggregate-ccby-v1')throw Error('公開集計への同意を確認してください。');
+    if(!['aggregate-ccby-v1','public-cat-ccby-v1'].includes(input?.consent))throw Error('公開への同意を確認してください。');
     if(!/^[a-zA-Z0-9_-]{12,80}$/.test(input.id||''))throw Error('記録IDが正しくありません。');
     if(!Array.isArray(input.weights)||input.weights.length!==5)throw Error('5つの問いの回答が必要です。');
     const weights=input.weights.map(normalizeWeights),points=weights.map((w,i)=>w?{x:w.reduce((v,n,k)=>v+n*anchors[i][k][0],0),y:w.reduce((v,n,k)=>v+n*anchors[i][k][1],0)}:null).filter(Boolean);
@@ -15,7 +15,7 @@ var OpenDataCore=(function(){
     if(!/^[a-zA-Z0-9_-]{0,32}$/.test(event))throw Error('イベントIDは半角英数字・ハイフン・下線で32文字以内です。');
     const cell=input.grid===null||input.grid===undefined?null:grid(Number(input.grid.lat),Number(input.grid.lon));
     const supports=Array.isArray(input.supports)?[...new Set(input.supports.filter(v=>Number.isInteger(v)&&v>=0&&v<3))]:[];
-    return{id:input.id,month:new Date(now.getTime()+9*3600000).toISOString().slice(0,7),region,event,x,y,weights,grid:cell,supports,consent:'aggregate-ccby-v1',test:input.test===true};
+    return{id:input.id,month:new Date(now.getTime()+9*3600000).toISOString().slice(0,7),region,event,x,y,weights,grid:cell,supports,consent:input.consent,test:input.test===true};
   }
   function aggregate(records,min=K){
     const bins=new Map();
@@ -43,7 +43,34 @@ var OpenDataCore=(function(){
   return{SCHEMA,K,TEAM,record,grid,aggregate,validateGroups,envelope,geojson,csv,columns};
 })();
 
+/* One explicitly consented cat per row. Never expose private collection records. */
+var PublicCatData=(function(){
+  const SCHEMA='ieneko-public-cats-1.0',CONSENT='public-cat-ccby-v1';
+  const columns=['schema','data_kind','public_id','reference_cat_no','reference_cat_name','x','y','quadrant',...Array.from({length:5},(_,i)=>['a','b','c'].map(s=>`q${i+1}_${s}`)).flat(),'matatabi','churu','tower','license','attribution'];
+  function project(records,references,verification=false){
+    return records.filter(r=>r.consent===CONSENT&&Boolean(r.test)===verification&&r.public_id).map(r=>{
+      const ref=references.map(c=>({...c,d:(c.x-r.x)**2+(c.y-r.y)**2})).sort((a,b)=>a.d-b.d||a.no-b.no)[0];
+      return{public_id:r.public_id,reference_cat_no:ref.no,reference_cat_name:ref.name,x:r.x,y:r.y,quadrant:['grove','sun','moon','rose'][(r.y>=5?2:0)+(r.x>=5?1:0)],weights:r.weights,supports:r.supports};
+    });
+  }
+  function validate(cats){
+    if(!Array.isArray(cats)||cats.length>20000)throw Error('公開猫のデータ形式を確認できませんでした。');
+    return cats.map(c=>{
+      if(!c||!/^[a-zA-Z0-9_-]{12,80}$/.test(c.public_id)||!Number.isInteger(c.reference_cat_no)||c.reference_cat_no<1||c.reference_cat_no>100||!Number.isFinite(c.x)||!Number.isFinite(c.y)||c.x<0||c.x>10||c.y<0||c.y>10||!Array.isArray(c.weights)||c.weights.length!==5)throw Error('公開猫のデータ形式を確認できませんでした。');
+      const weights=c.weights.map(w=>{if(w===null)return null;if(!Array.isArray(w)||w.length!==3||w.some(n=>typeof n!=='number'||!Number.isFinite(n)||n<0||n>1.000001)||Math.abs(w.reduce((a,b)=>a+b,0)-1)>.001)throw Error('公開猫の回答配分が正しくありません。');return w;});
+      return{public_id:c.public_id,reference_cat_no:c.reference_cat_no,reference_cat_name:String(c.reference_cat_name||''),x:c.x,y:c.y,quadrant:['grove','sun','moon','rose'][(c.y>=5?2:0)+(c.x>=5?1:0)],weights,supports:[...new Set((c.supports||[]).filter(n=>Number.isInteger(n)&&n>=0&&n<3))]};
+    });
+  }
+  function envelope(cats,verification=false){return{ok:true,service:'ienekomap2',schema:SCHEMA,data_kind:verification?'verification':'responses',license:'CC-BY-4.0',attribution:OpenDataCore.TEAM,cats:validate(cats)};}
+  function csv(cats,verification=false){
+    const cell=v=>{let s=String(v??'');if(/^[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};
+    return '\uFEFF'+[columns.join(','),...validate(cats).map(c=>[SCHEMA,verification?'verification':'responses',c.public_id,c.reference_cat_no,c.reference_cat_name,c.x,c.y,c.quadrant,...c.weights.flatMap(w=>w||['','','']),...[0,1,2].map(n=>c.supports.includes(n)?1:0),'CC-BY-4.0',OpenDataCore.TEAM].map(cell).join(','))].join('\r\n');
+  }
+  return{SCHEMA,CONSENT,columns,project,validate,envelope,csv};
+})();
+
 const MAP2_ANCHORS = [[[4.8,6.2],[5.8,5.2],[4.4,7.8]],[[4.8,6.2],[8,4.8],[6,7]],[[2.8,8],[5.4,5.8],[7.2,5]],[[5.4,5.8],[8,4.8],[7.2,5]],[[4.8,6.2],[6.8,5.4],[7.2,5]]];
+const MAP2_REFERENCES = [{"no":1,"name":"実家ぬくぬく猫","x":8,"y":7},{"no":2,"name":"次の一歩まち猫","x":6,"y":8},{"no":3,"name":"おうち安心猫","x":7,"y":9},{"no":4,"name":"おうち長期滞在猫","x":6,"y":9},{"no":5,"name":"自由時間満喫猫","x":9,"y":6},{"no":6,"name":"安心ベース待ち猫","x":2,"y":7},{"no":7,"name":"ひなたで充電猫","x":8,"y":8},{"no":8,"name":"アプリ活用猫","x":9,"y":5},{"no":9,"name":"おすすめ発見猫","x":10,"y":7},{"no":10,"name":"いいね励み猫","x":10,"y":7},{"no":11,"name":"借りぐらし上手猫","x":9,"y":6},{"no":12,"name":"まず聞いてみる猫","x":10,"y":8},{"no":13,"name":"仮想世界おでかけ猫","x":10,"y":8},{"no":14,"name":"お取り寄せ上手猫","x":9,"y":6},{"no":15,"name":"投票きっかけ待ち猫","x":3,"y":7},{"no":16,"name":"相談先さがし猫","x":1,"y":8},{"no":17,"name":"声を届けたい猫","x":2,"y":7},{"no":18,"name":"ご近所大事猫","x":3,"y":6},{"no":19,"name":"どうせ…から一歩猫","x":3,"y":8},{"no":20,"name":"空気を読む猫","x":5,"y":7},{"no":21,"name":"きちんと従う猫","x":2,"y":8},{"no":22,"name":"支えを使う猫","x":1,"y":8},{"no":23,"name":"からだ相談猫","x":4,"y":7},{"no":24,"name":"見守られ安心猫","x":3,"y":8},{"no":25,"name":"箱入り安心猫","x":7,"y":8},{"no":26,"name":"ぬくぬく安心猫","x":6,"y":6},{"no":27,"name":"安定だいじ猫","x":5,"y":6},{"no":28,"name":"おまかせ上手猫","x":7,"y":6},{"no":29,"name":"がんばり背負い猫","x":4,"y":7},{"no":30,"name":"推しと生きる猫","x":8,"y":6},{"no":31,"name":"手ぶら身軽猫","x":7,"y":5},{"no":32,"name":"おうちゆったり猫","x":6,"y":6},{"no":33,"name":"さっとごはん猫","x":8,"y":6},{"no":34,"name":"快適チューニング猫","x":9,"y":6},{"no":35,"name":"ひとり気まま猫","x":6,"y":7},{"no":36,"name":"家庭を守る猫","x":8,"y":7},{"no":37,"name":"便利さ歓迎猫","x":10,"y":8},{"no":38,"name":"するっと選ぶ猫","x":8,"y":7},{"no":39,"name":"ぬるま湯ごきげん猫","x":7,"y":9},{"no":40,"name":"飼われ心地よし猫","x":6,"y":9},{"no":41,"name":"働き方見直し猫","x":4,"y":7},{"no":42,"name":"からだアップデート猫","x":9,"y":8},{"no":43,"name":"ロボ見守り猫","x":7,"y":7},{"no":44,"name":"暮らし整え猫","x":5,"y":6},{"no":45,"name":"通知にそわそわ猫","x":10,"y":7},{"no":46,"name":"アプリで出会う猫","x":9,"y":6},{"no":47,"name":"残業ぎゅうぎゅう猫","x":6.8,"y":7.4},{"no":48,"name":"シフト読めない猫","x":7.6,"y":6.8},{"no":49,"name":"通勤へとへと猫","x":7.2,"y":7},{"no":50,"name":"平日ひっそり猫","x":6.4,"y":6.2},{"no":51,"name":"呼び出し待機猫","x":6.9,"y":6.6},{"no":52,"name":"30分なら行く猫","x":5.8,"y":5.2},{"no":53,"name":"おむつ優先猫","x":6.2,"y":8.1},{"no":54,"name":"お迎えダッシュ猫","x":6.6,"y":7.3},{"no":55,"name":"見守り介護猫","x":5.4,"y":8.6},{"no":56,"name":"家族ケア背負い猫","x":4.8,"y":8.8},{"no":57,"name":"家族カレンダー猫","x":6,"y":7},{"no":58,"name":"子連れなら行く猫","x":6.8,"y":5.8},{"no":59,"name":"バス待ち長い猫","x":3.5,"y":7.2},{"no":60,"name":"段差慎重猫","x":2.8,"y":8},{"no":61,"name":"坂道ゆっくり猫","x":3.2,"y":7.8},{"no":62,"name":"夜道こわい猫","x":4.8,"y":7.4},{"no":63,"name":"雨雪お休み猫","x":5.5,"y":6.6},{"no":64,"name":"近場なら行く猫","x":6.2,"y":5.6},{"no":65,"name":"知らなかった猫","x":4,"y":7.2},{"no":66,"name":"通知埋もれ猫","x":8.8,"y":6.8},{"no":67,"name":"QRむずかしい猫","x":3.6,"y":7.4},{"no":68,"name":"紙なら安心猫","x":3.2,"y":6.3},{"no":69,"name":"大きな文字うれしい猫","x":4.2,"y":7},{"no":70,"name":"オンラインなら出る猫","x":9,"y":5.8},{"no":71,"name":"知り合いゼロ猫","x":5,"y":7.3},{"no":72,"name":"常連の輪こわい猫","x":4.4,"y":7.8},{"no":73,"name":"ひとり参加ためらい猫","x":5.6,"y":7.1},{"no":74,"name":"雑談ちょっと苦手猫","x":6,"y":7.7},{"no":75,"name":"何するのかわからない猫","x":4.6,"y":6.8},{"no":76,"name":"一回お試し猫","x":6.8,"y":5.4},{"no":77,"name":"参加費気になる猫","x":6.5,"y":6.7},{"no":78,"name":"交通費しぶしぶ猫","x":5.8,"y":6.9},{"no":79,"name":"手ぶら希望猫","x":6.9,"y":6},{"no":80,"name":"長時間ボランティアむずかしい猫","x":6.2,"y":6.8},{"no":81,"name":"予定変更心配猫","x":6.6,"y":6.4},{"no":82,"name":"負担見えると安心猫","x":5.4,"y":5.8},{"no":83,"name":"やさしい日本語猫","x":4,"y":7.6},{"no":84,"name":"多言語あるなら猫","x":4.3,"y":7.8},{"no":85,"name":"地域ルール未知猫","x":4.8,"y":7.2},{"no":86,"name":"文化ちがい慎重猫","x":5.2,"y":7.5},{"no":87,"name":"読み書きサポート猫","x":4.1,"y":8.2},{"no":88,"name":"通訳いるなら猫","x":4.5,"y":7.9},{"no":89,"name":"個人情報心配猫","x":7.8,"y":7.6},{"no":90,"name":"勧誘警戒猫","x":6.6,"y":7.8},{"no":91,"name":"安全第一猫","x":4.7,"y":8.4},{"no":92,"name":"初心者不安猫","x":5.2,"y":8},{"no":93,"name":"失敗こわい猫","x":5.8,"y":8.2},{"no":94,"name":"顔見知り橋渡し猫","x":4.8,"y":6.2},{"no":95,"name":"会議長すぎ猫","x":5.7,"y":6.6},{"no":96,"name":"役員こわい猫","x":4,"y":8},{"no":97,"name":"仕事量みえない猫","x":4.3,"y":7.5},{"no":98,"name":"成果みえない猫","x":5,"y":6.8},{"no":99,"name":"アイデアだけ参加猫","x":7.2,"y":5},{"no":100,"name":"単発スポット猫","x":8,"y":4.8}];
 /* Appended to the shared aggregation core and the CSV-derived answer anchors. */
 function doGet(e){return e&&e.parameter&&e.parameter.api==='ieneko2'?map2Get_(e):legacyDoGet(e);}
 function doPost(e){var input;try{input=JSON.parse(e&&e.postData&&e.postData.contents||'{}');}catch(_){input={};}return input.api==='ieneko2'?map2Post_(input):legacyDoPost(e);}
@@ -57,14 +84,21 @@ function setupIenekoMap2(){
 }
 function map2Book_(){var id=PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID');if(!id)throw Error('collection_not_configured');return SpreadsheetApp.openById(id);}
 function map2Has_(book,id,name){var sh=book.getSheetByName(name);if(!sh||sh.getLastRow()<2)return false;return Boolean(sh.getRange(2,1,sh.getLastRow()-1,1).createTextFinder(id).matchEntireCell(true).findNext());}
+function map2Records_(book,name){var sh=book.getSheetByName(name);return sh&&sh.getLastRow()>1?sh.getRange(2,2,sh.getLastRow()-1,1).getValues().map(function(r){return JSON.parse(r[0]);}):[];}
 function map2Get_(e){
   var p=e.parameter||{},out;
   try{
-    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.05',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5};
+    if(p.mode==='health')out={ok:true,service:'ienekomap2',version:'2.11',ready:Boolean(PropertiesService.getScriptProperties().getProperty('IENEKO_MAP2_SHEET_ID')),minimum_group_size:5,public_cat_schema:PublicCatData.SCHEMA,csv:'?api=ieneko2&mode=csv'};
     else if(p.mode==='receipt'){
       if(!/^[a-zA-Z0-9_-]{12,80}$/.test(p.id||''))throw Error('invalid_id');
       var book=map2Book_(),verified=map2Has_(book,p.id,'verification'),accepted=verified||map2Has_(book,p.id,'responses');
-      out={ok:true,accepted:accepted,test:verified};
+      var record=accepted?map2Records_(book,verified?'verification':'responses').find(function(r){return r.id===p.id;}):null;
+      out={ok:true,accepted:accepted,test:verified,published:Boolean(record&&record.consent===PublicCatData.CONSENT&&record.public_id),public_id:record&&record.public_id||null};
+    }else if(p.mode==='cats'||p.mode==='csv'){
+      var proof=p.proof==='1',cats=PublicCatData.project(map2Records_(map2Book_(),proof?'verification':'responses'),MAP2_REFERENCES,proof);
+      if(p.public_id)cats=cats.filter(function(c){return c.public_id===p.public_id;});
+      if(p.mode==='csv')return ContentService.createTextOutput(PublicCatData.csv(cats,proof)).setMimeType(ContentService.MimeType.CSV).downloadAsFile(proof?'ieneko-cats-verification.csv':'ieneko-cats.csv');
+      out=PublicCatData.envelope(cats,proof);
     }else{
       var sh=map2Book_().getSheetByName('responses'),records=[];
       if(sh.getLastRow()>1)records=sh.getRange(2,2,sh.getLastRow()-1,1).getValues().map(function(r){return JSON.parse(r[0]);});
@@ -80,7 +114,7 @@ function map2Post_(input){
     if(!lock.tryLock(10000))throw Error('busy');
     var book=map2Book_(),name=record.test?'verification':'responses',sh=book.getSheetByName(name);
     if(sh.getLastRow()>20000)throw Error('collection_capacity_reached');
-    if(!map2Has_(book,record.id,name))sh.appendRow([record.id,JSON.stringify(record)]);
+    if(!map2Has_(book,record.id,name)){if(record.consent===PublicCatData.CONSENT)record.public_id=Utilities.getUuid();sh.appendRow([record.id,JSON.stringify(record)]);}
     return map2Response_({ok:true,accepted:true,test:record.test});
   }catch(err){return map2Response_({ok:false,error:String(err.message||err)});}
   finally{if(lock.hasLock())lock.releaseLock();}

@@ -1,0 +1,26 @@
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),assert=require('node:assert/strict');
+const read=n=>fs.readFileSync(path.join(__dirname,'..',n),'utf8');
+class Sheet{constructor(){this.rows=[['record_id','record_json']];}getLastRow(){return this.rows.length;}appendRow(row){this.rows.push(row);}getRange(r,col,n){return{getValues:()=>this.rows.slice(r-1,r-1+n).map(row=>[row[col-1]]),createTextFinder:id=>({matchEntireCell:()=>({findNext:()=>this.rows.some(row=>row[0]===id)})})};}}
+const sheets={responses:new Sheet(),verification:new Sheet()},book={getSheetByName:n=>sheets[n]};let serial=0;
+const c=vm.createContext({window:{},console,PropertiesService:{getScriptProperties:()=>({getProperty:()=> 'book'})},SpreadsheetApp:{openById:()=>book},Utilities:{getUuid:()=>`public-cat-number-${++serial}`},LockService:{getScriptLock:()=>({tryLock:()=>true,hasLock:()=>true,releaseLock(){}})},ContentService:{MimeType:{CSV:'csv',JAVASCRIPT:'js',JSON:'json'},createTextOutput:text=>({text,toString(){return this.text;},setMimeType(mime){this.mime=mime;return this;},downloadAsFile(name){this.filename=name;return this;}})},legacyDoGet:()=> 'legacy-get',legacyDoPost:()=> 'legacy-post'});
+vm.runInContext(read('gas/IenekoMap2.gs'),c);vm.runInContext(read('journey-model.js'),c);
+const post=(input)=>JSON.parse(c.map2Post_(input)),get=params=>c.map2Get_({parameter:params});
+const fields={id:'private-response-record',weights:[[.4,.6,0],[1,0,0],null,[0,.3,.7],[0,0,1]],region:'千代田区',event:'private-event',grid:{lat:35.685,lon:139.755},supports:[0,2],consent:'aggregate-ccby-v1'};
+assert.equal(post(fields).accepted,true);
+assert.equal(JSON.parse(get({mode:'cats'})).cats.length,0,'Old aggregate-only consent must not become a public individual row');
+const input={...fields,id:'new-public-response-record',consent:'public-cat-ccby-v1'};
+assert.equal(post(input).accepted,true);
+const dataset=JSON.parse(get({mode:'cats'}));assert.equal(dataset.cats.length,1,'One consented cat must be public without waiting for five');
+const cat=dataset.cats[0];assert.notEqual(cat.public_id,input.id);assert.equal(cat.weights.length,5);
+for(const key of ['id','record_id','region','event','grid','lat','lon','month','name','playerId','consent','test'])assert.equal(key in cat,false,`Private field ${key} leaked`);
+const output=get({mode:'csv'}),rows=c.window.JourneyModel.parse(output.text);
+assert.equal(output.mime,'csv');assert.equal(output.filename,'ieneko-cats.csv');assert.equal(rows.length,1);assert.equal(rows[0].public_id,cat.public_id);assert.equal(rows[0].license,'CC-BY-4.0');assert.equal(+rows[0].q1_b,.6);assert.equal(rows[0].q3_a,'');
+assert(!output.text.includes(input.id));assert(!output.text.includes('private-event'));assert(!output.text.includes('139.755'));
+post(input);assert.equal(JSON.parse(get({mode:'cats'})).cats.length,1,'Retry must not add another public cat');
+const receipt=JSON.parse(get({mode:'receipt',id:input.id}));assert.equal(receipt.published,true);assert.equal(receipt.public_id,cat.public_id);
+post({...input,id:'verification-public-record',test:true});assert.equal(JSON.parse(get({mode:'cats'})).cats.length,1);
+const proof=JSON.parse(get({mode:'cats',proof:'1'}));assert.equal(proof.cats.length,1);assert.equal(proof.data_kind,'verification');assert.equal(get({mode:'csv',proof:'1'}).filename,'ieneko-cats-verification.csv');
+assert.equal(JSON.parse(get({mode:'cats',public_id:cat.public_id})).cats.length,1);assert.equal(JSON.parse(get({mode:'cats',public_id:'not-found'})).cats.length,0);
+assert.equal(JSON.parse(get({mode:'aggregate'})).groups.length,0,'Regional aggregation retains its minimum group size');
+assert.equal(JSON.parse(get({mode:'health'})).public_cat_schema,'ieneko-public-cats-1.0');
+console.log('PASS: one cat per public CSV row, direct CSV filename and license, explicit new consent, private field exclusion, stable public ID, retry, verification separation and legacy aggregate privacy.');

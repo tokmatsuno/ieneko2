@@ -34,6 +34,7 @@ jobs:
           node --check journey-model.js
           node --check opendata-core.js
           node --check map-data-client.js
+          node --check public-cat-data.js
           node --check ienekomap2/map.js
           node scripts/build-cat-data.cjs --check
           node scripts/build-map-service.cjs --check
@@ -43,6 +44,8 @@ jobs:
           node tests/opendata.test.cjs
           node tests/map-data-client.test.cjs
           node tests/answer-storage.test.cjs
+          node tests/public-cats.test.cjs
+          node tests/publication-client.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

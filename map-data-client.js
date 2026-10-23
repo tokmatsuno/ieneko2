@@ -28,19 +28,28 @@ var MapDataClient=(function(){
       script.onerror=()=>{clean();reject(Error('共有先につながりませんでした。'));};script.src=u.href;document.head.append(script);
     });
   }
+  async function confirmPublicCSV(cat,verification){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    try{const response=await fetch(endpoint({mode:'csv',public_id:cat.public_id,...(verification?{proof:'1'}:{})}).href,{mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('csv_unavailable');const actual=(await response.text()).replace(/^\uFEFF/,'');if(actual!==PublicCatData.csv([cat],verification).replace(/^\uFEFF/,''))throw Error('csv_mismatch');}
+    catch{throw Error('保存済みですが、公開CSVの内容を確認できていません。同じ回答で再確認してください。');}finally{clearTimeout(timer);}
+  }
   async function submit(record){
     const health=await get({mode:'health'});if(health.service!=='ienekomap2'||!health.ready)throw Error('共有先の準備ができていません。この端末の記録は残っています。');
+    const publish=record.consent==='public-cat-ccby-v1';if(publish&&health.public_cat_schema!==PublicCatData.SCHEMA)throw Error('公開CSVの受付を確認できませんでした。この端末に回答を残しています。');
     try{await fetch(url(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...record,api:'ieneko2'})});}
     catch{throw Error('共有先へ送信できませんでした。この端末には回答が残っています。通信環境を確認し、もう一度保存してください。');}
-    for(let i=0;i<3;i++){const receipt=await get({mode:'receipt',id:record.id});if(receipt.accepted)return{...record,synced:true,test:receipt.test};if(i<2)await new Promise(r=>setTimeout(r,700));}
+    for(let i=0;i<3;i++){const receipt=await get({mode:'receipt',id:record.id});if(receipt.accepted){
+      if(publish){if(!receipt.published||!receipt.public_id)throw Error('保存済みですが、公開CSVへの反映を確認できていません。同じ回答で再確認してください。');const dataset=await get({mode:'cats',public_id:receipt.public_id,...(record.test?{proof:'1'}:{})});if(dataset.schema!==PublicCatData.SCHEMA||dataset.data_kind!==(record.test?'verification':'responses'))throw Error('公開猫のデータ形式を確認できませんでした。');const cat=PublicCatData.validate(dataset.cats).find(c=>c.public_id===receipt.public_id);if(!cat)throw Error('保存済みですが、公開CSVへの反映を確認できていません。同じ回答で再確認してください。');await confirmPublicCSV(cat,record.test);}
+      return{...record,synced:true,test:receipt.test,published:publish,public_id:receipt.public_id||null};
+    }if(i<2)await new Promise(r=>setTimeout(r,700));}
     throw Error('共有先への保存を確認できませんでした。この端末には残しています。');
   }
-  function signature(fields){return JSON.stringify([fields.weights?.map(w=>w?.map(n=>Number(n.toFixed(12)))??null),String(fields.region||'').trim(),String(fields.event||'').trim(),fields.grid||null,[...new Set(fields.supports||[])].sort(),fields.test===true]);}
+  function signature(fields){return JSON.stringify([fields.weights?.map(w=>w?.map(n=>Number(n.toFixed(12)))??null),String(fields.region||'').trim(),String(fields.event||'').trim(),fields.grid||null,[...new Set(fields.supports||[])].sort(),fields.test===true,fields.consent]);}
   function previous(fields){return local().find(r=>signature(r)===signature(fields));}
   async function contribute(fields,anchors){
     const prior=previous(fields),record=OpenDataCore.record({...fields,id:prior?.id||crypto.randomUUID()},anchors);
     save({...record,synced:prior?.synced||false});
     const accepted=await submit(record);save({...accepted,confirmedAt:Date.now()});return accepted;
   }
-  return{local,save,get,submit,contribute,previous};
+  return{local,save,get,submit,contribute,previous,endpoint};
 })();
