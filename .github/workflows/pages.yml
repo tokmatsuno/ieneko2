@@ -32,6 +32,7 @@ jobs:
           node --check cat-studio.js
           node --check quests.js
           node --check journey-model.js
+          node --check answer-input.js
           node --check opendata-core.js
           node --check map-data-client.js
           node --check public-cat-data.js
@@ -45,6 +46,7 @@ jobs:
           node tests/cat-data.test.cjs
           node tests/cat-studio.test.cjs
           node tests/continuous.test.cjs
+          node tests/answer-input.test.cjs
           node tests/opendata.test.cjs
           node tests/map-data-client.test.cjs
           node tests/answer-storage.test.cjs

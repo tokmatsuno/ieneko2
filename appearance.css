@@ -253,3 +253,62 @@ footer .footer-credit{font-size:12px;line-height:1.9;color:#e3ebdf;max-width:520
 
 @media(max-width:600px){.answer-mix-heading{gap:8px}.blend-keep{min-width:110px;padding-inline:10px;font-size:11px}.answer-mix-heading .answer-mix-label output{font-size:21px}}
 @media(max-width:350px){.answer-mix-heading .answer-mix-label{gap:6px}.answer-mix-heading .answer-mix-label>span{font-size:10px}.answer-mix-heading .answer-mix-label output{font-size:20px}}
+
+/* Readable controls and a separate raw-ratio entry step. */
+body{font-weight:500}
+button,.button{font-weight:800}
+.question-panel h2,.complete-actions h2{font-weight:900}
+.question-body,.question-prompt{font-size:15px;font-weight:600}
+.answer-card .answer-copy b{font-size:16px;font-weight:800;line-height:1.75}
+.answer-card .answer-copy small{font-size:13px;font-weight:600;line-height:1.85}
+.answer-mix-heading .answer-mix-label>span{font-size:13px;font-weight:700}
+.answer-card .blend-hint,.mix-endpoints{font-size:12px;font-weight:600}
+.blend-panel h3{font-size:17px;font-weight:800}
+.blend-panel p{font-size:13px;font-weight:600}
+.blend-keep,.blend-keep-actions button{font-size:13px;font-weight:800}
+.blend-presets button{font-size:12px;font-weight:700;min-height:44px}
+.blend-budget-title{font-size:13px}.blend-budget-legend{font-size:13px;font-weight:700;flex-wrap:wrap}
+.blend-budget-title strong{font-size:12px}.blend-panel .blend-budget p{font-size:12px}
+.blend-budget[data-pending] .blend-budget-bar,.blend-budget[data-pending] .blend-budget-legend{opacity:.35}
+.blend-number-panel{min-width:0;margin:22px 0 14px;padding:16px;border:2px solid #bdcdb2;border-radius:16px;background:#f1f5e9}
+.blend-number-panel legend{padding:0 6px;color:#365d47;font-size:15px;font-weight:800}
+.blend-number-panel legend span{font-size:12px;white-space:nowrap}
+.blend-number-panel p{margin:0 0 12px}
+.blend-number-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.blend-number-fields label{display:grid;gap:7px;min-width:0;color:#365d47;font-size:13px;font-weight:800}
+.blend-number-fields label:nth-child(2){color:#82651f}.blend-number-fields label:nth-child(3){color:#94563f}
+.blend-number-fields input{width:100%;min-width:0;min-height:52px;padding:9px 8px;border:2px solid #9eb392;border-radius:11px;background:#fffef8;color:#234c3b;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;text-align:center}
+.blend-number-fields input[aria-invalid="true"]{border-color:#a5452d;background:#fff1e9}
+.blend-number-fields input:disabled{background:#e5ebdf;color:#66755d;opacity:.8}
+.blend-number-panel .blend-number-status{margin:13px 0 10px;color:#31553e;font-weight:800;overflow-wrap:anywhere}
+.blend-number-status[data-state="error"]{color:#963d2a!important}
+.blend-number-panel .blend-number-keep-note{font-size:12px;margin:0;color:#5c6d50}
+.finished-top{font-size:12px;font-weight:700;letter-spacing:.08em}
+.finished-copy{font-weight:600}.finished-copy h2{font-weight:900}
+.finished-copy small{font-size:10px;font-weight:700}.finished-copy p{font-size:14px;font-weight:700}
+.finished-copy>span{font-size:12px;font-weight:700;line-height:1.8}
+.card-traits span{font-size:11px;font-weight:600}.card-traits b{font-weight:800}
+.card-mix-chart>span{font-size:13px;font-weight:800}.card-mix-chart small{font-size:11px;font-weight:600;line-height:1.9}
+.card-mix-chart svg text,.result-graph svg text{font-weight:700}
+.finished-bottom{font-size:11px;font-weight:600;flex-wrap:wrap}
+.feedback-intro,.feedback-text,.feedback-reflection p{font-weight:600}
+.takeaway p{font-weight:800}.feedback-kicker{font-weight:800}
+@media(max-width:600px){
+  .question-body,.question-prompt{font-size:14px}
+  .answer-card .answer-copy b{font-size:15px}.answer-card .answer-copy small{font-size:13px}
+  .blend-panel h3{font-size:16px}.blend-panel p{font-size:13px}
+  .answer-mix-heading{flex-wrap:wrap;gap:10px}.answer-mix-heading .answer-mix-label{min-width:110px}
+  .blend-keep{min-width:112px;font-size:12px}
+  .blend-budget-title{align-items:flex-start;flex-wrap:wrap;font-size:13px}
+  .blend-number-panel{padding:14px 12px}.blend-number-fields{gap:8px}
+  .blend-number-fields input{font-size:20px;padding-inline:4px;min-height:52px}
+  .finished-card{width:calc(100% - 12px);padding:17px}
+  .finished-copy{padding:20px 15px}.finished-copy h2{font-size:28px}
+  .finished-copy p{font-size:14px}.card-traits span{font-size:11px}
+}
+@media(max-width:350px){
+  .blend-number-panel legend{font-size:14px}.blend-number-fields label{font-size:12px}
+  .blend-budget-legend{gap:9px;font-size:12px}
+  .answer-mix-heading .answer-mix-label>span{font-size:12px}
+  .finished-copy h2{font-size:25px}.finished-top{letter-spacing:0;font-size:11px}
+}

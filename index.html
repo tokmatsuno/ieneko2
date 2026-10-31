@@ -13,8 +13,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.15" />
-    <link rel="stylesheet" href="appearance.css?v=2.15&amp;r=3" />
+    <link rel="stylesheet" href="app.css?v=2.16" />
+    <link rel="stylesheet" href="appearance.css?v=2.16&amp;r=3" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -56,7 +56,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.15#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.16#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -90,7 +90,7 @@
           ><i>↗</i><span>02 <b>猫の気持ちに出会う</b></span
           ><i>↗</i><span>03 <b>まちへの一歩を持ち帰る</b></span>
         </div>
-        <a href="ienekomap2/beta/?v=2.15" class="city-map-entry"><div><small>オープンデータで、まち同士をつなぐ β</small><b>突撃隣の家猫ごはん</b><p>日吉から5つのまちへ。仮想回答90件で、打ち手を持ち寄る。</p></div><span aria-hidden="true">↗</span></a>
+        <a href="ienekomap2/beta/?v=2.16" class="city-map-entry"><div><small>オープンデータで、まち同士をつなぐ β</small><b>突撃隣の家猫ごはん</b><p>日吉から5つのまちへ。仮想回答90件で、打ち手を持ち寄る。</p></div><span aria-hidden="true">↗</span></a>
         <div class="home-purpose">
           <p class="eyebrow">WHY HOUSE CATS?</p>
           <h2>「参加しない」を責めるより、<br />参加したくなる入口を。</h2>
@@ -156,14 +156,25 @@
               <p id="questionBody" class="question-body"></p>
               <p class="question-prompt">いまのあなたに、しっくりくるのは？</p>
               <section id="blendPanel" class="blend-panel" aria-labelledby="blendTitle">
-                <h3 id="blendTitle">ぴったりも、あいだも。割合で選ぼう。</h3>
-                <p id="blendHelp">A・B・Cをそれぞれキープできます。キープは「ほかから変えない」の印。自分のつまみでは手直しできます。3つともキープすると、配分を固定。合計は100%です。</p>
-                <div class="blend-budget"><div class="blend-budget-title"><span>100%の気持ちを、3つに分けよう</span><strong>合計 <b>100%</b></strong></div><div id="blendBudgetBar" class="blend-budget-bar" role="img"></div><div id="blendBudgetLegend" class="blend-budget-legend"></div><p>ひとつを増やすと、ほかが減ります。このバー全体が、あなたの100%です。</p></div>
+                <h3 id="blendTitle">バーでも、数字でも。気持ちの割合を選ぼう。</h3>
+                <p id="blendHelp">答えを押す、バーを動かす、数字をまとめて入力する。好きな方法で選べます。結果は自動で合計100%になります。</p>
+                <div class="blend-budget"><div class="blend-budget-title"><span>あなたの気持ちを、100%に換算</span><strong>合計 <b id="blendBudgetTotal">100%</b></strong></div><div id="blendBudgetBar" class="blend-budget-bar" role="img"></div><div id="blendBudgetLegend" class="blend-budget-legend"></div><p>表示は0.1%刻み。端数も調整し、合計が100%になるようにしています。</p></div>
                 <div class="blend-keep-actions" role="group" aria-label="まとめてキープを操作"><button type="button" id="keepAllBlend" aria-pressed="false">✓ 3つともキープ</button><button type="button" id="releaseAllBlend">すべて解除</button></div>
                 <p id="blendAdjustmentNote" class="blend-adjustment-note" role="status"></p>
                 <div id="blendSliders" class="blend-sliders">
                   <div id="answerList" class="answer-list" role="group" aria-label="答えと割合の選択"></div>
                 </div>
+                <fieldset class="blend-number-panel" aria-describedby="blendNumberHelp blendNumberStatus">
+                  <legend>数字でまとめて入力 <span>0〜100</span></legend>
+                  <p id="blendNumberHelp">100・100・100でもOK。入力値の大きさの比率で、ほぼ3分の1ずつに換算します。小数を入力する必要はありません。</p>
+                  <div class="blend-number-fields">
+                    <label for="blendNumber0"><span>Aの入力値</span><input id="blendNumber0" data-blend-number="0" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="10" aria-describedby="blendNumberHelp blendNumberStatus"></label>
+                    <label for="blendNumber1"><span>Bの入力値</span><input id="blendNumber1" data-blend-number="1" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="10" aria-describedby="blendNumberHelp blendNumberStatus"></label>
+                    <label for="blendNumber2"><span>Cの入力値</span><input id="blendNumber2" data-blend-number="2" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="10" aria-describedby="blendNumberHelp blendNumberStatus"></label>
+                  </div>
+                  <p id="blendNumberStatus" class="blend-number-status" role="status"></p>
+                  <p class="blend-number-keep-note">数字を入力すると、キープを解除して3つの比率を決め直します。3つともキープ中は、先にキープを解除してください。</p>
+                </fieldset>
                 <div id="blendPresets" class="blend-presets"><button data-mid="0,1">AとBのあいだ</button><button data-mid="1,2">BとCのあいだ</button><button data-mid="0,2">AとCのあいだ</button><button data-equal>3つを同じくらい</button></div>
                 <output id="blendSummary" class="blend-summary"></output>
               </section>
@@ -245,7 +256,7 @@
             <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
             <div class="finished-bottom">
               <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.15</span></span>
+              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.16</span></span>
             </div>
           </article>
           <div class="complete-actions">
@@ -267,7 +278,7 @@
               <p id="answerSaveStatus" class="answer-save-status" role="status">まだ共有先には保存していません。</p>
               <small>猫CSVは1匹から公開。氏名・保存用ID・日時・地域・イベント・位置情報は載せません。</small>
               <a id="answerPublishedCSV" class="text-link" href="ienekomap2/#open-data" hidden>公開CSVのダウンロードページを開く ↗</a>
-              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.15#open-data">集まった回答と公開CSVを見る ↗</a>
+              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.16#open-data">集まった回答と公開CSVを見る ↗</a>
             </form>
             <details class="result-graph"><summary>答えの配分をグラフで見る</summary><div id="resultGraph"></div><p>3つの答えの割合をそのまま図示します。能力や性格の点数ではありません。保留した問いは集計に含めません。</p></details>
             <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
@@ -647,7 +658,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫の冒険 <small id="appVersion">ver2.15</small></a
+        >家猫の冒険 <small id="appVersion">ver2.16</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -677,15 +688,16 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.15&amp;r=1"></script>
-    <script src="config.js?v=2.15"></script>
+    <script src="version.js?v=2.16&amp;r=1"></script>
+    <script src="config.js?v=2.16"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.15"></script>
-    <script src="quests.js?v=2.15"></script>
-    <script src="journey-model.js?v=2.15"></script>
-    <script src="opendata-core.js?v=2.15"></script>
-    <script src="public-cat-data.js?v=2.15"></script>
-    <script src="map-data-client.js?v=2.15"></script>
+    <script src="cat-data.js?v=2.16"></script>
+    <script src="quests.js?v=2.16"></script>
+    <script src="journey-model.js?v=2.16"></script>
+    <script src="answer-input.js?v=2.16"></script>
+    <script src="opendata-core.js?v=2.16"></script>
+    <script src="public-cat-data.js?v=2.16"></script>
+    <script src="map-data-client.js?v=2.16"></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -697,7 +709,7 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.15&amp;r=2"></script>
-    <script src="app.js?v=2.15&amp;r=2"></script>
+    <script src="cat-studio.js?v=2.16&amp;r=2"></script>
+    <script src="app.js?v=2.16&amp;r=2"></script>
   </body>
 </html>

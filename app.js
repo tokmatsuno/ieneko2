@@ -423,8 +423,19 @@ function previewChoice(index) {
   $("#catBubble").textContent = a.reaction;
   $("#companionMood").textContent = POSES[a.pose].name;
 }
-function renderBlendValues(w){
+function renderNumericBlend(w,sync=true){
+  const inputs=[...document.querySelectorAll('[data-blend-number]')];
+  if(sync){const values=AnswerInput.fromWeights(w);inputs.forEach((input,i)=>{input.value=values[i];});}
+  inputs.forEach(input=>{input.disabled=blendKeeps.every(Boolean);input.removeAttribute('aria-invalid');});
+  const parsed=AnswerInput.parse(inputs.map(input=>input.value));
+  const note=$('#blendNumberStatus');note.dataset.state=parsed.ok?'ready':'error';
+  note.textContent=parsed.ok?`入力値の合計 ${+parsed.total.toFixed(3)} → 結果は合計100%。A ${parsed.percentages[0]}%・B ${parsed.percentages[1]}%・C ${parsed.percentages[2]}%` : parsed.message;
+}
+function renderBlendValues(w,syncNumbers=true){
   const p=JourneyModel.percentages(w),held=[0,1,2].filter(i=>blendKeeps[i]),allKept=held.length===3;
+  $('#blendBudgetTotal').textContent='100%';
+  $('.blend-budget').removeAttribute('data-pending');
+  renderNumericBlend(w,syncNumbers);
   document.querySelectorAll('[data-blend]').forEach((input,i)=>{
     const otherHeld=held.filter(k=>k!==i),fixed=otherHeld.reduce((sum,k)=>sum+Math.round(p[k]*10),0);
     const label=`${p[i]}%`,blocked=allKept||otherHeld.length===2,max=blocked?100:(1000-fixed)/10;
@@ -451,13 +462,13 @@ function renderBlendValues(w){
   $("#keepAllBlend").textContent=allKept?'✓ 3つともキープ中':'✓ 3つともキープ';
   $("#releaseAllBlend").disabled=!held.length;
 }
-function previewBlend(values) {
+function previewBlend(values,syncNumbers=true) {
   const answer = JourneyModel.normalize(JourneyModel.percentages(values)), w = answer.weights;
   if(!w)return;
   selectedChoice = answer;
   const percentages=JourneyModel.percentages(w);
   document.querySelectorAll('.answer-button').forEach((b,i)=>{b.setAttribute('aria-pressed','false');b.dataset.mixed='true';b.querySelector('.answer-check').textContent=`${percentages[i]}%`;});
-  renderBlendValues(w);
+  renderBlendValues(w,syncNumbers);
   $("#confirmAnswer").disabled=false;
   $("#confirmAnswer").textContent='この配分で、一歩進む →';
   const look=appearance(answer);renderRecipe(look,state.step);
@@ -704,30 +715,30 @@ async function downloadCard() {
     ctx.fillStyle=gloss;ctx.fillRect(0,0,1080,1710);
     ctx.strokeStyle=t.gold; ctx.lineWidth=2;
     ctx.strokeRect(22,22,1036,1666);ctx.strokeRect(35,35,1010,1640);
-    ctx.fillStyle=t.gold;ctx.font="500 26px sans-serif";
+    ctx.fillStyle=t.gold;ctx.font="700 26px sans-serif";
     ctx.fillText("✦ 家猫の冒険 / CAT ATELIER",70,94);
-    ctx.textAlign="right";ctx.font="500 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
+    ctx.textAlign="right";ctx.font="700 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
     ctx.fillStyle=t.light;ctx.beginPath();ctx.ellipse(540,420,350,300,0,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle=t.gold;ctx.lineWidth=3;ctx.stroke();
     const scale=Math.min(780/img.naturalWidth,670/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
     ctx.drawImage(img,540-w/2,420-h/2,w,h);
     ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,745,950,428,25);ctx.fill();
-    ctx.fillStyle=t.ink;ctx.font="500 22px sans-serif";ctx.fillText("TODAY’S COMPANION",105,800);
+    ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText("TODAY’S COMPANION",105,800);
     let size=62;
     while(size>26){ctx.font=`800 ${size}px sans-serif`;if(ctx.measureText(c.name).width<=865)break;size-=2;}
     ctx.fillText(c.name,105,887);
-    ctx.font="500 26px sans-serif";ctx.fillText(t.name,105,940);
+    ctx.font="700 26px sans-serif";ctx.fillText(t.name,105,940);
     ctx.strokeStyle="#d6c39f";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(105,973);ctx.lineTo(975,973);ctx.stroke();
-    ctx.font="500 23px sans-serif";
+    ctx.font="700 23px sans-serif";
     look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45,420));
     ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,1195,950,340,22);ctx.fill();
-    ctx.fillStyle=t.ink;ctx.font="600 24px sans-serif";ctx.fillText("5つの問い、きょうの配分。",105,1242);
+    ctx.fillStyle=t.ink;ctx.font="800 24px sans-serif";ctx.fillText("5つの問い、きょうの配分。",105,1242);
     const mixColors=['#47775e','#c69c4e','#bb755e'];
-    state.answers.forEach((answer,i)=>{const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="500 20px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;if(weights)weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,25);x+=w*790;});else ctx.fillText('保留',175,y+19);});
-    ctx.fillStyle=t.ink;ctx.font="400 16px sans-serif";ctx.fillText('緑=A  黄=B  茶=C：各問の答えの配分。能力や性格の点数ではありません。',105,1510);
-    ctx.fillStyle=t.gold;ctx.font="500 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1590);
-    ctx.fillStyle="#fff5df";ctx.font="400 19px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1630);
-    ctx.font="400 15px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1665);
+    state.answers.forEach((answer,i)=>{const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;if(weights)weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,25);x+=w*790;});else ctx.fillText('保留',175,y+19);});
+    ctx.fillStyle=t.ink;ctx.font="700 18px sans-serif";ctx.fillText('緑=A  黄=B  茶=C：各問の答えの配分。能力や性格の点数ではありません。',105,1510);
+    ctx.fillStyle=t.gold;ctx.font="700 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1590);
+    ctx.fillStyle="#fff5df";ctx.font="700 21px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1630);
+    ctx.font="600 17px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1665);
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, "image/png"),
     );
@@ -1063,6 +1074,23 @@ async function init() {
     const i=Number(input.dataset.blend),value=selectedChoice??state.answers[state.step];
     if(!blendKeeps.some(Boolean))blendKeeps[i]=true;
     previewBlend(JourneyModel.adjustWeights(value,i,Number(input.value),blendKeeps));
+  });
+  $('.blend-number-fields').addEventListener('input',e=>{
+    if(!e.target.matches('[data-blend-number]')||e.target.disabled)return;
+    const inputs=[...document.querySelectorAll('[data-blend-number]')],parsed=AnswerInput.parse(inputs.map(input=>input.value));
+    inputs.forEach((input,i)=>input.setAttribute('aria-invalid',String(!parsed.ok&&parsed.invalid.includes(i))));
+    if(!parsed.ok){
+      selectedChoice=null;clearTimeout(blendPaintTimer);
+      $('#blendNumberStatus').textContent=parsed.message;$('#blendNumberStatus').dataset.state='error';
+      $('.blend-budget').dataset.pending='true';$('#blendBudgetTotal').textContent='未確定';
+      $('#blendBudgetBar').innerHTML='';$('#blendBudgetBar').setAttribute('aria-label','割合は未確定です。入力値を確認してください。');$('#blendBudgetLegend').innerHTML='';
+      [0,1,2].forEach(i=>{$('#blendValue'+i).textContent='未確定';});
+      document.querySelectorAll('.answer-button').forEach(button=>{button.removeAttribute('data-mixed');button.setAttribute('aria-pressed','false');button.querySelector('.answer-check').textContent='○';});
+      $('#blendSummary').textContent=parsed.message;$('#confirmAnswer').disabled=true;$('#confirmAnswer').textContent='数字を確認してね';
+      return;
+    }
+    blendKeeps=[false,false,false];
+    previewBlend(parsed.weights,false);
   });
   $("#blendSliders").addEventListener("click",e=>{
     const button=e.target.closest('[data-blend-keep]');if(!button)return;
