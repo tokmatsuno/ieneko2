@@ -1,0 +1,27 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),core=require('../region-data-core.js');
+const root=require('node:path').resolve(__dirname,'..'),read=f=>fs.readFileSync(require('node:path').join(root,f),'utf8'),context=vm.createContext({window:{}});
+vm.runInContext(read('ienekomap2/beta/region-data.js'),context);const data=JSON.parse(JSON.stringify(context.window.IENEKO_REGIONS)),profiles=core.profiles(data),known=new Set(profiles.map(p=>p.code)),byCode=c=>profiles.find(p=>p.code===c),raw=core.parseCSV(read('ienekomap2/beta/regional-data/municipalities.csv'));
+assert.equal(profiles.length,1741);assert.equal(new Set(profiles.map(p=>p.prefecture)).size,47);assert.equal(known.size,1741);
+for(const p of profiles){const r=raw.find(r=>r.code===p.code);for(const k of core.METRICS)assert.equal(p[k],Number(r[k]));if(p.age_known)assert(Math.abs(p.under15_pct+p.working_age_pct+p.over65_pct-100)<1e-9);}
+assert.equal(byCode('01100').population,1973395);assert.equal(byCode('13106').name,'台東区');assert.equal(byCode('14100').name,'横浜市');assert.equal(byCode('40130').name,'福岡市');
+assert(Object.values(core.TOWN_CODES).every(c=>known.has(c)));assert.equal(data.source.fields.find(f=>f.key==='population').year,2020);assert.equal(data.source.fields.find(f=>f.key==='libraries').year,2021);
+const a=byCode('13106'),b=byCode('13201');
+for(const mode of Object.keys(core.MODES)){const ranked=core.rank(a,profiles,mode,true);assert(ranked.length>1000);assert(ranked.every(p=>p.profile.prefecture!==a.prefecture&&p.profile.code!==a.code));assert(ranked.every((p,i)=>i===0||p.distance>=ranked[i-1].distance));}
+assert.notDeepEqual(core.rank(a,profiles,'demographics').slice(0,6).map(p=>p.profile.code),core.rank(b,profiles,'demographics').slice(0,6).map(p=>p.profile.code));
+assert.notDeepEqual(core.rank(a,profiles,'demographics').slice(0,6).map(p=>p.profile.code),core.rank(a,profiles,'facilities').slice(0,6).map(p=>p.profile.code));
+assert.equal(core.distance({population:0},{population:100},'population'),null);assert.equal(core.ratio(0,0),null);assert.equal(core.ratio(0,100),0);
+assert.equal(data.places.length,773);assert.equal(data.place_sources.length,5);assert.equal(data.places.filter(p=>p.municipality_code==='40130').length,88);assert.equal(data.places.filter(p=>p.municipality_code==='13201').length,685);
+assert.equal(core.uniquePlaces(data.places).length,772);assert.equal(core.uniquePlaces([...data.places,...data.places]).length,772);
+for(const place of data.places){assert(known.has(place.municipality_code));assert(data.place_sources.some(s=>s.id===place.source_id));assert.equal(place.data_kind,'official_open_data');assert(!place.url||core.safeURL(place.url));}
+const meta={title:'検証用 公共施設CSV',source_url:'https://example.org/open-data',license:'CC BY 4.0',updated:'2026-11-01',kind:'facility'};
+const input='全国地方公共団体コード,ID,名称,所在地_連結表記,緯度,経度,URL,飲食可否\r\n132012,1,"検証用,図書館",検証用住所,35.65,139.31,https://example.org/library,可\r\n';
+const places=core.importPlaces(input,meta,known);assert.equal(places[0].municipality_code,'13201');assert.equal(places[0].name,'検証用,図書館');assert.equal(core.placesFor(places,'13201','tower').length,1);assert.equal(core.placesFor(places,'13201','churu').length,1);assert.equal(core.placesFor(places,'13201','matatabi').length,0);
+assert.equal(core.placesFor([{...places[0],food:''}],'13201','churu').length,0);
+assert.throws(()=>core.importPlaces(input.replace('35.65','not-a-coordinate'),meta,known));assert.throws(()=>core.importPlaces(input.replace('https://example.org/library','javascript:alert(1)'),meta,known));assert.throws(()=>core.importPlaces(input,{...meta,source_url:''},known));assert.throws(()=>core.importPlaces(input.replace('132012','999999'),meta,known));
+assert.equal(core.code('R01100'),'01100');assert.equal(core.code('011002'),'01100');assert.equal(core.safeURL('javascript:alert(1)'),'');assert.throws(()=>core.parseCSV('a,a\n1,2'));assert.throws(()=>core.parseCSV('a,b\n"unclosed,2'));
+const event=core.importPlaces('municipality_code,name,start_date,end_date\n13201,検証用イベント,2026-11-01,2026-11-02',{...meta,kind:'event'},known)[0];assert.equal(event.kind,'event');assert.equal(event.end_date,'2026-11-02');assert.throws(()=>core.importPlaces('municipality_code,name,start_date,end_date\n13201,検証,2026-11-02,2026-11-01',{...meta,kind:'event'},known));assert.throws(()=>core.date('2026-02-30'));
+const entry={id:'test-record',municipality_code:'13201',status:'completed',date:'2026-11-01',tool:'tower',activity:'検証用取り組み',participants:'0',observation:'検証用',source_url:'https://example.org/report'};
+const log=core.implementation(entry,known);assert.equal(log.participants,0);assert.equal(log.data_kind,'implementation_record');assert.throws(()=>core.implementation({...entry,status:'planned'},known));assert.throws(()=>core.implementation({...entry,participants:'1.5'},known));assert.equal(core.implementation({...entry,status:'planned',participants:''},known).participants,null);
+assert.throws(()=>core.implementation({...entry,license:'CC-BY-NC'},known));
+const roundtrip=core.parseCSV(core.csv([log],core.LOG_FIELDS));assert.equal(core.implementation(roundtrip[0],known).participants,0);assert(core.csv([{name:'=1+1'}],['name']).includes("'=1+1"));
+console.log('PASS: 1,741 real municipalities, exact source values and years, cross-prefecture rankings, zero denominators, 773 official facility rows (772 distinct name/address pairs), CSV imports, source attribution, event dates, and implementation-record round trips.');

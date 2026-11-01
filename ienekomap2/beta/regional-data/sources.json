@@ -1,0 +1,159 @@
+{
+  "schema": "ieneko-region-sources-1.0",
+  "fetched_on": "2026-11-01",
+  "statistic": {
+    "id": "ssdse-a-2026",
+    "title": "統計センター SSDSE-A-2026（市区町村）",
+    "url": "https://www.nstac.go.jp/use/literacy/ssdse/",
+    "data_url": "https://www.nstac.go.jp/files/SSDSE-A-2026.csv",
+    "definition_url": "https://www.nstac.go.jp/files/kaisetsu-A-2026.pdf",
+    "license": "CC-BY-4.0",
+    "license_url": "https://www.nstac.go.jp/info/site-policy/",
+    "attribution": "独立行政法人 統計センター SSDSE-A-2026を加工して作成",
+    "published_on": "2026-06-30",
+    "raw_sha256": "471ad23bd8f9a7cc01f0c684b9762934e855d2400e3a77608a12171018fc655a",
+    "municipality_count": 1741,
+    "scope": "2025年3月31日時点の1,741市区町村。政令指定都市は市全体。東京都特別区は区単位。町内会や町丁目の統計ではありません。",
+    "fields": [
+      {
+        "key": "population",
+        "code": "A1101",
+        "label": "総人口",
+        "year": 2020,
+        "unit": "人",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "under15",
+        "code": "A1301",
+        "label": "15歳未満人口",
+        "year": 2020,
+        "unit": "人",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "working_age",
+        "code": "A1302",
+        "label": "15～64歳人口",
+        "year": 2020,
+        "unit": "人",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "over65",
+        "code": "A1303",
+        "label": "65歳以上人口",
+        "year": 2020,
+        "unit": "人",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "households",
+        "code": "A7101",
+        "label": "世帯数",
+        "year": 2020,
+        "unit": "世帯",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "general_households",
+        "code": "A710101",
+        "label": "一般世帯数",
+        "year": 2020,
+        "unit": "世帯",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "single_households",
+        "code": "A810105",
+        "label": "単独世帯数",
+        "year": 2020,
+        "unit": "世帯",
+        "origin": "総務省統計局 国勢調査"
+      },
+      {
+        "key": "libraries",
+        "code": "G1401",
+        "label": "図書館数",
+        "year": 2021,
+        "unit": "施設",
+        "origin": "文部科学省 社会教育調査"
+      },
+      {
+        "key": "community_centres",
+        "code": "G1201",
+        "label": "公民館数",
+        "year": 2021,
+        "unit": "施設",
+        "origin": "文部科学省 社会教育調査"
+      }
+    ]
+  },
+  "place_sources": [
+    {
+      "id": "fukuoka-library",
+      "title": "福岡市 公共施設一覧（図書館広域利用対象）",
+      "url": "https://data.bodik.jp/dataset/401307_ftoshiken_public_facility",
+      "data_url": "https://data.bodik.jp/dataset/cb811da4-4b64-4fe2-b368-37ed6f526267/resource/9740ebfb-bd01-490b-bcff-f68737fc36cb/download/401307_public_facility_library.csv",
+      "updated": "2025-01-07",
+      "updated_label": "リソース更新日",
+      "license": "CC BY",
+      "license_url": "http://www.opendefinition.org/licenses/cc-by",
+      "attribution": "福岡市 公共施設一覧（福岡都市圏共通フォーマット）を加工して作成",
+      "raw_sha256": "879d1bf3823052f23831391df7936a9da89fee7eaba088b38e0dead6fb866dbb",
+      "fetched_on": "2026-11-01"
+    },
+    {
+      "id": "fukuoka-sports",
+      "title": "福岡市 公共施設一覧（スポーツ施設広域利用対象）",
+      "url": "https://data.bodik.jp/dataset/401307_ftoshiken_public_facility",
+      "data_url": "https://data.bodik.jp/dataset/cb811da4-4b64-4fe2-b368-37ed6f526267/resource/b2fdb691-2083-4570-8453-cafdd62032a9/download/401307_public_facility_sports.csv",
+      "updated": "2025-01-07",
+      "updated_label": "リソース更新日",
+      "license": "CC BY",
+      "license_url": "http://www.opendefinition.org/licenses/cc-by",
+      "attribution": "福岡市 公共施設一覧（福岡都市圏共通フォーマット）を加工して作成",
+      "raw_sha256": "6efeaf205a197d3a0e885da87c361aed74688e4f79a722f84eaf558695938d8d",
+      "fetched_on": "2026-11-01"
+    },
+    {
+      "id": "fukuoka-culture",
+      "title": "福岡市 公共施設一覧（文化施設）",
+      "url": "https://data.bodik.jp/dataset/401307_ftoshiken_public_facility",
+      "data_url": "https://data.bodik.jp/dataset/cb811da4-4b64-4fe2-b368-37ed6f526267/resource/c7ce2ae7-0774-47ce-8a61-db607f5ffda0/download/401307_public_facility_culture.csv",
+      "updated": "2025-01-07",
+      "updated_label": "リソース更新日",
+      "license": "CC BY",
+      "license_url": "http://www.opendefinition.org/licenses/cc-by",
+      "attribution": "福岡市 公共施設一覧（福岡都市圏共通フォーマット）を加工して作成",
+      "raw_sha256": "78dbb39b90665975b8b23f28d8457ed2918fcaae761074878811cdee6c430cdb",
+      "fetched_on": "2026-11-01"
+    },
+    {
+      "id": "fukuoka-culture-museum",
+      "title": "福岡市 公共施設一覧（美術館・博物館等）",
+      "url": "https://data.bodik.jp/dataset/401307_ftoshiken_public_facility",
+      "data_url": "https://data.bodik.jp/dataset/cb811da4-4b64-4fe2-b368-37ed6f526267/resource/da4211dc-9670-42a1-b92b-5d8cddb0d722/download/401307_public_facility_museum.csv",
+      "updated": "2025-01-07",
+      "updated_label": "リソース更新日",
+      "license": "CC BY",
+      "license_url": "http://www.opendefinition.org/licenses/cc-by",
+      "attribution": "福岡市 公共施設一覧（福岡都市圏共通フォーマット）を加工して作成",
+      "raw_sha256": "05ba3184e55187ef467e36d928cd4a9a44ce6bb1cd25b83dcaaec86f3b6f2094",
+      "fetched_on": "2026-11-01"
+    },
+    {
+      "id": "hachioji-public",
+      "title": "八王子市 公共施設一覧",
+      "url": "https://www.city.hachioji.tokyo.jp/contents/open/002/p035934.html",
+      "data_url": "https://www.city.hachioji.tokyo.jp/contents/open/002/p035934_d/fil/132012_public_facility.csv",
+      "updated": "2025-08-20",
+      "updated_label": "公開ページ更新日（CSVの更新日とは限りません）",
+      "license": "CC-BY-4.0",
+      "license_url": "https://www.city.hachioji.tokyo.jp/contents/open/002/p035934.html",
+      "attribution": "八王子市 公共施設一覧 CC BY 4.0を加工して作成",
+      "raw_sha256": "d5333fb68f49e27db37de266e822847eab708ef118b06d7c74da70a4e93e922a",
+      "fetched_on": "2026-11-01"
+    }
+  ]
+}
