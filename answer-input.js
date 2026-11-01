@@ -1,4 +1,4 @@
-/* UI-only ratio input adapter. Geometry, saved answers and server schemas stay shared. */
+/* UI-only input adapter. Geometry, saved weights and server schemas stay shared. */
 (function(){
   function parse(raw){
     if(!Array.isArray(raw)||raw.length!==3)return {ok:false,message:'A・B・Cの3つの数値を入力してください。',invalid:[0,1,2]};
@@ -16,5 +16,22 @@
   function fromWeights(value){
     return window.JourneyModel.percentages(value);
   }
-  window.AnswerInput={parse,fromWeights};
+  function score(values){
+    if(!Array.isArray(values)||values.length!==3||values.some(v=>!Number.isInteger(v)||v<0||v>10))
+      return {ok:false,message:'それぞれ0〜10点で選んでください。'};
+    if(!values.some(v=>v>0))return {ok:false,message:'気になる答えの肉球を、ひとつ押してね。'};
+    const answer=window.JourneyModel.normalize(window.JourneyModel.percentages(values));
+    return {ok:true,points:values.slice(),answer};
+  }
+  function savedPoints(values,answer){
+    const result=score(values),weights=window.JourneyModel.weights(answer);
+    return result.ok&&weights&&result.answer.weights.every((v,i)=>Math.abs(v-weights[i])<1e-9)?values.slice():null;
+  }
+  function suggestPoints(answer){
+    const weights=window.JourneyModel.weights(answer);
+    if(!weights)return [0,0,0];
+    const max=Math.max(...weights);
+    return weights.map(v=>Math.round(v/max*10));
+  }
+  window.AnswerInput={parse,fromWeights,score,savedPoints,suggestPoints};
 })();

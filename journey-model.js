@@ -48,9 +48,14 @@
   }
   function connect(quests,cats){quests.forEach(q=>q.answers.forEach(a=>{const c=cats.find(c=>c.no===a.anchorNo);if(!c)throw Error('missing_anchor');a.x=c.x;a.y=c.y;a.anchorName=c.name;}));return quests;}
   function scores(answers){return labels.map((label,i)=>{const w=weights(answers[i]);return{label,values:w?w.map(v=>v*100):null};});}
-  function barsSVG(answers){
-    const colors=['#47775e','#c69c4e','#bb755e'];
-    return `<svg viewBox="0 0 360 160" role="img" aria-label="5つの問いでA・B・Cを選んだ割合。能力や性格の点数ではありません。">${labels.map((label,i)=>{const w=weights(answers[i]);let x=48;return `<text x="6" y="${24+i*23}" fill="currentColor" font-size="10">問${i+1}</text>${w?w.map((n,k)=>{const r=`<rect x="${x}" y="${13+i*23}" width="${n*290}" height="16" fill="${colors[k]}"><title>${label} ${['A','B','C'][k]} ${+(n*100).toFixed(1)}%</title></rect>`;x+=n*290;return r;}).join(''):`<text x="48" y="${24+i*23}" font-size="10" fill="currentColor">保留</text>`}`;}).join('')}${colors.map((c,i)=>`<rect x="${72+i*90}" y="141" width="10" height="10" fill="${c}"/><text x="${88+i*90}" y="150" font-size="10" fill="currentColor">答え${['A','B','C'][i]}</text>`).join('')}</svg>`;
+  function barsSVG(answers,showValues=false){
+    const colors=['#47775e','#c69c4e','#bb755e'],row=showValues?37:23,height=showValues?230:160,legend=height-19;
+    return `<svg viewBox="0 0 360 ${height}" role="img" aria-label="5つの問いでA・B・Cを選んだ割合。能力や性格の点数ではありません。">${labels.map((label,i)=>{
+      const w=weights(answers[i]);let x=48;
+      const bars=w?w.map((n,k)=>{const r=`<rect x="${x}" y="${13+i*row}" width="${n*290}" height="16" fill="${colors[k]}"><title>${label} ${['A','B','C'][k]} ${percentages(w)[k]}%</title></rect>`;x+=n*290;return r;}).join(''):`<text x="48" y="${24+i*row}" font-size="10" fill="currentColor">保留</text>`;
+      const values=showValues&&w?`<text x="48" y="${42+i*row}" fill="currentColor" font-size="10">${percentages(w).map((v,k)=>`${['A','B','C'][k]} ${v}%`).join('　')}</text>`:'';
+      return `<text x="6" y="${24+i*row}" fill="currentColor" font-size="10">問${i+1}</text>${bars}${values}`;
+    }).join('')}${colors.map((c,i)=>`<rect x="${72+i*90}" y="${legend}" width="10" height="10" fill="${c}"/><text x="${88+i*90}" y="${legend+9}" font-size="10" fill="currentColor">答え${['A','B','C'][i]}</text>`).join('')}</svg>`;
   }
   window.JourneyModel={weights,normalize,percentages,adjustWeights,mixed,point,describe,nearest,parse,connect,scores,barsSVG,labels};
 })();

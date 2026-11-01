@@ -82,13 +82,14 @@ let cats = [],
   selectedPlace = 0,
   activeScreen = "home";
 let blendPaintTimer = null;
-let blendKeeps = [false,false,false];
+let answerScores = [0,0,0], scoreApproximate = false, scoreTouched = false;
 let presenceTimer = null,
   worldTimer = null,
   worldRequest = 0;
 const state = {
   step: 0,
   answers: [],
+  answerPoints: [],
   kids: false,
   playerId: "",
   optedIn: false,
@@ -191,7 +192,9 @@ function loadState() {
         const a = saved.answers[i];
         if (!a || !Number.isInteger(a.choice) || a.choice < -1 || a.choice > 2)
           break;
-        state.answers.push(JourneyModel.normalize(a));
+        const answer = JourneyModel.normalize(a);
+        state.answers.push(answer);
+        state.answerPoints.push(AnswerInput.savedPoints(saved.answerPoints?.[i],answer));
       }
     }
     state.step = Math.max(
@@ -267,6 +270,7 @@ function showScreen(id) {
 function startJourney() {
   state.step = 0;
   state.answers = [];
+  state.answerPoints = [];
   state.cardPose = "";
   feedbackOpen = false;
   $("#journey").classList.remove("is-feedback");
@@ -331,11 +335,18 @@ function setPose(selector, key, look = appearance()) {
   const painted = CatStudio.render(look, pose);
   img.painting = painted;
   painted.then(src => {if (img.dataset.paintToken === token){img.src = src;img.dataset.paintState='ready';}}).catch(() => {if(img.dataset.paintToken===token)img.dataset.paintState='error';});
-  img.alt = `${CatStudio.poseNames[pose] || "猫時計"}。${CatStudio.valuesText(look)}`;
+  img.alt = `${CatStudio.poseNames[pose] || "猫時計"}。${selector === "#companionImage" ? journeyValues(look).join("、") : CatStudio.valuesText(look)}`;
   img.dataset.pose = pose;
 }
+function journeyValues(look) {
+  return look.values.map(v=>v.replace(/\d+(?:\.\d+)?%/g,""));
+}
+function journeyDescription(answer,q,kids=false) {
+  const w=JourneyModel.weights(answer);
+  return w?w.flatMap((n,i)=>n>0?[kids?q.answers[i].kid:q.answers[i].label]:[]).join(" ＋ "):"今は決めずに進んだ";
+}
 function renderRecipe(look, changed = -1) {
-  $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${look.values.map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。原画の毛並みを保って色を変えます。</small>`;
+  $("#catRecipe").innerHTML = `<div class="cat-recipe-title"><span>きみの猫のつくりかた</span><b>${esc(look.theme.name)}</b></div><div class="recipe-parts">${journeyValues(look).map((v,i)=>`<span class="${look.choices[i] < 0 || look.choices[i] === undefined ? "pending" : ""} ${i===changed?"changed":""}">${i+1}. ${esc(v)}</span>`).join("")}</div><small class="recipe-note">この問いは「${look.labels[state.step]}」に。原画の毛並みを保って色を変えます。</small>`;
 }
 let summonTimer = null, summoning = false;
 function finishSummon() {
@@ -356,7 +367,7 @@ function summonCat() {
 function renderQuestion() {
   const q = QUESTS[state.step];
   selectedChoice = null;
-  blendKeeps = [false,false,false];
+  scoreTouched = false;
   clearTimeout(blendPaintTimer);
   feedbackOpen = false;
   $("#journey").classList.remove("is-feedback");
@@ -382,106 +393,64 @@ function renderQuestion() {
   $("#choiceView").classList.remove("hidden");
   $("#feedbackView").classList.add("hidden");
   $("#questionEvidence").open = false;
-  $("#answerList").innerHTML = q.answers
-    .map(
-      (a, i) =>
-        `<div class="answer-card" data-answer="${i}">
-          <button class="answer-button" data-choice="${i}" aria-pressed="false"><span class="answer-symbol">${["✳", "↗", "☾"][i]}</span><span class="answer-copy"><b><span class="answer-letter">${["A","B","C"][i]}</span> ${esc(state.kids ? a.kid : a.label)}</b><small>${esc(state.kids ? ["いっしょなら、あんしん。", "まずは、小さくためそう。", "自分のペースで、いいんだよ。"][i] : a.note)}</small></span><span class="answer-check" aria-hidden="true">○</span></button>
-          <div class="answer-mix-heading"><label class="answer-mix-label" for="blendInput${i}"><span>${["A","B","C"][i]}の割合</span><output id="blendValue${i}" for="blendInput${i}"></output></label><button type="button" id="blendKeep${i}" class="blend-keep" data-blend-keep="${i}" aria-pressed="false">キープする</button></div>
-          <input id="blendInput${i}" type="range" min="0" max="100" step="0.1" data-blend="${i}" aria-label="${esc(state.kids?a.kid:a.label)}の割合" aria-describedby="blendHelp blendAdjustmentNote blendHint${i}">
-          <div class="mix-endpoints" aria-hidden="true"><span>0%</span><span id="blendMax${i}">100%</span></div>
-          <p id="blendHint${i}" class="blend-hint"></p>
-        </div>`,
-    )
-    .join("");
-  const oldWeights = JourneyModel.weights(state.answers[state.step]) || [1/3,1/3,1/3];
-  renderBlendValues(oldWeights);
-  $("#confirmAnswer").disabled = true;
-  $("#confirmAnswer").textContent = "割合を動かすか、答えを押してね";
+  const paw = '<svg viewBox="0 0 36 36" aria-hidden="true" focusable="false"><ellipse cx="7" cy="14" rx="4" ry="5.5" transform="rotate(-25 7 14)"/><ellipse cx="14" cy="7.5" rx="4" ry="5.5" transform="rotate(-8 14 7.5)"/><ellipse cx="23" cy="7.5" rx="4" ry="5.5" transform="rotate(8 23 7.5)"/><ellipse cx="30" cy="14" rx="4" ry="5.5" transform="rotate(25 30 14)"/><path d="M7 27c0-4 4-6 6-9 3-4 7-4 10 0 2 3 6 5 6 9 0 6-7 4-11 4S7 33 7 27Z"/></svg>';
+  $("#answerList").innerHTML = q.answers.map((a,i)=>{
+    const letter=['A','B','C'][i], label=state.kids?a.kid:a.label;
+    return `<section class="answer-card paw-card" data-answer="${i}" aria-labelledby="pawTitle${i}">
+      <div class="paw-card-heading"><div class="answer-copy"><h4 id="pawTitle${i}"><span class="answer-letter">${letter}</span> ${esc(label)}</h4><small>${esc(state.kids?["いっしょなら、あんしん。","まずは、小さくためそう。","自分のペースで、いいんだよ。"][i]:a.note)}</small></div><output id="pawValue${i}" class="paw-value" aria-label="${letter}の点数"><b>0</b><span> / 10点</span></output></div>
+      <div class="paw-scale" role="group" aria-labelledby="pawTitle${i}" aria-describedby="blendHelp">${Array.from({length:10},(_,n)=>`<button type="button" class="paw-point" data-paw-answer="${i}" data-paw-score="${n+1}" aria-label="${letter}を${n+1}点にする" aria-pressed="false">${paw}<span>${n+1}</span></button>`).join('')}</div>
+      <div class="paw-scale-foot"><button type="button" class="paw-zero" data-paw-answer="${i}" data-paw-score="0" aria-label="${letter}を0点にする" aria-pressed="true">0点にする</button><span>ちょっと気になる <span aria-hidden="true">→</span> ぴったり！</span></div>
+    </section>`;
+  }).join('');
+  const saved=state.answers[state.step], exact=AnswerInput.savedPoints(state.answerPoints[state.step],saved);
+  answerScores=exact||AnswerInput.suggestPoints(saved);
+  scoreApproximate=Boolean(JourneyModel.weights(saved)&&!exact);
+  selectedChoice=JourneyModel.weights(saved)?saved:null;
+  renderPawValues();
   $("#previousQuestion").hidden = state.step === 0;
   $("#storyMap").innerHTML = QUESTS.map(
     (s, i) =>
       `<button class="route-stop ${i === state.step ? "current" : ""} ${state.answers[i] ? "visited" : ""}" data-visit="${i}" ${i > state.answers.length ? "disabled" : ""} ${i === state.step ? 'aria-current="step"' : ""}><i>${state.answers[i] ? "✓" : String(i + 1).padStart(2, "0")}</i><span>${s.place}</span></button>`,
   ).join("");
 }
-function previewChoice(index) {
-  clearTimeout(blendPaintTimer);
-  blendKeeps = [false,false,false];
-  selectedChoice = index;
-  document.querySelectorAll(".answer-button").forEach((b, i) => {
-    b.removeAttribute("data-mixed");
-    b.setAttribute("aria-pressed", String(i === index));
-    b.querySelector(".answer-check").textContent = i === index ? "✓" : "○";
+function renderPawValues() {
+  answerScores.forEach((score,i)=>{
+    $("#pawValue"+i).innerHTML=`<b>${scoreApproximate?'≈ ':''}${score}</b><span> / 10点</span>`;
+    document.querySelectorAll(`[data-paw-answer="${i}"]`).forEach(button=>{
+      const n=Number(button.dataset.pawScore);
+      button.setAttribute('aria-pressed',String(score===n));
+      button.classList.toggle('is-filled',n>0&&n<=score);
+    });
   });
-  renderBlendValues(JourneyModel.weights(index));
-  $("#confirmAnswer").disabled = false;
-  $("#confirmAnswer").textContent = "この一歩にする →";
-  const a = QUESTS[state.step].answers[index];
-  const look = appearance(index);
-  setPose("#companionImage", a.pose, look);
-  renderRecipe(look, state.step);
-  $("#catBubble").textContent = a.reaction;
-  $("#companionMood").textContent = POSES[a.pose].name;
+  $('#pawLegacyNote').hidden=!scoreApproximate;
+  $('#pawSummary').textContent=selectedChoice?['A','B','C'].map((v,i)=>`${v} ${scoreApproximate?'約':''}${answerScores[i]}点`).join(' ・ '):'気になる答えの肉球を、ひとつ押してね。';
+  $('#confirmAnswer').disabled=selectedChoice===null;
+  $('#confirmAnswer').textContent=selectedChoice===null?'肉球を押して、気持ちを選ぼう':scoreApproximate?'前の答えで、一歩進む →':'この気持ちで、一歩進む →';
 }
-function renderNumericBlend(w,sync=true){
-  const inputs=[...document.querySelectorAll('[data-blend-number]')];
-  if(sync){const values=AnswerInput.fromWeights(w);inputs.forEach((input,i)=>{input.value=values[i];});}
-  inputs.forEach(input=>{input.disabled=blendKeeps.every(Boolean);input.removeAttribute('aria-invalid');});
-  const parsed=AnswerInput.parse(inputs.map(input=>input.value));
-  const note=$('#blendNumberStatus');note.dataset.state=parsed.ok?'ready':'error';
-  note.textContent=parsed.ok?`入力値の合計 ${+parsed.total.toFixed(3)} → 結果は合計100%。A ${parsed.percentages[0]}%・B ${parsed.percentages[1]}%・C ${parsed.percentages[2]}%` : parsed.message;
-}
-function renderBlendValues(w,syncNumbers=true){
-  const p=JourneyModel.percentages(w),held=[0,1,2].filter(i=>blendKeeps[i]),allKept=held.length===3;
-  $('#blendBudgetTotal').textContent='100%';
-  $('.blend-budget').removeAttribute('data-pending');
-  renderNumericBlend(w,syncNumbers);
-  document.querySelectorAll('[data-blend]').forEach((input,i)=>{
-    const otherHeld=held.filter(k=>k!==i),fixed=otherHeld.reduce((sum,k)=>sum+Math.round(p[k]*10),0);
-    const label=`${p[i]}%`,blocked=allKept||otherHeld.length===2,max=blocked?100:(1000-fixed)/10;
-    input.max=max;input.value=p[i];input.setAttribute('aria-valuetext',label);
-    input.disabled=blocked;
-    $("#blendValue"+i).textContent=label;
-    input.style.setProperty('--mix-fill',`${max?p[i]/max*100:0}%`);
-    $("#blendMax"+i).textContent=`${max}%`;
-    const keep=$("#blendKeep"+i),kept=blendKeeps[i];
-    keep.setAttribute('aria-pressed',String(kept));
-    keep.innerHTML=kept?'<span aria-hidden="true">✓</span> キープ中':'<span aria-hidden="true">＋</span> キープする';
-    keep.setAttribute('aria-label',`${['A','B','C'][i]}の割合を${kept?'キープ解除':'キープ'}`);
-    input.closest('.answer-card').classList.toggle('is-kept',kept);
-    $("#blendHint"+i).textContent=allKept?'この割合でキープしています。':blocked?'残りの割合を自動調整します。':kept?'ほかを動かしてもキープ。ここは手直しできます。':'つまみを動かして、気持ちを調整。';
-  });
-  $("#blendSummary").textContent=['A','B','C'].map((v,i)=>`${v} ${p[i]}%`).join(' ・ ')+'　合計100%';
-  $("#blendBudgetBar").innerHTML=p.map((v,i)=>`<span data-share="${i}" style="width:${v}%">${v>=22?`${['A','B','C'][i]} ${v}%`:v>=8?['A','B','C'][i]:''}</span>`).join('');
-  $("#blendBudgetBar").setAttribute('aria-label',`気持ちの合計100%。A ${p[0]}%、B ${p[1]}%、C ${p[2]}%。`);
-  $("#blendBudgetLegend").innerHTML=p.map((v,i)=>`<span><i data-share="${i}"></i>${['A','B','C'][i]} <b>${v}%</b></span>`).join('');
-  const names=held.map(i=>['A','B','C'][i]).join('・');
-  $("#blendAdjustmentNote").textContent=allKept?'3つともキープ中。この配分で進めます。1つ外すと、その答えを自動調整に戻せます。':held.length===2?`${names}をキープ。${names}のつまみで手直しすると、残り1つが自動調整されます。`:held.length===1?`${names}をキープ。ほかの2つを手直しできます。`:'まず1つを調整。残りは自動で分けます。';
-  $("#keepAllBlend").disabled=allKept;
-  $("#keepAllBlend").setAttribute('aria-pressed',String(allKept));
-  $("#keepAllBlend").textContent=allKept?'✓ 3つともキープ中':'✓ 3つともキープ';
-  $("#releaseAllBlend").disabled=!held.length;
-}
-function previewBlend(values,syncNumbers=true) {
-  const answer = JourneyModel.normalize(JourneyModel.percentages(values)), w = answer.weights;
-  if(!w)return;
-  selectedChoice = answer;
-  const percentages=JourneyModel.percentages(w);
-  document.querySelectorAll('.answer-button').forEach((b,i)=>{b.setAttribute('aria-pressed','false');b.dataset.mixed='true';b.querySelector('.answer-check').textContent=`${percentages[i]}%`;});
-  renderBlendValues(w,syncNumbers);
-  $("#confirmAnswer").disabled=false;
-  $("#confirmAnswer").textContent='この配分で、一歩進む →';
-  const look=appearance(answer);renderRecipe(look,state.step);
-  $("#catBubble").textContent='どっちの気持ちも、あるにゃ。';
+function previewScores(values) {
+  answerScores=values.slice();
+  scoreApproximate=false;
+  scoreTouched=true;
+  const result=AnswerInput.score(answerScores);
+  selectedChoice=result.ok?result.answer:null;
+  renderPawValues();
+  const look=appearance(selectedChoice??-1);
+  renderRecipe(look,state.step);
+  const a=QUESTS[state.step].answers[selectedChoice?.choice??0];
+  $('#catBubble').textContent=result.ok?'そのくらいの気持ち、受け取ったにゃ。':'気になる肉球を、ぽんと押してにゃ。';
+  $('#companionMood').textContent=POSES[result.ok?a.pose:QUESTS[state.step].pose].name;
   clearTimeout(blendPaintTimer);
-  blendPaintTimer=setTimeout(()=>setPose('#companionImage',QUESTS[state.step].answers[answer.choice].pose,look),160);
+  blendPaintTimer=setTimeout(()=>setPose('#companionImage',result.ok?a.pose:QUESTS[state.step].pose,look),160);
 }
 function confirmAnswer(value, record = true) {
   if (feedbackOpen) return;
   clearTimeout(blendPaintTimer);
   const answer=JourneyModel.normalize(value),index=answer.choice,q=QUESTS[state.step],a=index>=0?q.answers[index]:null;
   state.answers[state.step] = answer;
-  if (record) state.cardPose = "";
+  if (record) {
+    state.cardPose = "";
+    state.answerPoints[state.step]=value===selectedChoice&&!scoreApproximate&&AnswerInput.score(answerScores).ok?answerScores.slice():null;
+  }
   persist();
   feedbackOpen = true;
   $("#journey").classList.add("is-feedback");
@@ -503,20 +472,20 @@ function confirmAnswer(value, record = true) {
     : "猫はひと休みして、次の場所へ。答えを保留することも、自分のペースを大切にする選択です。";
   if(JourneyModel.mixed(answer)){
     $("#feedbackReaction").textContent='「あいだの気持ちも、きみの答え。」';
-    $("#feedbackText").textContent=JourneyModel.describe(answer,q,state.kids)+' という配分でした。気になる一歩を、ひとつから試してみよう。';
+    $("#feedbackText").textContent=journeyDescription(answer,q,state.kids)+' の気持ちがありました。気になる一歩を、ひとつから試してみよう。';
   }
   $("#feedbackAction").textContent = a
     ? state.kids
       ? KID_ACTIONS[state.step][index]
       : a.action
     : "今日、気になったことをひとつだけ覚えておく。";
-  $("#blendFeedback").innerHTML=JourneyModel.mixed(answer)?'<span>もうひとつの気持ちから</span>'+answer.weights.map((w,i)=>i!==index&&w>.05?`<p>${Math.round(w*100)}%：${esc(state.kids?KID_ACTIONS[state.step][i]:q.answers[i].action)}</p>`:'').join(''):'';
+  $("#blendFeedback").innerHTML=JourneyModel.mixed(answer)?'<span>もうひとつの気持ちから</span>'+answer.weights.map((w,i)=>i!==index&&w>.05?`<p>${esc(state.kids?KID_ACTIONS[state.step][i]:q.answers[i].action)}</p>`:'').join(''):'';
   $("#questionEvidenceBody").innerHTML =
     `<p class="research-application">${esc(q.why)}</p>${a ? `<p class="quiet-note">選択肢の参照猫：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>。その猫の設計座標 X ${a.x} / Y ${a.y} を使います。選択肢との対応は制作者の解釈です。</p>` : ""}${q.refs.map((key) => sourceCard(key, true)).join("")}<p class="quiet-note">問い・選択肢・反応は本作品の創作です。研究がこの回答を正解と認定したものではありません。</p>`;
   if(JourneyModel.mixed(answer)){
     const p=JourneyModel.point([answer],[q]);
     $("#questionEvidenceBody .quiet-note")?.remove();
-    $("#questionEvidenceBody").insertAdjacentHTML('afterbegin',`<p class="quiet-note">各参照猫の設計座標を回答の配分で加重平均：X ${p.x.toFixed(3)} / Y ${p.y.toFixed(3)}。${esc(JourneyModel.describe(answer,q))}</p><p class="quiet-note">${q.answers.map((a,i)=>answer.weights[i]>0?`${['A','B','C'][i]}：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>（X ${a.x} / Y ${a.y}）`:'').filter(Boolean).join('、')}。選択肢との対応は制作者の解釈です。</p>`);
+    $("#questionEvidenceBody").insertAdjacentHTML('afterbegin',`<p class="quiet-note">各参照猫の設計座標を回答の配分で加重平均：X ${p.x.toFixed(3)} / Y ${p.y.toFixed(3)}。${esc(journeyDescription(answer,q))}</p><p class="quiet-note">${q.answers.map((a,i)=>answer.weights[i]>0?`${['A','B','C'][i]}：<button class="text-link" data-cat="${a.anchorNo}">No.${a.anchorNo} ${esc(a.anchorName)} ↗</button>（X ${a.x} / Y ${a.y}）`:'').filter(Boolean).join('、')}。選択肢との対応は制作者の解釈です。</p>`);
   }
   $("#nextQuestion").textContent =
     state.step === 4 ? "わたしの猫を、呼んでみる ✦" : "次の足あとを、つけにいく →";
@@ -661,8 +630,8 @@ function renderComplete() {
   $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":JourneyModel.mixed(a)?"◒":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
   $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さ、5問目は瞳と左右の模様に反映します。表情とポーズは初めに象限と5つの回答の組み合わせで選びます。今回の組み合わせ：${look.values.join("、")}。`;
 
-  $("#cardMixChart").innerHTML=JourneyModel.barsSVG(state.answers);
-  $("#resultGraph").innerHTML=JourneyModel.barsSVG(state.answers);
+  $("#cardMixChart").innerHTML=JourneyModel.barsSVG(state.answers,true);
+  $("#resultGraph").innerHTML=JourneyModel.barsSVG(state.answers,true);
   $("#finishedName").textContent = c.name;
   $("#finishedCatch").textContent = state.kids
     ? "今日のえらび方から出会った、あなたの相棒。"
@@ -734,7 +703,13 @@ async function downloadCard() {
     ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,1195,950,340,22);ctx.fill();
     ctx.fillStyle=t.ink;ctx.font="800 24px sans-serif";ctx.fillText("5つの問い、きょうの配分。",105,1242);
     const mixColors=['#47775e','#c69c4e','#bb755e'];
-    state.answers.forEach((answer,i)=>{const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;if(weights)weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,25);x+=w*790;});else ctx.fillText('保留',175,y+19);});
+    state.answers.forEach((answer,i)=>{
+      const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;
+      if(weights){
+        weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,20);x+=w*790;});
+        ctx.fillStyle=t.ink;ctx.font="700 17px sans-serif";ctx.fillText(JourneyModel.percentages(answer).map((v,k)=>`${['A','B','C'][k]} ${v}%`).join('   '),175,y+36);
+      }else ctx.fillText('保留',175,y+19);
+    });
     ctx.fillStyle=t.ink;ctx.font="700 18px sans-serif";ctx.fillText('緑=A  黄=B  茶=C：各問の答えの配分。能力や性格の点数ではありません。',105,1510);
     ctx.fillStyle=t.gold;ctx.font="700 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1590);
     ctx.fillStyle="#fff5df";ctx.font="700 21px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1630);
@@ -1057,50 +1032,33 @@ async function init() {
     persist();
     setKids();
     if (activeScreen === "journey") {
-      const wasFeedback = feedbackOpen;
+      const wasFeedback = feedbackOpen, points=answerScores.slice(), touched=scoreTouched;
       renderQuestion();
+      if(!wasFeedback&&touched)previewScores(points);
       if (wasFeedback)
         confirmAnswer(state.answers[state.step] ?? -1, false);
     }
     if (activeScreen === "complete") renderComplete();
     if (activeScreen === "world") renderPlaceDetail(selectedPlace);
   });
-  $("#answerList").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-choice]");
-    if (b) previewChoice(Number(b.dataset.choice));
+  $("#answerList").addEventListener("click",e=>{
+    const button=e.target.closest('[data-paw-answer]');if(!button)return;
+    const scores=answerScores.slice();scores[Number(button.dataset.pawAnswer)]=Number(button.dataset.pawScore);
+    previewScores(scores);
   });
-  $("#blendSliders").addEventListener("input",e=>{
-    const input=e.target.closest('[data-blend]');if(!input||input.disabled)return;
-    const i=Number(input.dataset.blend),value=selectedChoice??state.answers[state.step];
-    if(!blendKeeps.some(Boolean))blendKeeps[i]=true;
-    previewBlend(JourneyModel.adjustWeights(value,i,Number(input.value),blendKeeps));
+  $("#answerList").addEventListener("keydown",e=>{
+    const button=e.target.closest('[data-paw-answer]');if(!button)return;
+    const directions={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1};
+    if(!(e.key in directions)&&e.key!=='Home'&&e.key!=='End')return;
+    e.preventDefault();
+    const i=Number(button.dataset.pawAnswer),score=e.key==='Home'?0:e.key==='End'?10:Math.max(0,Math.min(10,answerScores[i]+directions[e.key]));
+    const scores=answerScores.slice();scores[i]=score;previewScores(scores);
+    document.querySelector(`[data-paw-answer="${i}"][data-paw-score="${score}"]`).focus({preventScroll:true});
   });
-  $('.blend-number-fields').addEventListener('input',e=>{
-    if(!e.target.matches('[data-blend-number]')||e.target.disabled)return;
-    const inputs=[...document.querySelectorAll('[data-blend-number]')],parsed=AnswerInput.parse(inputs.map(input=>input.value));
-    inputs.forEach((input,i)=>input.setAttribute('aria-invalid',String(!parsed.ok&&parsed.invalid.includes(i))));
-    if(!parsed.ok){
-      selectedChoice=null;clearTimeout(blendPaintTimer);
-      $('#blendNumberStatus').textContent=parsed.message;$('#blendNumberStatus').dataset.state='error';
-      $('.blend-budget').dataset.pending='true';$('#blendBudgetTotal').textContent='未確定';
-      $('#blendBudgetBar').innerHTML='';$('#blendBudgetBar').setAttribute('aria-label','割合は未確定です。入力値を確認してください。');$('#blendBudgetLegend').innerHTML='';
-      [0,1,2].forEach(i=>{$('#blendValue'+i).textContent='未確定';});
-      document.querySelectorAll('.answer-button').forEach(button=>{button.removeAttribute('data-mixed');button.setAttribute('aria-pressed','false');button.querySelector('.answer-check').textContent='○';});
-      $('#blendSummary').textContent=parsed.message;$('#confirmAnswer').disabled=true;$('#confirmAnswer').textContent='数字を確認してね';
-      return;
-    }
-    blendKeeps=[false,false,false];
-    previewBlend(parsed.weights,false);
+  $('#pawPresets').addEventListener('click',e=>{
+    if(e.target.closest('[data-paw-equal]'))previewScores([10,10,10]);
+    if(e.target.closest('[data-paw-reset]'))previewScores([0,0,0]);
   });
-  $("#blendSliders").addEventListener("click",e=>{
-    const button=e.target.closest('[data-blend-keep]');if(!button)return;
-    const i=Number(button.dataset.blendKeep);
-    blendKeeps[i]=!blendKeeps[i];
-    previewBlend(JourneyModel.weights(selectedChoice??state.answers[state.step])||[1/3,1/3,1/3]);
-  });
-  $("#keepAllBlend").addEventListener("click",()=>{blendKeeps=[true,true,true];previewBlend(JourneyModel.weights(selectedChoice??state.answers[state.step])||[1/3,1/3,1/3]);});
-  $("#releaseAllBlend").addEventListener("click",()=>{blendKeeps=[false,false,false];previewBlend(JourneyModel.weights(selectedChoice??state.answers[state.step])||[1/3,1/3,1/3]);});
-  $("#blendPresets").addEventListener("click",e=>{const b=e.target.closest('[data-mid],[data-equal]');if(!b)return;blendKeeps=[false,false,false];if(b.hasAttribute('data-equal')){previewBlend([1,1,1]);return;}const [a,c]=b.dataset.mid.split(',').map(Number);previewBlend([0,1,2].map(i=>(i===a||i===c)?0.5:0));});
   $("#confirmAnswer").addEventListener("click", () => {
     if (selectedChoice !== null) confirmAnswer(selectedChoice);
   });
