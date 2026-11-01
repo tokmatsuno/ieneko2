@@ -66,4 +66,5 @@
   $('#regionLogFeedback').textContent=byCode(selected).name+'で試す案として入力しました。内容を確認し、記録してください。まだ保存していません。';
  }
  window.RegionExplorer={profiles,byCode,select,draft,current:()=>byCode(selected)};select(selected);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderPlaces,{once:true});
 })();

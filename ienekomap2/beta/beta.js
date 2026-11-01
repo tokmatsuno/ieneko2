@@ -80,6 +80,7 @@
   finally{loading=false;$('#refreshData').disabled=false;}
  }
  $('#homeTown').innerHTML=towns.map(t=>`<option value="${t.id}">${esc(t.short+' / '+t.name)}</option>`).join('');$('#catTown').insertAdjacentHTML('beforeend',towns.map(t=>`<option value="${t.id}">${esc(t.short+' / '+t.name)}</option>`).join(''));
+ const linkedTown=towns.find(t=>RegionDataCore.TOWN_CODES[t.id]===RegionExplorer.current().code);if(linkedTown){homeTown=linkedTown.id;selectedTown=linkedTown.id;}
  $('#homeTown').value=homeTown;
  document.addEventListener('ieneko:region-change',e=>{const match=towns.find(t=>RegionDataCore.TOWN_CODES[t.id]===e.detail.code);if(match&&match.id!==homeTown){homeTown=match.id;$('#homeTown').value=homeTown;renderGeo();}renderCases();});
  document.addEventListener('click',e=>{const button=e.target.closest('[data-regional-plan]');if(button){const t=town(button.dataset.regionalPlan);if(t)RegionExplorer.draft({tool:['matatabi','churu','tower'][t.case_tool],title:t.case_title,note:t.case_idea});}});
