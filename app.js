@@ -223,6 +223,8 @@ function navigate(id) {
   else location.hash = id;
 }
 function showScreen(id) {
+  const lifestyleAnchor = id === "resultLifestyle";
+  if (lifestyleAnchor) id = "complete";
   if (
     !["home", "journey", "complete", "world", "cats", "research"].includes(id)
   )
@@ -261,6 +263,12 @@ function showScreen(id) {
     research: "研究とデータ | 家猫の冒険",
   }[id];
   window.scrollTo({ top: 0, behavior: "instant" });
+  if (lifestyleAnchor && id === "complete") {
+    $("#resultLifestyle").scrollIntoView({ block: "start" });
+    const title = $("#resultLifestyle h2");
+    if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+    return;
+  }
   const heading = $(`#${id} h1`);
   if (heading) {
     heading.tabIndex = -1;

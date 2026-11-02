@@ -58,6 +58,7 @@
  $('#regionSources').innerHTML=[source,...data.place_sources].map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a> / ${esc(s.published_on||s.updated)}${s.updated_label?'（'+esc(s.updated_label)+'）':''} / ${esc(s.license)} / 取得 ${esc(s.fetched_on||data.fetched_on)}<br><a href="${esc(s.data_url)}" target="_blank" rel="noopener">提供元のCSV</a>${s.definition_url?` / <a href="${esc(s.definition_url)}" target="_blank" rel="noopener">項目定義と年次</a>`:''}<br>${esc(s.attribution)}</li>`).join('');
  $('#regionCoverage').textContent=`全国${profiles.length.toLocaleString()}市区町村の実データ / 公開施設データ${official.length}行（同名・同所在地の重複をまとめて${core.uniquePlaces(official).length}件。福岡市・八王子市の取得分）`;
  function draft(idea){
+  const background=$('#regional-background');if(background)background.open=true;
   $('#regionLogState').value='planned';$('#regionLogParticipants').value='';$('#regionLogParticipants').disabled=true;
   $('#regionLogDate').value=new Date().toISOString().slice(0,10);$('#regionLogTool').value=idea.tool;
   $('#regionLogActivity').value=idea.title;$('#regionLogObservation').value='5つのまちの仮想案を参考にした検討案（実施実績ではありません）。'+idea.note;
@@ -65,6 +66,13 @@
   $('#regionLogForm').closest('details').open=true;$('#regionLogForm').scrollIntoView({block:'start'});$('#regionLogActivity').focus({preventScroll:true});
   $('#regionLogFeedback').textContent=byCode(selected).name+'で試す案として入力しました。内容を確認し、記録してください。まだ保存していません。';
  }
+ function revealLinkedSection(){
+  const background=$('#regional-background'),target=document.getElementById(location.hash.slice(1));
+  if(background&&target&&background.contains(target)){background.open=true;target.scrollIntoView({block:'start'});}
+ }
+ $('#regional-background')?.addEventListener('toggle',e=>{if(e.target.open)renderPlaces();});
+ window.addEventListener('hashchange',revealLinkedSection);
  window.RegionExplorer={profiles,byCode,select,draft,current:()=>byCode(selected)};select(selected);
+ revealLinkedSection();
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderPlaces,{once:true});
 })();

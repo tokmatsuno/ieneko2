@@ -1,0 +1,3 @@
+# Preserve published source bytes and the generated CSV's CRLF line endings.
+lifestyle-data/raw/* -text whitespace=cr-at-eol
+lifestyle-data/*.csv -text whitespace=cr-at-eol

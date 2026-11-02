@@ -1,0 +1,23 @@
+{
+  "file": "ieneko-lifestyle-reference.csv",
+  "encoding": "UTF-8 with BOM",
+  "grain": "公式調査の全国集計値1項目。個人や町内会の回答ではない。",
+  "columns": {
+    "dataset_id": "sources.jsonの調査ID",
+    "table": "原典の表・設問",
+    "key": "アプリ内の項目ID",
+    "label": "原典の項目名。Excel内の改行・空白は除去。CSV表の省略記号は保持。",
+    "value": "提供された数値。割合の合計を100%に再調整しない。",
+    "unit": "percentは割合（0〜100）、mean_0_10は満足度平均（0〜10）",
+    "population": "その表の対象範囲",
+    "denominator": "回答者数、または推計人口であることの説明。人口を標本数と表示しない。",
+    "response_type": "singleは単一回答、multipleは複数回答、multiple_activityは複数の活動が重複、meanは平均",
+    "year": "調査年。取得年ではない。",
+    "source_file": "raw/内の提供元ファイル名",
+    "source_locator": "Excelのシート・セル、またはCSVの物理行・列。1始まり。",
+    "count": "該当回答者数が表にある場合のみ。割合から人数を逆算しない。",
+    "source_url": "提供元の元ファイルURL"
+  },
+  "reuse": "提供元ごとの利用条件と帰属表示はsources.jsonを参照。公開調査の集計値と、家猫の実回答CSV、仮想90件CSVは別のデータセット。",
+  "not_included": ["個票", "新しい趣味や関わり方フィルターの選択履歴", "個人の内面の推定", "町内会別の趣味の推定", "施策の有効性の推定"]
+}

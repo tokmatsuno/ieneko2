@@ -43,6 +43,11 @@ jobs:
           node --check ienekomap2/beta/region-data.js
           node --check ienekomap2/beta/region-explorer.js
           node --check gas/migration-proxy.js
+          node --check lifestyle-core.js
+          node --check lifestyle-ui.js
+          node --check lifestyle-data.js
+          python3 scripts/build-lifestyle-data.py --check
+          node tests/lifestyle.test.cjs
           node scripts/build-cat-data.cjs --check
           node scripts/build-beta-data.cjs --check
           node scripts/build-region-data.cjs --check
