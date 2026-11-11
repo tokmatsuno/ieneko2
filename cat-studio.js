@@ -12,16 +12,20 @@
   const poseNames={hello:'手をあげて、ごあいさつ',scared:'ちょっと、どきどき',hungry:'ごはんを待つ',curious:'そっと、のぞきこむ',resting:'丸くなって、ひと休み'};
   const eyeBounds={hello:[.28,.07,.74,.24],scared:[.22,.15,.66,.34],hungry:[.30,.10,.76,.30],curious:[.12,.37,.55,.64],resting:null};
   Object.assign(sources,{
+    'evh-tapping':'dist/cat-evh-tapping.png',kamehameha:'dist/cat-kamehameha.png',dj:'dist/cat-dj.png',
     bristling:'dist/cat-bristling.png',drunken:'dist/cat-drunken.png',oppappi:'dist/cat-oppappi.png',scooter:'dist/cat-scooter.png',napping:'dist/cat-napping.png','sports-car':'dist/cat-sports-car.png',guitar:'dist/cat-guitar.png',reading:'dist/cat-reading.png',gardening:'dist/cat-gardening.png',
   });
   Object.assign(poseNames,{bristling:'びっくり、毛が逆立つ',drunken:'ふらり、酔拳風',oppappi:'はいオッパッピー風',scooter:'キックボードでおでかけ',napping:'ごろんと、昼寝','sports-car':'スポーツカーで気ままに',guitar:'ぽろんと、ギター',reading:'本をひらいて、読み聞かせ',gardening:'小さな庭を育てる'});
   const poseShortNames={hello:'ごあいさつ',curious:'のぞきこむ',scared:'どきどき',hungry:'ごはん待ち',resting:'ひと休み',bristling:'総毛立ち',drunken:'酔拳風',oppappi:'オッパッピー風',scooter:'キックボード',napping:'昼寝','sports-car':'スポーツカー',guitar:'ギター',reading:'読み聞かせ',gardening:'庭づくり'};
+  Object.assign(poseNames,{'evh-tapping':'エディ風、タッピングギター',kamehameha:'かめはめ波風、気分をチャージ',dj:'DJ IENEKO、今日の一曲'});
+  Object.assign(poseShortNames,{'evh-tapping':'タッピングギター',kamehameha:'かめはめ波風',dj:'DJ IENEKO'});
+  Object.assign(eyeBounds,{'evh-tapping':[.32,.13,.62,.24],kamehameha:[.44,.23,.69,.31],dj:[.38,.14,.65,.20]});
   Object.assign(eyeBounds,{bristling:[.16,.42,.42,.51],drunken:[.49,.13,.75,.25],oppappi:[.43,.15,.67,.25],scooter:[.35,.09,.58,.17],napping:null,'sports-car':[.54,.16,.70,.24],guitar:[.35,.16,.60,.25],reading:[.41,.14,.67,.25],gardening:[.44,.17,.67,.28]});
   const quadrants=[
-    {key:'grove',title:'まちで、みんなと',note:'小さな庭づくり、にぎやかなごあいさつ。まちで楽しみを分け合う一日。',poses:['gardening','oppappi','scooter','hello','curious']},
-    {key:'sun',title:'まちで、自分らしく',note:'気になる方へ、ちょっと遠回り。乗り物や体の動きで楽しむ一日。',poses:['sports-car','scooter','drunken','bristling']},
-    {key:'moon',title:'おうちで、だれかと',note:'ギター、本、おしゃべり。好きなものを分け合う、あたたかな一日。',poses:['guitar','reading','oppappi','hungry','hello']},
-    {key:'rose',title:'おうちで、気ままに',note:'昼寝も、ひとり演奏会も、ふらりと酔拳も。気分で過ごす一日。',poses:['napping','bristling','guitar','reading','drunken','resting','scared']},
+    {key:'grove',title:'まちで、みんなと',note:'庭づくりも、小さなDJタイムも。好きな楽しみを分け合う一日。',poses:['gardening','oppappi','scooter','hello','curious','dj']},
+    {key:'sun',title:'まちで、自分らしく',note:'乗り物、ギター、気分のチャージ。思い切り好きなことを楽しむ一日。',poses:['sports-car','scooter','drunken','bristling','evh-tapping','kamehameha']},
+    {key:'moon',title:'おうちで、だれかと',note:'ギター、本、おしゃべり。好きな一曲も持ち寄る、あたたかな一日。',poses:['guitar','reading','oppappi','hungry','hello','dj','evh-tapping']},
+    {key:'rose',title:'おうちで、気ままに',note:'昼寝も、ひとり演奏会も。気ままに充電する一日。',poses:['napping','bristling','guitar','reading','drunken','resting','scared','kamehameha']},
   ];
   const quadrantFor=p=>(p.y>=5?2:0)+(p.x>=5?1:0);
   function poseFor(point,route=0){const pool=quadrants[quadrantFor(point)].poses;const hash=Array.isArray(route)?route.reduce((v,c)=>(v*5+c+2)>>>0,7):Math.abs(Number(route)||0);return pool[hash%pool.length];}
@@ -29,6 +33,7 @@
   const coatNames=[['白猫','白黒ぶち猫','三毛猫'],['黒猫','白黒猫','さび猫'],['茶猫','茶白猫','茶トラ猫']];
   const landmarks={hello:[[.49,.17],[.50,.50],[.87,.50],[.48,.86]],scared:[[.44,.27],[.49,.53],[.81,.59],[.48,.82]],hungry:[[.53,.22],[.52,.52],[.20,.79],[.50,.78]],curious:[[.33,.52],[.67,.54],[.83,.23],[.51,.80]],resting:[[.48,.31],[.55,.61],[.76,.72],[.31,.76]]};
   Object.assign(landmarks,{
+    'evh-tapping':[[.46,.20],[.54,.55],[.86,.47],[.57,.90]],kamehameha:[[.57,.29],[.56,.58],[.23,.48],[.57,.84]],dj:[[.50,.19],[.51,.44],[.82,.48],[.53,.85]],
     bristling:[[.29,.48],[.65,.58],[.90,.24],[.54,.91]],drunken:[[.60,.20],[.52,.52],[.78,.65],[.49,.94]],oppappi:[[.55,.23],[.55,.56],[.23,.52],[.52,.93]],scooter:[[.46,.15],[.57,.53],[.86,.46],[.56,.80]],napping:[[.26,.24],[.64,.58],[.65,.83],[.60,.80]],'sports-car':[[.62,.23],[.62,.39],[.87,.33],[.53,.42]],guitar:[[.48,.22],[.52,.56],[.84,.73],[.55,.87]],reading:[[.52,.19],[.51,.56],[.25,.85],[.60,.87]],gardening:[[.54,.23],[.63,.57],[.85,.53],[.68,.92]],
   });
   function derive(answers,quests,point) {
@@ -117,6 +122,15 @@
   }
   function inPolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))inside=!inside;}return inside;}
   function protectedProp(x,y,pose){
+    if(pose==='evh-tapping'){
+      if(((x-.34)/.11)**2+((y-.43)/.045)**2<1||((x-.67)/.075)**2+((y-.335)/.05)**2<1)return false;
+      return ((x-.35)/.24)**2+((y-.575)/.18)**2<1||(x>.39&&x<.98&&Math.abs(y-(.65-.46*x))<.055);
+    }
+    if(pose==='kamehameha')return ((x-.78)/.055)**2+((y-.48)/.055)**2<1;
+    if(pose==='dj'){
+      if(((x-.69)/.07)**2+((y-.535)/.034)**2<1)return false;
+      return inPolygon(x,y,[[.12,.51],[.80,.51],[.86,.64],[.82,.71],[.12,.71],[.08,.63]])||(x>.25&&x<.35&&y>.12&&y<.24)||(x>.66&&x<.77&&y>.11&&y<.24)||(x>.40&&x<.64&&y>.038&&y<.07);
+    }
     if(pose==='sports-car'&&((x-.608)/.044)**2+((y-.438)/.055)**2<1)return false;
     if(pose==='sports-car')return y>.52||(x<.40&&y>.30)||((x-.51)**2+(y-.426)**2<.0105&&!(x<.48&&y<.40))||(x>.73&&x<.83&&y>.35&&y<.52);
     if(pose==='scooter')return y>.84||(Math.abs(x-(.40-.32*y))<.038&&y>.37&&y<.83)||((y>.31&&y<.39&&x>.07&&x<.52)&&!((x>.1&&x<.23&&y<.35)||(x>.35&&x<.47&&y<.38)));

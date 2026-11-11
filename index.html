@@ -13,9 +13,9 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🐾%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="app.css?v=2.19" />
-    <link rel="stylesheet" href="appearance.css?v=2.19&amp;r=4" />
-    <link rel="stylesheet" href="lifestyle.css?v=2.19" />
+    <link rel="stylesheet" href="app.css?v=2.20" />
+    <link rel="stylesheet" href="appearance.css?v=2.20&amp;r=4" />
+    <link rel="stylesheet" href="lifestyle.css?v=2.20" /><link rel="stylesheet" href="card-social.css?v=2.20" />
   </head>
   <body>
     <a class="skip-link" href="#main">本文へ</a>
@@ -57,7 +57,7 @@
             <p id="dataStatus" class="data-status" role="status">家猫100匹のデータを準備しています。</p>
             <div id="startError" class="start-error" role="alert" hidden>
               <p>公開版を開くか、ページを読み込み直してください。</p>
-              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.19#home" class="button small primary">公開版を開く ↗</a>
+              <a href="https://tokmatsuno.github.io/ieneko2/?v=2.20#home" class="button small primary">公開版を開く ↗</a>
               <button id="retryLoad" class="text-link">もう一度読み込む</button>
             </div>
           </div>
@@ -91,7 +91,7 @@
           ><i>↗</i><span>02 <b>猫の気持ちに出会う</b></span
           ><i>↗</i><span>03 <b>まちへの一歩を持ち帰る</b></span>
         </div>
-        <a href="ienekomap2/beta/?v=2.19#lifestyle" class="city-map-entry"><div><small>好きなことと、心地よい関わり方から β</small><b>突撃隣の家猫ごはん</b><p>趣味・近所付き合い・生活の質の公開調査を参考に。遊び・おやつ・環境の案を、まちへ持ち寄る。</p></div><span aria-hidden="true">↗</span></a>
+        <a href="ienekomap2/beta/?v=2.20#lifestyle" class="city-map-entry"><div><small>好きなことと、心地よい関わり方から β</small><b>突撃隣の家猫ごはん</b><p>趣味・近所付き合い・生活の質の公開調査を参考に。遊び・おやつ・環境の案を、まちへ持ち寄る。</p></div><span aria-hidden="true">↗</span></a>
         <div class="home-purpose">
           <p class="eyebrow">WHY HOUSE CATS?</p>
           <h2>「参加しない」を責めるより、<br />参加したくなる入口を。</h2>
@@ -211,45 +211,46 @@
           <div>
             <p class="eyebrow">A CAT, AND A LITTLE POSSIBILITY</p>
             <h1 id="completeTitle">
-              あなたの選んだ一歩が、<br />家猫のカードになりました。
+              「はじめまして」を、<br />家猫の名刺に。
             </h1>
-            <p>今日の選び方に近い座標の猫を、100匹のデータから探しました。</p>
+            <p>タイプも、いまの気分も、好きなことも。見せ合ったあとに、ひとつ会話が始まるカードへ。</p>
           </div>
           <a href="#home" class="text-link">ホームへ ↗</a>
         </div>
         <div class="complete-layout">
-          <article id="finishedCard" class="finished-card">
-            <div class="finished-top">
-              <span>家猫の冒険</span><span id="finishedNo"></span>
+          <div class="card-stage">
+            <article id="finishedCard" class="finished-card name-card" aria-label="保存・共有する家猫の名刺">
+              <img id="cardPreview" src="dist/mike-main-visual.png" alt="家猫の名刺を準備しています" data-ready="pending">
+              <p id="cardIdentitySummary" class="visually-hidden" aria-hidden="true"></p>
+            </article>
+            <p id="cardBuildStatus" class="card-build-status" role="status">名刺カードを準備しています…</p>
+            <div class="card-share-box" aria-labelledby="cardShareTitle">
+              <h2 id="cardShareTitle">見せて、好きの話をしよう。</h2>
+              <label class="card-format-label">画像のかたち<select id="cardFormat"><option value="portrait">名刺カード / 縦</option><option value="square">正方形</option><option value="story">ストーリー</option></select></label>
+              <div class="card-primary-actions"><button id="shareCardImage" class="button primary" disabled>画像を共有する ↗</button><button id="downloadCard" class="button ghost" disabled>画像を保存する ↓</button></div>
+              <p class="card-share-help">共有メニューが開いたら、LINEやSNSを選んでください。対応しない端末では画像を保存できます。</p>
+              <div class="card-social-links"><a id="shareCardLine" href="#" target="_blank" rel="noopener" aria-disabled="true">LINEでリンク ↗</a><a id="shareCardFacebook" href="#" target="_blank" rel="noopener" aria-disabled="true">Facebookでリンク ↗</a><button id="downloadInstagram" disabled>Instagram用に保存 ↓</button></div>
+              <p class="card-share-help">リンクは猫タイプの紹介ページへ。編集した名刺画像は「画像を共有」または「画像を保存」から使えます。</p>
+              <details class="card-caption"><summary>画像に添える紹介文</summary><label class="visually-hidden" for="shareCaption">共有する紹介文</label><textarea id="shareCaption" rows="7" readonly></textarea><button id="copyCardCaption" class="button small ghost">紹介文をコピー</button></details>
+              <p id="cardShareStatus" role="status" aria-live="polite">送信・投稿先は、自分で選べます。</p><button id="retryCard" class="text-link">画像を仕上げ直す ↻</button>
             </div>
-            <span class="card-edition" id="cardEdition"></span>
-            <span class="card-seal" id="cardSeal" aria-hidden="true">✦</span>
-            <div class="finished-cat">
-              <img
-                id="finishedCatImage"
-                src="dist/mike-main-visual.png"
-                alt="今日の家猫"
-              />
-            </div>
-            <div class="finished-copy">
-              <small>TODAY'S COMPANION</small>
-              <h2 id="finishedName"></h2>
-              <p id="finishedCatch"></p>
-              <span id="finishedMood"></span>
-              <div class="card-traits" id="cardTraits"></div>
-            </div>
-            <div class="card-route" id="cardRoute" aria-label="5つの問いの足あと"></div>
-            <div class="card-mix-chart"><span>5つの問い、きょうの配分。</span><div id="cardMixChart"></div><small>点数を割合に換算。A・B・Cは各問の答え。優劣を示す点数ではありません。</small></div>
-            <div class="finished-bottom">
-              <span>あなたのペースで、まちとつながる。</span
-              ><span><time id="finishedDate"></time> · <span id="cardVersion">ver2.19</span></span>
-            </div>
-          </article>
+          </div>
           <div class="complete-actions">
             <p class="eyebrow">YOUR NEXT SMALL STEP</p>
             <h2 id="resultTitle"></h2>
             <p id="resultText"></p>
-            <div class="result-coordinate" id="resultCoordinate"></div>
+            <section id="cardEditor" class="card-editor" aria-labelledby="cardEditorTitle">
+              <p class="eyebrow">MAKE IT YOURS</p><h2 id="cardEditorTitle">名刺に、あなたらしさを。</h2>
+              <p>回答から置いたことばは、好きに手直しできます。編集内容はこの端末に残し、回答データとして送信しません。</p>
+              <label for="cardNickname">呼ばれたい名前（任意）<input id="cardNickname" maxlength="16" placeholder="例：ときねこ" autocomplete="off"></label>
+              <label for="cardStatusInput">いまのステータス<input id="cardStatusInput" maxlength="24" placeholder="空欄なら、今日の選び方から"></label>
+              <fieldset><legend>好きなことを選ぶ（最大3つ）</legend><div id="cardLikeOptions" class="card-like-options"></div></fieldset>
+              <label for="cardCustomLike">好きなことを、もうひとつ自由に<input id="cardCustomLike" maxlength="16" placeholder="例：朝のコーヒー"></label>
+              <label for="cardQuestion">話しかけるきっかけ<input id="cardQuestion" maxlength="36" placeholder="空欄なら、好みからひとこと"></label>
+              <p class="card-editor-note">好みを選ぶまでは、回答から「好きな関わり方」を仮置きします。タイプは作品の類型で、性格の判定ではありません。</p>
+              <div class="card-editor-actions"><button id="morePoses" class="button ghost">猫のポーズを選ぶ ✦</button><button id="cardProfileReset" class="text-link">名刺の編集をリセット</button></div>
+            </section>
+            <details class="result-coordinates"><summary>設計座標と、選ばれた猫を見る</summary><div class="result-coordinate" id="resultCoordinate"></div></details>
             <form id="answerCollection" class="answer-collection" aria-labelledby="answerCollectionTitle">
               <p class="eyebrow">YOUR ANSWER, OUR NEXT IDEA</p>
               <h3 id="answerCollectionTitle">この回答を、まちづくりのデータに。</h3>
@@ -264,15 +265,13 @@
               <p id="answerSaveStatus" class="answer-save-status" role="status">まだ共有先には保存していません。</p>
               <small>猫CSVは1匹から公開。氏名・保存用ID・日時・地域・イベント・位置情報は載せません。</small>
               <a id="answerPublishedCSV" class="text-link" href="ienekomap2/#open-data" hidden>公開CSVのダウンロードページを開く ↗</a>
-              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.19#open-data">集まった回答と公開CSVを見る ↗</a>
+              <a id="answerMapLink" class="text-link" href="ienekomap2/?v=2.20#open-data">集まった回答と公開CSVを見る ↗</a>
             </form>
             <details class="result-graph"><summary>答えの配分をグラフで見る</summary><div id="resultGraph"></div><p>3つの答えの割合をそのまま図示します。能力や性格の点数ではありません。保留した問いは集計に含めません。</p></details>
             <details class="appearance-explainer"><summary>この猫の姿ができるまで</summary><p id="appearanceExplanation"></p><p>色と姿は作品の演出です。研究から毛色や目の色、性格を推定しているわけではありません。保留した問いには基本の姿を使います。</p></details>
             <div class="action-stack">
-              <button id="downloadCard" class="button primary">
-                家猫カードを保存する ↓</button
-              ><button id="morePoses" class="button ghost">相棒の、ほかの一日を見る ✦</button
-              ><button id="resultEvidence" class="button ghost">
+              <a href="#djIeneko" class="button primary">DJ IENEKOに、今日の一曲を頼む ↗</a>
+              <button id="resultEvidence" class="button ghost">
                 この猫の根拠と、選ばれた理由 ↗</button
               ><a href="#world" class="button ghost"
                 >みんなの世界に足あとを残す ↗</a
@@ -308,6 +307,14 @@
             </button>
           </div>
         </div>
+        <section id="djIeneko" class="dj-ieneko" aria-labelledby="djTitle">
+          <div class="dj-section-heading"><div><p class="eyebrow">A CAT FOR EVERY TRACK</p><h2 id="djTitle">DJ IENEKO</h2><p id="djPlaylistTotal">きょうの一曲を、探そう。</p></div><span class="dj-stamp" aria-hidden="true">好きな一曲も、<br>名刺の話題に。</span></div>
+          <div class="dj-layout"><div class="dj-booth"><img id="djCat" src="dist/cat-dj.png" alt="ヘッドホンをつけてレコードを選ぶ、あなたの毛色の猫" loading="lazy"><div class="dj-now"><p>SELECTED FOR TODAY</p><h3 id="djNowTitle"></h3><b id="djNowArtist"></b><p id="djNowNote"></p></div><div class="dj-listen-actions"><button id="djListen">ここで聴く ▶</button><a id="djYouTube" target="_blank" rel="noopener">YouTubeで聴く ↗</a><a id="djSpotify" target="_blank" rel="noopener">Spotifyで探す ↗</a></div><a id="djSource" class="dj-source" target="_blank" rel="noopener"></a></div>
+          <div class="dj-selection"><p class="eyebrow">この猫から、こんなセットを。</p><div id="djSelectionList" class="dj-track-list"></div><div class="dj-selection-actions"><button id="djNext" class="button ghost">別の一曲を選ぶ ↻</button><a id="djPlaySet" class="button ghost" target="_blank" rel="noopener">このセットをYouTubeで開く ↗</a></div><button id="djFavorite" class="button primary">この一曲を、カードの話題に ＋</button><p id="djStatus" role="status" aria-live="polite">自動再生しません。好きな曲を選んで、聴く場所を選べます。</p></div></div>
+          <div id="djPlayer" class="dj-player" hidden></div><button id="djStop" class="button ghost" hidden>プレイヤーを閉じる</button>
+          <details class="dj-catalog"><summary>全24曲から、気になる曲を探す</summary><div class="dj-filters"><label>場面<select id="djMood"><option value="">すべての場面</option><option value="0">まちで、みんなと</option><option value="1">まちで、自分らしく</option><option value="2">おうちで、だれかと</option><option value="3">おうちで、気ままに</option></select></label><label>曲名・アーティスト・好み<input id="djSearch" type="search" placeholder="例：Van Halen、ギター、猫"></label><p id="djTrackCount" role="status"></p></div><div id="djTracks" class="dj-track-list dj-catalog-tracks"></div></details>
+          <p class="dj-method">象限・ポーズ・自分で選んだ好みを参考にした、Team 1の選曲です。「カードの話題に」を押した曲だけを名刺に添えます。配信地域や広告などは配信元の条件により、再生できない場合は公式の視聴ページも使えます。<a href="music/playlist.json" target="_blank">全曲の配信元・確認記録 ↗</a></p>
+        </section>
         <div id="journeyJournal" class="journey-journal"></div>
         <section id="resultLifestyle" data-lifestyle-widget data-life-base=""></section>
       </section>
@@ -647,7 +654,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="#home"
-        >家猫の冒険 <small id="appVersion">ver2.19</small></a
+        >家猫の冒険 <small id="appVersion">ver2.20</small></a
       ><span class="footer-credit" id="teamCredit">2026年度東京大学シビックテックデザイン学講座Team 1</span>
       <div>
         <a href="#research">研究とデータ</a
@@ -677,19 +684,19 @@
     </dialog>
     <div id="toast" class="toast hidden" role="status"></div>
     <link rel="preload" as="image" href="dist/cat-clock-retro-ver2.03.png" />
-    <script src="version.js?v=2.19&amp;r=1"></script>
-    <script src="config.js?v=2.19"></script>
+    <script src="version.js?v=2.20&amp;r=1"></script>
+    <script src="config.js?v=2.20"></script>
     <script src="evidence.js?v=3"></script>
-    <script src="cat-data.js?v=2.19"></script>
-    <script src="quests.js?v=2.19"></script>
-    <script src="journey-model.js?v=2.19&amp;r=1"></script>
-    <script src="answer-input.js?v=2.19"></script>
-    <script src="opendata-core.js?v=2.19"></script>
-    <script src="public-cat-data.js?v=2.19"></script>
-    <script src="map-data-client.js?v=2.19"></script>
-    <script src="lifestyle-data.js?v=2.19"></script>
-    <script src="lifestyle-core.js?v=2.19"></script>
-    <script src="lifestyle-ui.js?v=2.19" defer></script>
+    <script src="cat-data.js?v=2.20"></script>
+    <script src="quests.js?v=2.20"></script>
+    <script src="journey-model.js?v=2.20&amp;r=1"></script>
+    <script src="answer-input.js?v=2.20"></script>
+    <script src="opendata-core.js?v=2.20"></script>
+    <script src="public-cat-data.js?v=2.20"></script>
+    <script src="map-data-client.js?v=2.20"></script>
+    <script src="lifestyle-data.js?v=2.20"></script>
+    <script src="lifestyle-core.js?v=2.20"></script>
+    <script src="lifestyle-ui.js?v=2.20" defer></script>
     <dialog id="summonDialog" aria-labelledby="summonTitle" aria-describedby="summonText">
       <div class="summon-stage">
         <p class="eyebrow">THE ATELIER OF LITTLE MOMENTS</p>
@@ -701,7 +708,11 @@
         <button id="skipSummon" class="summon-skip">すぐに猫に会う →</button>
       </div>
     </dialog>
-    <script src="cat-studio.js?v=2.19&amp;r=2"></script>
-    <script src="app.js?v=2.19&amp;r=4"></script>
+    <script src="cat-studio.js?v=2.20&amp;r=2"></script>
+    <script src="vendor/qrcode-generator.js?v=1.4.4"></script>
+    <script src="card-identity.js?v=2.20"></script><script src="card-renderer.js?v=2.20"></script>
+    <script src="music-data.js?v=2.20"></script><script src="dj-core.js?v=2.20"></script>
+    <script src="card-ui.js?v=2.20"></script><script src="dj-ui.js?v=2.20"></script>
+    <script src="app.js?v=2.20&amp;r=4"></script>
   </body>
 </html>

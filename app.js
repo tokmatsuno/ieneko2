@@ -223,8 +223,8 @@ function navigate(id) {
   else location.hash = id;
 }
 function showScreen(id) {
-  const lifestyleAnchor = id === "resultLifestyle";
-  if (lifestyleAnchor) id = "complete";
+  const resultAnchor = ["resultLifestyle", "djIeneko"].includes(id) ? id : "";
+  if (resultAnchor) id = "complete";
   if (
     !["home", "journey", "complete", "world", "cats", "research"].includes(id)
   )
@@ -263,9 +263,9 @@ function showScreen(id) {
     research: "研究とデータ | 家猫の冒険",
   }[id];
   window.scrollTo({ top: 0, behavior: "instant" });
-  if (lifestyleAnchor && id === "complete") {
-    $("#resultLifestyle").scrollIntoView({ block: "start" });
-    const title = $("#resultLifestyle h2");
+  if (resultAnchor && id === "complete") {
+    $("#" + resultAnchor).scrollIntoView({ block: "start" });
+    const title = $("#" + resultAnchor + " h2");
     if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
     return;
   }
@@ -625,31 +625,12 @@ function renderComplete() {
   if (!c) return;
   renderAnswerSaveState();
   const p = journeyPoint(), look = cardAppearance(), pose = look.finalPose;
-  $("#finishedNo").textContent = `NO. ${String(c.no).padStart(3, "0")}`;
-  setPose("#finishedCatImage", pose, look);
-  const card = $("#finishedCard");
-  card.dataset.theme = look.theme.key;
-  card.style.setProperty("--card-ink", look.theme.ink);
-  card.style.setProperty("--card-light", look.theme.light);
-  card.style.setProperty("--card-gold", look.theme.gold);
-  $("#cardEdition").textContent = `ATELIER / ${look.signature}`;
-  $("#cardSeal").textContent = ["✿", "✦", "☾"][look.choices[4]] || "✦";
-  $("#cardTraits").innerHTML = look.values.map((v,i)=>`<span>${look.labels[i]} <b>${esc(v)}</b></span>`).join("");
-  $("#cardRoute").innerHTML = state.answers.map((a,i)=>`${i?"<i></i>":""}<span>${a.choice<0?"·":JourneyModel.mixed(a)?"◒":["✿","✦","☾"][a.choice]}</span>`).join("") + '<i></i>🐾';
+  document.body.dataset.atelier = look.theme.key;
+  CardUI.update({cat:c,look,answers:state.answers,kids:state.kids});
+  DJUI.update({cat:c,look});
   $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さ、5問目は瞳と左右の模様に反映します。表情とポーズは初めに象限と5つの回答の組み合わせで選びます。今回の組み合わせ：${look.values.join("、")}。`;
 
-  $("#cardMixChart").innerHTML=JourneyModel.barsSVG(state.answers,true);
   $("#resultGraph").innerHTML=JourneyModel.barsSVG(state.answers,true);
-  $("#finishedName").textContent = c.name;
-  $("#finishedCatch").textContent = state.kids
-    ? "今日のえらび方から出会った、あなたの相棒。"
-    : c.catch;
-  $("#finishedMood").textContent = `${look.name} · ${look.theme.name}`;
-  $("#finishedDate").textContent = new Intl.DateTimeFormat("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
   $("#resultTitle").textContent = "持ち帰るのは、ひとつの可能性。";
   $("#resultText").textContent = state.kids
     ? "今日の気分も、明日の気分も、ちがっていい。また別のえらび方で歩くと、ちがう猫に出会えるかも。"
@@ -670,76 +651,6 @@ function renderComplete() {
       : "共有参加はオフです。"
     : "ニックネームと物語の地点の共有は準備中です。回答の保存は、上の猫の公開ボタンから利用できます。";
 }
-async function downloadCard() {
-  const button = $("#downloadCard"),
-    c = chooseCat();
-  if (!c) return;
-  button.disabled = true;
-  button.textContent = "カードを描いています…";
-  try {
-    const img = $("#finishedCatImage");
-    if (img.painting) img.src = await img.painting;
-    await img.decode();
-    const canvas = document.createElement("canvas"),
-      ctx = canvas.getContext("2d");
-    canvas.width = 1080;
-    canvas.height = 1710;
-    const look = cardAppearance(), t = look.theme;
-    ctx.fillStyle = t.ink;
-    ctx.fillRect(0,0,1080,1710);
-    const gloss = ctx.createLinearGradient(0,0,1080,1710);
-    gloss.addColorStop(0,"#ffffff15"); gloss.addColorStop(.48,"#ffffff00"); gloss.addColorStop(.52,"#fff2bd16"); gloss.addColorStop(1,"#ffffff00");
-    ctx.fillStyle=gloss;ctx.fillRect(0,0,1080,1710);
-    ctx.strokeStyle=t.gold; ctx.lineWidth=2;
-    ctx.strokeRect(22,22,1036,1666);ctx.strokeRect(35,35,1010,1640);
-    ctx.fillStyle=t.gold;ctx.font="700 26px sans-serif";
-    ctx.fillText("✦ 家猫の冒険 / CAT ATELIER",70,94);
-    ctx.textAlign="right";ctx.font="700 25px monospace";ctx.fillText(`NO. ${String(c.no).padStart(3,"0")}`,1010,94);ctx.textAlign="left";
-    ctx.fillStyle=t.light;ctx.beginPath();ctx.ellipse(540,420,350,300,0,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle=t.gold;ctx.lineWidth=3;ctx.stroke();
-    const scale=Math.min(780/img.naturalWidth,670/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
-    ctx.drawImage(img,540-w/2,420-h/2,w,h);
-    ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,745,950,428,25);ctx.fill();
-    ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText("TODAY’S COMPANION",105,800);
-    let size=62;
-    while(size>26){ctx.font=`800 ${size}px sans-serif`;if(ctx.measureText(c.name).width<=865)break;size-=2;}
-    ctx.fillText(c.name,105,887);
-    ctx.font="700 26px sans-serif";ctx.fillText(t.name,105,940);
-    ctx.strokeStyle="#d6c39f";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(105,973);ctx.lineTo(975,973);ctx.stroke();
-    ctx.font="700 23px sans-serif";
-    look.values.forEach((v,i)=>ctx.fillText(`${look.labels[i]}：${v}`,105+(i%2)*435,1025+Math.floor(i/2)*45,420));
-    ctx.fillStyle="#fcf4e3";ctx.beginPath();ctx.roundRect(65,1195,950,340,22);ctx.fill();
-    ctx.fillStyle=t.ink;ctx.font="800 24px sans-serif";ctx.fillText("5つの問い、きょうの配分。",105,1242);
-    const mixColors=['#47775e','#c69c4e','#bb755e'];
-    state.answers.forEach((answer,i)=>{
-      const weights=JourneyModel.weights(answer),y=1272+i*40;ctx.fillStyle=t.ink;ctx.font="700 22px sans-serif";ctx.fillText(`問${i+1}`,105,y+19);let x=175;
-      if(weights){
-        weights.forEach((w,k)=>{ctx.fillStyle=mixColors[k];ctx.fillRect(x,y,w*790,20);x+=w*790;});
-        ctx.fillStyle=t.ink;ctx.font="700 17px sans-serif";ctx.fillText(JourneyModel.percentages(answer).map((v,k)=>`${['A','B','C'][k]} ${v}%`).join('   '),175,y+36);
-      }else ctx.fillText('保留',175,y+19);
-    });
-    ctx.fillStyle=t.ink;ctx.font="700 18px sans-serif";ctx.fillText('緑=A  黄=B  茶=C：各問の答えの配分。能力や性格の点数ではありません。',105,1510);
-    ctx.fillStyle=t.gold;ctx.font="700 22px monospace";ctx.fillText(`ATELIER ${look.signature} / ver${window.IENEKO_RELEASE.version} / ${$("#finishedDate").textContent}`,75,1590);
-    ctx.fillStyle="#fff5df";ctx.font="700 21px sans-serif";ctx.fillText("あなたのペースで、まちとつながる。",75,1630);
-    ctx.font="600 17px sans-serif";ctx.fillText("色と姿は作品の演出です。性格や属性の診断ではありません。",75,1665);
-    const blob = await new Promise((resolve) =>
-      canvas.toBlob(resolve, "image/png"),
-    );
-    if (!blob) throw new Error("canvas");
-    const url = URL.createObjectURL(blob),
-      a = document.createElement("a");
-    a.href = url;
-    a.download = `ieneko-ver${window.IENEKO_RELEASE.version}-card-${String(c.no).padStart(3, "0")}.png`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-    toast("家猫カードを保存しました。");
-  } catch {
-    toast("画像を読み込めませんでした。少し待って、もう一度保存してください。");
-  } finally {
-    button.disabled = false;
-    button.textContent = "家猫カードを保存する ↓";
-  }
-}
 let poseGroup = 0;
 function renderPoseGallery(group = poseGroup) {
   poseGroup = Math.max(0, Math.min(3, Number(group)));
@@ -759,7 +670,6 @@ function renderRelease() {
   const release = window.IENEKO_RELEASE;
   $("#appVersion").textContent = `ver${release.version}`;
   $("#teamCredit").textContent = release.team;
-  $("#cardVersion").textContent = `ver${release.version}`;
 }
 function renderTown() {
   $("#townStops").innerHTML = QUESTS.map(
@@ -1129,7 +1039,6 @@ async function init() {
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   });
-  $("#downloadCard").addEventListener("click", downloadCard);
   $("#morePoses").addEventListener("click", openPoseGallery);
   $("#closePoseDialog").addEventListener("click", () => $("#poseDialog").close());
   $("#automaticPose").addEventListener("click", () => setCardPose(""));

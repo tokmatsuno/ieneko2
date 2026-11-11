@@ -46,6 +46,15 @@ jobs:
           node --check lifestyle-core.js
           node --check lifestyle-ui.js
           node --check lifestyle-data.js
+          node --check card-identity.js
+          node --check card-renderer.js
+          node --check card-ui.js
+          node --check dj-core.js
+          node --check dj-ui.js
+          node --check music-data.js
+          node scripts/build-social-pages.cjs --check
+          node tests/card-social.test.cjs
+          node tests/card-sharing.test.cjs
           python3 scripts/build-lifestyle-data.py --check
           node tests/lifestyle.test.cjs
           node scripts/build-cat-data.cjs --check

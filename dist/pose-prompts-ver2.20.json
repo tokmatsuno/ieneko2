@@ -1,0 +1,20 @@
+{
+  "created": "2026-11-12",
+  "mode": "built-in image_gen",
+  "reference": "dist/mike-main-visual.png",
+  "transparent_background": true,
+  "assets": [
+    {
+      "file": "dist/cat-evh-tapping.png",
+      "prompt": "Use case: identity-preserve. Asset type: one transparent cutout illustration for the existing IENEKO web app. Reference image is the existing app cat at the provided local path; preserve exactly its recognizable face, golden eyes, pink nose, cream muzzle/chest/paws and charcoal fur, fine detailed vintage pen-and-ink storybook fur with warm watercolor texture. Create ONLY this same anthropomorphic cat doing an energetic Eddie Van Halen inspired two-handed electric-guitar tapping pose: legs wide in a joyful rock-star stance, knees bent, body leaning, both furry paws visibly touching the fretboard, grinning with closed happy mouth. A red solid-body electric guitar with bold black and cream diagonal stripe decoration, long fretboard and distinct tuning pegs is slung diagonally across the waist. A guitar strap, no clothes, no human hair, no human face. Full cat, ears, all paws, tail, entire instrument visible with generous 8 percent safe margins. Fur anatomy and rendering match the reference precisely. No letters, numbers, brand logos, watermark, frame, background, extra cats, motion smears, scenery or floor. Genuine alpha transparency, no painted halo or shadow cloud."
+    },
+    {
+      "file": "dist/cat-kamehameha.png",
+      "prompt": "Use case: identity-preserve. Asset type: one transparent cutout illustration for the existing IENEKO web app. The provided cat is the identity and illustration-style reference. Keep exactly its golden eyes, pink nose, cream muzzle/chest/paws, charcoal fur, detailed fine pen-and-ink storybook fur and warm watercolor rendering. Show the SAME CAT performing Son Goku's recognizable Kamehameha charging pose from Dragon Ball: a deep wide-legged stance with bent knees, torso turned three-quarters, both furry forepaws cupped together beside the right hip, gathering a small luminous cyan energy orb between the cupped paws. Determined but adorable face, rounded cat muzzle, fluffy tail sweeps to the opposite side for balance. Cat has its original fur, no clothes, no human hair, no human hands or humanoid face. The cyan energy is compact, not a beam covering the cat; paws, face and all cat anatomy remain clear. Full body, tail and paws visible with 8 percent safe margins. No text, logos, numbers, watermarks, frame, background or extra characters. Real alpha transparency including surrounding energy, no black or white background, no rectangular glow."
+    },
+    {
+      "file": "dist/cat-dj.png",
+      "prompt": "Use case: identity-preserve. Asset type: one transparent cutout illustration for existing IENEKO app's DJ IENEKO feature. Reference is the exact cat identity and illustration rendering style: golden eyes, pink nose, cream muzzle/chest/paws, charcoal fur, highly detailed vintage pen-and-ink fur with warm watercolor shading. The SAME CAT is a delighted DJ: soft black over-ear headphones over the ears (cat ears still visible), left forepaw holding one headphone cup, right forepaw gently touching a small vinyl record on a compact twin-turntable console in front of its waist. Standing full body on hind paws with fluffy curled tail clearly visible. Relaxed playful smile, no human face, no clothing, anatomically feline paws. Console has two black vinyl records, a few knobs, warm ivory and dark forest green finish; no text or logos. Preserve all original expressive cat details, not a cartoon redesign. One cat only, full ears, headphones, console, tail and feet visible, generous 8 percent clear margin. Real alpha transparent background. No letters, branding, watermarks, frames, scenery, background glow or drop shadow cloud."
+    }
+  ]
+}
