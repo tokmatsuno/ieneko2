@@ -48,7 +48,10 @@ jobs:
           node --check lifestyle-data.js
           node --check card-identity.js
           node --check card-renderer.js
+          node --check card-collection.js
           node --check card-ui.js
+          node --check install-ui.js
+          node --check sw.js
           node --check dj-core.js
           node --check dj-ui.js
           node --check music-data.js

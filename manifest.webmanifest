@@ -1,0 +1,13 @@
+{
+  "name": "家猫の冒険",
+  "short_name": "家猫",
+  "description": "100匹の家猫と、まちへの小さな入口を探す。",
+  "start_url": "./?v=2.22#home",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2e7",
+  "theme_color": "#183b38",
+  "icons": [
+    {"src": "dist/ieneko-app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

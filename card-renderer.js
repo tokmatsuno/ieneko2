@@ -10,15 +10,21 @@
     ctx.fillStyle=color;rows.slice(0,maxLines).forEach((row,i)=>ctx.fillText(row,x,y+i*size*lineHeight));return rows.length*size*lineHeight;
   }
   function tagRows(ctx,tags,x,y,width,ink,light){let dx=x,dy=y;ctx.font=`800 24px ${sans}`;for(const text of tags){const w=Math.min(width,ctx.measureText(text).width+32);if(dx+w>x+width){dx=x;dy+=59;}rounded(ctx,dx,dy,w,45,12,light);ctx.fillStyle=ink;ctx.fillText(text,dx+16,dy+31);dx+=w+10;}return dy+45;}
-  function qr(ctx,url,x,y,size){const code=qrcode(0,'M');code.addData(url);code.make();const n=code.getModuleCount(),cell=Math.floor(size/(n+8)),actual=cell*(n+8);ctx.fillStyle='#fffdf5';ctx.fillRect(x,y,actual,actual);ctx.fillStyle='#153e34';for(let row=0;row<n;row++)for(let col=0;col<n;col++)if(code.isDark(row,col))ctx.fillRect(x+(col+4)*cell,y+(row+4)*cell,cell,cell);return actual;}
+  function tilePattern(ctx,t){
+    ctx.save();ctx.globalAlpha=.12;ctx.strokeStyle=t.gold;ctx.fillStyle=t.gold;ctx.lineWidth=2;
+    for(let y=-60;y<1410;y+=96)for(let x=-60;x<1140;x+=96){const odd=(Math.floor(y/96)&1)*48,cx=x+odd;ctx.beginPath();ctx.moveTo(cx,y);ctx.lineTo(cx+30,y+30);ctx.lineTo(cx,y+60);ctx.lineTo(cx-30,y+30);ctx.closePath();ctx.stroke();ctx.beginPath();ctx.arc(cx,y+30,5,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  }
+  function monogram(ctx,x,y,t){ctx.save();ctx.translate(x,y);ctx.rotate(-Math.PI/4);rounded(ctx,-42,-42,84,84,15,t.gold);ctx.rotate(Math.PI/4);ctx.fillStyle=t.ink;ctx.textAlign='center';ctx.font=`900 25px ${serif}`;ctx.fillText('家猫',0,9);ctx.textAlign='left';ctx.restore();}
   function image(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('card_artwork_load'));im.src=src;});}
   async function render(card,art){
     const dim=CardIdentity.SIZE,canvas=document.createElement('canvas');canvas.width=dim.width;canvas.height=dim.height;const ctx=canvas.getContext('2d'),t=card.theme;
     const cat=await image(art);await document.fonts?.ready;
     ctx.fillStyle=t.ink;ctx.fillRect(0,0,dim.width,dim.height);
+    tilePattern(ctx,t);
     const glow=ctx.createRadialGradient(910,100,30,620,500,950);glow.addColorStop(0,'#ffffff14');glow.addColorStop(1,'#ffffff00');ctx.fillStyle=glow;ctx.fillRect(0,0,dim.width,dim.height);
-    rounded(ctx,28,26,1024,1298,29,null,t.gold);rounded(ctx,40,38,1000,1274,22,null,t.gold+'77');
-    ctx.fillStyle=t.gold;ctx.font=`800 28px ${serif}`;ctx.fillText('家猫の冒険',76,104);ctx.font=`700 17px ${sans}`;ctx.textAlign='right';ctx.fillText('MY LITTLE INTRODUCTION',1002,103);ctx.textAlign='left';
+    rounded(ctx,28,26,1024,1298,29,'#00000012',t.gold);rounded(ctx,40,38,1000,1274,22,null,t.gold+'77');
+    monogram(ctx,82,87,t);ctx.fillStyle=t.gold;ctx.font=`800 28px ${serif}`;ctx.fillText('家猫の冒険',140,104);ctx.font=`800 17px ${sans}`;ctx.textAlign='right';ctx.fillText('DIGITAL IENEKO COLLECTION',1002,103);ctx.textAlign='left';
     fitText(ctx,card.nickname,{x:76,y:167,width:915,size:card.hasNickname?56:43,min:32,maxLines:1,color:'#fff5df',font:serif});
     ctx.fillStyle=t.gold;ctx.font=`800 19px ${sans}`;ctx.fillText('タイプ',78,233);
     fitText(ctx,card.type,{x:76,y:296,width:440,size:60,min:30,maxLines:3,lineHeight:1.28,color:'#fff8e5',font:serif});
@@ -30,8 +36,8 @@
     details.forEach(([label,text],i)=>{const y=735+i*90;rounded(ctx,65,y,950,84,16,t.light);ctx.fillStyle=t.ink;ctx.font=`800 18px ${sans}`;ctx.fillText(label,91,y+27);fitText(ctx,text,{x:91,y:y+65,width:900,size:32,min:26,maxLines:1,color:t.ink});});
     const boxY=1021,boxH=167;rounded(ctx,65,boxY,950,boxH,23,'#fff6e2');ctx.fillStyle=t.ink;ctx.font=`800 18px ${sans}`;ctx.fillText('こんな話、しませんか。',94,boxY+37);fitText(ctx,card.question,{x:94,y:boxY+77,width:875,size:32,min:24,maxLines:2,lineHeight:1.25,color:t.ink,font:serif});
     if(card.track)fitText(ctx,card.track.title+' / '+card.track.artist,{x:94,y:boxY+boxH-25,width:875,size:23,min:18,maxLines:1,color:t.ink});
-    fitText(ctx,'好きなことから、つながろう。',{x:76,y:1267,width:730,size:29,min:24,maxLines:1,color:t.gold,font:serif});ctx.fillStyle='#fff4d9';ctx.font=`600 19px ${sans}`;ctx.fillText('いまの気分を、ことばと猫に。',77,1305);
-    qr(ctx,card.qrURL,891,1227,108);
+    fitText(ctx,'好きなことから、つながろう。',{x:76,y:1258,width:620,size:29,min:24,maxLines:1,color:t.gold,font:serif});ctx.fillStyle='#fff4d9';ctx.font=`700 18px ${sans}`;ctx.fillText('いまの気分を、ことばと猫に。',77,1299);
+    rounded(ctx,704,1218,311,83,14,'#fff6e2');ctx.fillStyle=t.ink;ctx.font=`900 14px ${sans}`;ctx.fillText('COLLECTION ID',728,1247);ctx.font=`800 20px ${sans}`;ctx.fillText(card.collectibleCode,728,1281);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('card_canvas_blob');return {blob,width:dim.width,height:dim.height};
   }
 
