@@ -1,0 +1,12 @@
+{
+  "created": "2026-11-12",
+  "mode": "built-in image_gen",
+  "reference": "dist/mike-main-visual.png",
+  "transparent_background": true,
+  "assets": [
+    {
+      "file": "dist/cat-kiss-rock.png",
+      "prompt": "Use case: identity-preserve. Asset type: a transparent cutout cat illustration for the IENEKO application. Reference image is the existing IENEKO cat at the provided path; preserve its exact recognizable rounded feline face, golden eyes, pink nose, cream muzzle/chest/paws, charcoal fur, finely drawn pen-and-ink fur and warm vintage storybook watercolor shading. Create this SAME CAT as a joyful KISS-inspired theatrical hard-rock bassist: wide-legged bent-knee concert stance, one forepaw fretting a dark angular electric bass across the waist, the other paw plucking the strings, playful open smile with a small pink tongue. The cat wears theatrical black-and-white eye makeup with bold wing-like black shapes around the eyes, a slim black studded vest with silver accents, and silver platform boots on the hind paws. Real feline muzzle, no human face or hair. Small pointed cat ears remain visible. Full body, tail, all paws, the entire bass neck visible with generous eight percent clear margin. Keep detailed original fur rendering throughout, not flat vector art. A single cat, no other characters, no flames, stage, audience, text, brand letters, logos, watermark or background. Actual alpha transparency, no drop shadow cloud. This is an original cat performance illustration inspired by KISS, not a photograph or an official band image."
+    }
+  ]
+}

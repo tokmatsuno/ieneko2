@@ -12,7 +12,7 @@
   const poseNames={hello:'手をあげて、ごあいさつ',scared:'ちょっと、どきどき',hungry:'ごはんを待つ',curious:'そっと、のぞきこむ',resting:'丸くなって、ひと休み'};
   const eyeBounds={hello:[.28,.07,.74,.24],scared:[.22,.15,.66,.34],hungry:[.30,.10,.76,.30],curious:[.12,.37,.55,.64],resting:null};
   Object.assign(sources,{
-    'evh-tapping':'dist/cat-evh-tapping.png',kamehameha:'dist/cat-kamehameha.png',dj:'dist/cat-dj.png',
+    'kiss-rock':'dist/cat-kiss-rock.png','evh-tapping':'dist/cat-evh-tapping.png',kamehameha:'dist/cat-kamehameha.png',dj:'dist/cat-dj.png',
     bristling:'dist/cat-bristling.png',drunken:'dist/cat-drunken.png',oppappi:'dist/cat-oppappi.png',scooter:'dist/cat-scooter.png',napping:'dist/cat-napping.png','sports-car':'dist/cat-sports-car.png',guitar:'dist/cat-guitar.png',reading:'dist/cat-reading.png',gardening:'dist/cat-gardening.png',
   });
   Object.assign(poseNames,{bristling:'びっくり、毛が逆立つ',drunken:'ふらり、酔拳風',oppappi:'はいオッパッピー風',scooter:'キックボードでおでかけ',napping:'ごろんと、昼寝','sports-car':'スポーツカーで気ままに',guitar:'ぽろんと、ギター',reading:'本をひらいて、読み聞かせ',gardening:'小さな庭を育てる'});
@@ -27,13 +27,16 @@
     {key:'moon',title:'おうちで、だれかと',note:'ギター、本、おしゃべり。好きな一曲も持ち寄る、あたたかな一日。',poses:['guitar','reading','oppappi','hungry','hello','dj','evh-tapping']},
     {key:'rose',title:'おうちで、気ままに',note:'昼寝も、ひとり演奏会も。気ままに充電する一日。',poses:['napping','bristling','guitar','reading','drunken','resting','scared','kamehameha']},
   ];
+  const featured=['evh-tapping','kamehameha','dj','kiss-rock'];
+  Object.assign(poseNames,{'kiss-rock':'KISS風、ロックな猫'});Object.assign(poseShortNames,{'kiss-rock':'KISS風ロック'});Object.assign(eyeBounds,{'kiss-rock':[.36,.12,.62,.20]});
+  quadrants.forEach(q=>{q.poses=[...new Set([...q.poses,...featured])];q.featured=featured;});
   const quadrantFor=p=>(p.y>=5?2:0)+(p.x>=5?1:0);
-  function poseFor(point,route=0){const pool=quadrants[quadrantFor(point)].poses;const hash=Array.isArray(route)?route.reduce((v,c)=>(v*5+c+2)>>>0,7):Math.abs(Number(route)||0);return pool[hash%pool.length];}
+  function poseFor(point,route=0){const q=quadrants[quadrantFor(point)],hash=Array.isArray(route)?route.reduce((v,c)=>(v*5+c+2)>>>0,7):Math.abs(Number(route)||0),pool=hash%3?q.featured:q.poses.filter(p=>!q.featured.includes(p));return pool[Math.floor(hash/3)%pool.length];}
   const cache=new Map(),loaded=new Map();
   const coatNames=[['白猫','白黒ぶち猫','三毛猫'],['黒猫','白黒猫','さび猫'],['茶猫','茶白猫','茶トラ猫']];
   const landmarks={hello:[[.49,.17],[.50,.50],[.87,.50],[.48,.86]],scared:[[.44,.27],[.49,.53],[.81,.59],[.48,.82]],hungry:[[.53,.22],[.52,.52],[.20,.79],[.50,.78]],curious:[[.33,.52],[.67,.54],[.83,.23],[.51,.80]],resting:[[.48,.31],[.55,.61],[.76,.72],[.31,.76]]};
   Object.assign(landmarks,{
-    'evh-tapping':[[.46,.20],[.54,.55],[.86,.47],[.57,.90]],kamehameha:[[.57,.29],[.56,.58],[.23,.48],[.57,.84]],dj:[[.50,.19],[.51,.44],[.82,.48],[.53,.85]],
+    'kiss-rock':[[.49,.17],[.52,.56],[.87,.47],[.53,.91]],'evh-tapping':[[.46,.20],[.54,.55],[.86,.47],[.57,.90]],kamehameha:[[.57,.29],[.56,.58],[.23,.48],[.57,.84]],dj:[[.50,.19],[.51,.44],[.82,.48],[.53,.85]],
     bristling:[[.29,.48],[.65,.58],[.90,.24],[.54,.91]],drunken:[[.60,.20],[.52,.52],[.78,.65],[.49,.94]],oppappi:[[.55,.23],[.55,.56],[.23,.52],[.52,.93]],scooter:[[.46,.15],[.57,.53],[.86,.46],[.56,.80]],napping:[[.26,.24],[.64,.58],[.65,.83],[.60,.80]],'sports-car':[[.62,.23],[.62,.39],[.87,.33],[.53,.42]],guitar:[[.48,.22],[.52,.56],[.84,.73],[.55,.87]],reading:[[.52,.19],[.51,.56],[.25,.85],[.60,.87]],gardening:[[.54,.23],[.63,.57],[.85,.53],[.68,.92]],
   });
   function derive(answers,quests,point) {
@@ -122,6 +125,10 @@
   }
   function inPolygon(x,y,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a[1]>y)!==(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))inside=!inside;}return inside;}
   function protectedProp(x,y,pose){
+    if(pose==='kiss-rock'){
+      if(((x-.22)/.09)**2+((y-.49)/.07)**2<1||((x-.75)/.08)**2+((y-.33)/.07)**2<1)return false;
+      return y>.79||(x>.31&&x<.64&&y>.09&&y<.21)||inPolygon(x,y,[[.26,.24],[.38,.26],[.40,.40],[.29,.46],[.25,.36]])||inPolygon(x,y,[[.55,.26],[.64,.29],[.64,.52],[.53,.48]])||inPolygon(x,y,[[.03,.56],[.96,.18],[1,.28],[.49,.66],[.24,.72],[.11,.64]]);
+    }
     if(pose==='evh-tapping'){
       if(((x-.34)/.11)**2+((y-.43)/.045)**2<1||((x-.67)/.075)**2+((y-.335)/.05)**2<1)return false;
       return ((x-.35)/.24)**2+((y-.575)/.18)**2<1||(x>.39&&x<.98&&Math.abs(y-(.65-.46*x))<.055);
