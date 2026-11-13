@@ -1,0 +1,30 @@
+{
+  "version": "2.23",
+  "references": [
+    "dist/cat-evh-tapping.png",
+    "dist/cat-kiss-rock.png"
+  ],
+  "shared_direction": "従来の家猫の丸い顔、金色の瞳、桃色の鼻、白い口元と胸、描き込まれた毛並み、ヴィンテージ絵本風の水彩陰影を維持。全身と道具を余白つきで収め、透過背景、文字・ロゴ・透かしなし。",
+  "assets": [
+    {
+      "key": "mantis-boxing",
+      "file": "dist/cat-mantis-boxing.png",
+      "direction": "北派螳螂拳を思わせる鉤手。片方の前足を前へ、もう片方を胸元へ構え、深緑の稽古着で俊敏に立つ。"
+    },
+    {
+      "key": "clark-pose",
+      "file": "dist/cat-clark-pose.png",
+      "direction": "クラーク博士像を思わせる希望に満ちた指さし。暗色の洋装と蝶ネクタイで、片方の前足を斜め上へ伸ばす。文字と台座は入れない。"
+    },
+    {
+      "key": "kannon-batting",
+      "file": "dist/cat-kannon-batting.png",
+      "direction": "落合博満の観音打法を思わせる打撃姿勢。バットを頭の後ろへ高く構え、腰と肩をためる。無地の野球服で球団表示なし。"
+    },
+    {
+      "key": "sauna",
+      "file": "dist/cat-sauna.png",
+      "direction": "木の腰掛けに座ってサウナを楽しむ。頭に生成りのタオル、半眼の穏やかな表情、小さな汗。室内背景は入れない。"
+    }
+  ]
+}

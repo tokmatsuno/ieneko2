@@ -14,12 +14,16 @@
   Object.assign(sources,{
     'kiss-rock':'dist/cat-kiss-rock.png','evh-tapping':'dist/cat-evh-tapping.png',kamehameha:'dist/cat-kamehameha.png',dj:'dist/cat-dj.png',
     bristling:'dist/cat-bristling.png',drunken:'dist/cat-drunken.png',oppappi:'dist/cat-oppappi.png',scooter:'dist/cat-scooter.png',napping:'dist/cat-napping.png','sports-car':'dist/cat-sports-car.png',guitar:'dist/cat-guitar.png',reading:'dist/cat-reading.png',gardening:'dist/cat-gardening.png',
+    'mantis-boxing':'dist/cat-mantis-boxing.png','clark-pose':'dist/cat-clark-pose.png','kannon-batting':'dist/cat-kannon-batting.png',sauna:'dist/cat-sauna.png',
   });
   Object.assign(poseNames,{bristling:'びっくり、毛が逆立つ',drunken:'ふらり、酔拳風',oppappi:'はいオッパッピー風',scooter:'キックボードでおでかけ',napping:'ごろんと、昼寝','sports-car':'スポーツカーで気ままに',guitar:'ぽろんと、ギター',reading:'本をひらいて、読み聞かせ',gardening:'小さな庭を育てる'});
   const poseShortNames={hello:'ごあいさつ',curious:'のぞきこむ',scared:'どきどき',hungry:'ごはん待ち',resting:'ひと休み',bristling:'総毛立ち',drunken:'酔拳風',oppappi:'オッパッピー風',scooter:'キックボード',napping:'昼寝','sports-car':'スポーツカー',guitar:'ギター',reading:'読み聞かせ',gardening:'庭づくり'};
   Object.assign(poseNames,{'evh-tapping':'エディ風、タッピングギター',kamehameha:'かめはめ波風、気分をチャージ',dj:'DJ IENEKO、今日の一曲'});
   Object.assign(poseShortNames,{'evh-tapping':'タッピングギター',kamehameha:'かめはめ波風',dj:'DJ IENEKO'});
   Object.assign(eyeBounds,{'evh-tapping':[.32,.13,.62,.24],kamehameha:[.44,.23,.69,.31],dj:[.38,.14,.65,.20]});
+  Object.assign(poseNames,{'mantis-boxing':'螳螂拳、鉤手で構える','clark-pose':'青年よ大志をいだけ、指さす猫','kannon-batting':'観音打法、高く構える',sauna:'サウナで、ととのう'});
+  Object.assign(poseShortNames,{'mantis-boxing':'螳螂拳','clark-pose':'大志をいだけ','kannon-batting':'観音打法',sauna:'サウナ'});
+  Object.assign(eyeBounds,{'mantis-boxing':[.38,.15,.68,.30],'clark-pose':[.34,.14,.62,.25],'kannon-batting':[.30,.16,.56,.27],sauna:[.36,.14,.66,.28]});
   Object.assign(eyeBounds,{bristling:[.16,.42,.42,.51],drunken:[.49,.13,.75,.25],oppappi:[.43,.15,.67,.25],scooter:[.35,.09,.58,.17],napping:null,'sports-car':[.54,.16,.70,.24],guitar:[.35,.16,.60,.25],reading:[.41,.14,.67,.25],gardening:[.44,.17,.67,.28]});
   const quadrants=[
     {key:'grove',title:'まちで、みんなと',note:'庭づくりも、小さなDJタイムも。好きな楽しみを分け合う一日。',poses:['gardening','oppappi','scooter','hello','curious','dj']},
@@ -27,7 +31,7 @@
     {key:'moon',title:'おうちで、だれかと',note:'ギター、本、おしゃべり。好きな一曲も持ち寄る、あたたかな一日。',poses:['guitar','reading','oppappi','hungry','hello','dj','evh-tapping']},
     {key:'rose',title:'おうちで、気ままに',note:'昼寝も、ひとり演奏会も。気ままに充電する一日。',poses:['napping','bristling','guitar','reading','drunken','resting','scared','kamehameha']},
   ];
-  const featured=['evh-tapping','kamehameha','dj','kiss-rock'];
+  const featured=['evh-tapping','kamehameha','dj','kiss-rock','mantis-boxing','clark-pose','kannon-batting','sauna'];
   Object.assign(poseNames,{'kiss-rock':'KISS風、ロックな猫'});Object.assign(poseShortNames,{'kiss-rock':'KISS風ロック'});Object.assign(eyeBounds,{'kiss-rock':[.36,.12,.62,.20]});
   quadrants.forEach(q=>{q.poses=[...new Set([...q.poses,...featured])];q.featured=featured;});
   const quadrantFor=p=>(p.y>=5?2:0)+(p.x>=5?1:0);
@@ -38,6 +42,7 @@
   Object.assign(landmarks,{
     'kiss-rock':[[.49,.17],[.52,.56],[.87,.47],[.53,.91]],'evh-tapping':[[.46,.20],[.54,.55],[.86,.47],[.57,.90]],kamehameha:[[.57,.29],[.56,.58],[.23,.48],[.57,.84]],dj:[[.50,.19],[.51,.44],[.82,.48],[.53,.85]],
     bristling:[[.29,.48],[.65,.58],[.90,.24],[.54,.91]],drunken:[[.60,.20],[.52,.52],[.78,.65],[.49,.94]],oppappi:[[.55,.23],[.55,.56],[.23,.52],[.52,.93]],scooter:[[.46,.15],[.57,.53],[.86,.46],[.56,.80]],napping:[[.26,.24],[.64,.58],[.65,.83],[.60,.80]],'sports-car':[[.62,.23],[.62,.39],[.87,.33],[.53,.42]],guitar:[[.48,.22],[.52,.56],[.84,.73],[.55,.87]],reading:[[.52,.19],[.51,.56],[.25,.85],[.60,.87]],gardening:[[.54,.23],[.63,.57],[.85,.53],[.68,.92]],
+    'mantis-boxing':[[.50,.23],[.53,.55],[.17,.45],[.53,.88]],'clark-pose':[[.45,.20],[.49,.55],[.83,.54],[.50,.90]],'kannon-batting':[[.43,.23],[.49,.56],[.83,.53],[.52,.91]],sauna:[[.50,.21],[.52,.55],[.67,.76],[.52,.80]],
   });
   function derive(answers,quests,point) {
     const choices=Array.from({length:5},(_,i)=>answers[i]?.choice??window.JourneyModel?.normalize(answers[i]).choice??-1);
@@ -144,6 +149,10 @@
     if(pose==='guitar'){const body=((x-.29)/.29)**2+((y-.59)/.20)**2<1.04&&!(((x-.23)/.13)**2+((y-.49)/.07)**2<1);const neck=x>.38&&x<.99&&Math.abs(y-(.75-.45*x))<.055&&!(x>.64&&x<.78&&y>.39&&y<.52);return body||neck;}
     if(pose==='reading')return inPolygon(x,y,[[.20,.45],[.56,.52],[.88,.42],[.82,.62],[.58,.75],[.28,.64]]);
     if(pose==='gardening')return inPolygon(x,y,[[.02,.40],[.18,.36],[.34,.50],[.29,.60],[.03,.61]])||(x>.21&&x<.48&&y>.74)||(x>.29&&x<.36&&y>.55&&y<.75);
+    if(pose==='mantis-boxing')return inPolygon(x,y,[[.28,.28],[.69,.27],[.73,.57],[.59,.66],[.34,.63],[.23,.49]])&&!(((x-.18)/.09)**2+((y-.43)/.07)**2<1)&&!(((x-.77)/.08)**2+((y-.38)/.07)**2<1);
+    if(pose==='clark-pose')return inPolygon(x,y,[[.29,.27],[.66,.27],[.73,.67],[.56,.72],[.31,.66],[.23,.42]])&&!(((x-.83)/.10)**2+((y-.36)/.07)**2<1);
+    if(pose==='kannon-batting')return inPolygon(x,y,[[.24,.30],[.66,.28],[.76,.70],[.60,.82],[.31,.76],[.19,.48]])||(x>.27&&x<.91&&Math.abs(y-(.54-.29*x))<.045)||(x>.31&&x<.60&&y>.08&&y<.18);
+    if(pose==='sauna')return (x>.25&&x<.75&&y>.05&&y<.20)||(y>.77&&x>.16&&x<.85);
     return false;
   }
   // No shapes are drawn over the cat: only the original fur pixels change pigment.

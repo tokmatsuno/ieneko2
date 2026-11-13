@@ -264,7 +264,11 @@ function showScreen(id) {
   }[id];
   window.scrollTo({ top: 0, behavior: "instant" });
   if (resultAnchor && id === "complete") {
-    $("#" + resultAnchor).scrollIntoView({ block: "start" });
+    const target = $("#" + resultAnchor);
+    if (target?.tagName === "DETAILS") target.open = true;
+    const parent = target?.closest("details");
+    if (parent) parent.open = true;
+    target.scrollIntoView({ block: "start" });
     const title = $("#" + resultAnchor + " h2");
     if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
     return;
@@ -631,14 +635,12 @@ function renderComplete() {
   $("#appearanceExplanation").textContent = `回答の平均座標を中心 (5,5) で4つに分け、${look.theme.name}の色合いに。1問目は白・黒・茶の毛色、2問目は単色・ぶち・三毛などの模様、3問目は模様の位置、4問目は模様の広さ、5問目は瞳と左右の模様に反映します。表情とポーズは初めに象限と5つの回答の組み合わせで選びます。今回の組み合わせ：${look.values.join("、")}。`;
 
   $("#resultGraph").innerHTML=JourneyModel.barsSVG(state.answers,true);
-  $("#resultTitle").textContent = "持ち帰るのは、ひとつの可能性。";
-  $("#resultText").textContent = state.kids
-    ? "今日の気分も、明日の気分も、ちがっていい。また別のえらび方で歩くと、ちがう猫に出会えるかも。"
-    : "近いのは、今日の選び方と、この猫の設計座標。あなたを決めつける結果ではありません。背景の出典を読みながら、次に試したい関わり方をひとつ探してみて。";
+  $("#resultTitle").textContent = "今日の家猫。";
+  $("#resultText").textContent = "また違う気分で歩いてもいい。";
   $("#resultCoordinate").innerHTML =
     `あなたの選択の平均 <b>X ${p.x.toFixed(2)} / Y ${p.y.toFixed(2)}</b><span>近い猫の座標 X ${c.x.toFixed(1)} / Y ${c.y.toFixed(1)} · 数値は作品内の設計値</span>`;
   $("#journeyJournal").innerHTML =
-    `<div class="section-heading"><div><p class="eyebrow">YOUR FIVE LITTLE STEPS</p><h2>歩いた道と、問いの背景。</h2></div></div><div class="journal-grid">${state.answers
+    `<div class="section-heading"><div><h2>5つの問い</h2></div></div><div class="journal-grid">${state.answers
       .map((a, i) => {
         const q = QUESTS[i],
           choice = a.choice >= 0 ? q.answers[a.choice] : null;

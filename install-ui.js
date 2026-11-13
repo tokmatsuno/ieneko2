@@ -9,5 +9,5 @@
     if(promptEvent){promptEvent.prompt();const choice=await promptEvent.userChoice;status.textContent=choice.outcome==='accepted'?'ホーム画面への追加を受け付けました。':'追加は行いませんでした。コレクションはこの端末に残ります。';promptEvent=null;return;}
     status.textContent=/iphone|ipad|ipod/i.test(navigator.userAgent)?'Safariの共有ボタンから「ホーム画面に追加」を選べます。':'ブラウザのメニューから「アプリをインストール」または「ホーム画面に追加」を選べます。';
   });
-  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.22').catch(()=>{}),{once:true});
+  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.23').catch(()=>{}),{once:true});
 })();

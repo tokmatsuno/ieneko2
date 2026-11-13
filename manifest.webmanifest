@@ -2,7 +2,7 @@
   "name": "家猫の冒険",
   "short_name": "家猫",
   "description": "100匹の家猫と、まちへの小さな入口を探す。",
-  "start_url": "./?v=2.22#home",
+  "start_url": "./?v=2.23#home",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6f2e7",
