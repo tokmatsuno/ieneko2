@@ -21,7 +21,7 @@
     </div>
     <p class="life-status" role="status" aria-live="polite">3つの条件を選ぶと、遊び・おやつ・環境の案が現れます。</p>
     <div data-life-result hidden><div class="life-result-heading"><p class="life-kicker">うちのまちで、小さく試すなら</p><h3 data-life-title></h3><p>制作者による検討案です。調査が効果を実証した施策ではありません。</p></div><div class="life-tools" data-life-tools></div><details class="life-evidence"><summary>この案で参照した、3つの調査の数字を見る</summary><p>別々の調査の全国集計です。数値を掛け合わせたり、特定の町内会や家猫タイプの割合に置き換えたりしません。</p><div class="life-references" data-life-references></div><p>「近所との距離」「大切にしたいこと」は、原典を参考に制作者が言い換えた選択肢です。原典の調査をそのまま再実施するものではありません。</p></details></div>
-    <div class="life-foot"><a href="${base}lifestyle-data/?v=2.23">使った3つのデータセット・利用条件 ↗</a><a href="${base}lifestyle-data/ieneko-lifestyle-reference.csv" download>参照データのCSVをダウンロード ↓</a><button type="button" data-life-reset>条件を選び直す</button></div>`;
+    <div class="life-foot"><a href="${base}lifestyle-data/?v=2.24">使った3つのデータセット・利用条件 ↗</a><a href="${base}lifestyle-data/ieneko-lifestyle-reference.csv" download>参照データのCSVをダウンロード ↓</a><button type="button" data-life-reset>条件を選び直す</button></div>`;
     const update=()=>{
       const proposal=core.propose({interest:host.querySelector('input[type=radio]:checked')?.value,relation:host.querySelector('[data-life-relation]').value,priority:host.querySelector('[data-life-priority]').value},data);
       host.querySelector('[data-life-result]').hidden=!proposal.ready;

@@ -1,0 +1,8 @@
+{
+  "version": "2.24",
+  "mode": "built-in image generation edit",
+  "edit_target": "dist/cat-kannon-batting.png from ver2.23",
+  "pose_reference": "user-provided batting photograph",
+  "output": "dist/cat-shinto-batting.png",
+  "direction": "従来の家猫の顔、毛並み、野球服、透過背景を維持。両手を胸の前へ伸ばし、バットを肩の後ろへ寝かせず、左上へ約65度から75度でほぼ垂直に立てた神主打法へ修正。全身、両足、尻尾、バット全体を余白つきで収め、文字、ロゴ、球場、人物を加えない。"
+}

@@ -14,15 +14,15 @@
   Object.assign(sources,{
     'kiss-rock':'dist/cat-kiss-rock.png','evh-tapping':'dist/cat-evh-tapping.png',kamehameha:'dist/cat-kamehameha.png',dj:'dist/cat-dj.png',
     bristling:'dist/cat-bristling.png',drunken:'dist/cat-drunken.png',oppappi:'dist/cat-oppappi.png',scooter:'dist/cat-scooter.png',napping:'dist/cat-napping.png','sports-car':'dist/cat-sports-car.png',guitar:'dist/cat-guitar.png',reading:'dist/cat-reading.png',gardening:'dist/cat-gardening.png',
-    'mantis-boxing':'dist/cat-mantis-boxing.png','clark-pose':'dist/cat-clark-pose.png','kannon-batting':'dist/cat-kannon-batting.png',sauna:'dist/cat-sauna.png',
+    'mantis-boxing':'dist/cat-mantis-boxing.png','clark-pose':'dist/cat-clark-pose.png','kannon-batting':'dist/cat-shinto-batting.png',sauna:'dist/cat-sauna.png',
   });
   Object.assign(poseNames,{bristling:'びっくり、毛が逆立つ',drunken:'ふらり、酔拳風',oppappi:'はいオッパッピー風',scooter:'キックボードでおでかけ',napping:'ごろんと、昼寝','sports-car':'スポーツカーで気ままに',guitar:'ぽろんと、ギター',reading:'本をひらいて、読み聞かせ',gardening:'小さな庭を育てる'});
   const poseShortNames={hello:'ごあいさつ',curious:'のぞきこむ',scared:'どきどき',hungry:'ごはん待ち',resting:'ひと休み',bristling:'総毛立ち',drunken:'酔拳風',oppappi:'オッパッピー風',scooter:'キックボード',napping:'昼寝','sports-car':'スポーツカー',guitar:'ギター',reading:'読み聞かせ',gardening:'庭づくり'};
   Object.assign(poseNames,{'evh-tapping':'エディ風、タッピングギター',kamehameha:'かめはめ波風、気分をチャージ',dj:'DJ IENEKO、今日の一曲'});
   Object.assign(poseShortNames,{'evh-tapping':'タッピングギター',kamehameha:'かめはめ波風',dj:'DJ IENEKO'});
   Object.assign(eyeBounds,{'evh-tapping':[.32,.13,.62,.24],kamehameha:[.44,.23,.69,.31],dj:[.38,.14,.65,.20]});
-  Object.assign(poseNames,{'mantis-boxing':'螳螂拳、鉤手で構える','clark-pose':'青年よ大志をいだけ、指さす猫','kannon-batting':'観音打法、高く構える',sauna:'サウナで、ととのう'});
-  Object.assign(poseShortNames,{'mantis-boxing':'螳螂拳','clark-pose':'大志をいだけ','kannon-batting':'観音打法',sauna:'サウナ'});
+  Object.assign(poseNames,{'mantis-boxing':'螳螂拳、鉤手で構える','clark-pose':'青年よ大志をいだけ、指さす猫','kannon-batting':'神主打法、バットを立てる',sauna:'サウナで、ととのう'});
+  Object.assign(poseShortNames,{'mantis-boxing':'螳螂拳','clark-pose':'大志をいだけ','kannon-batting':'神主打法',sauna:'サウナ'});
   Object.assign(eyeBounds,{'mantis-boxing':[.38,.15,.68,.30],'clark-pose':[.34,.14,.62,.25],'kannon-batting':[.30,.16,.56,.27],sauna:[.36,.14,.66,.28]});
   Object.assign(eyeBounds,{bristling:[.16,.42,.42,.51],drunken:[.49,.13,.75,.25],oppappi:[.43,.15,.67,.25],scooter:[.35,.09,.58,.17],napping:null,'sports-car':[.54,.16,.70,.24],guitar:[.35,.16,.60,.25],reading:[.41,.14,.67,.25],gardening:[.44,.17,.67,.28]});
   const quadrants=[
@@ -151,7 +151,7 @@
     if(pose==='gardening')return inPolygon(x,y,[[.02,.40],[.18,.36],[.34,.50],[.29,.60],[.03,.61]])||(x>.21&&x<.48&&y>.74)||(x>.29&&x<.36&&y>.55&&y<.75);
     if(pose==='mantis-boxing')return inPolygon(x,y,[[.28,.28],[.69,.27],[.73,.57],[.59,.66],[.34,.63],[.23,.49]])&&!(((x-.18)/.09)**2+((y-.43)/.07)**2<1)&&!(((x-.77)/.08)**2+((y-.38)/.07)**2<1);
     if(pose==='clark-pose')return inPolygon(x,y,[[.29,.27],[.66,.27],[.73,.67],[.56,.72],[.31,.66],[.23,.42]])&&!(((x-.83)/.10)**2+((y-.36)/.07)**2<1);
-    if(pose==='kannon-batting')return inPolygon(x,y,[[.24,.30],[.66,.28],[.76,.70],[.60,.82],[.31,.76],[.19,.48]])||(x>.27&&x<.91&&Math.abs(y-(.54-.29*x))<.045)||(x>.31&&x<.60&&y>.08&&y<.18);
+    if(pose==='kannon-batting')return inPolygon(x,y,[[.24,.30],[.66,.28],[.76,.70],[.60,.82],[.31,.76],[.19,.48]])||(y<.46&&Math.abs(x-(.08+.38*y))<.052)||(x>.31&&x<.60&&y>.08&&y<.18);
     if(pose==='sauna')return (x>.25&&x<.75&&y>.05&&y<.20)||(y>.77&&x>.16&&x<.85);
     return false;
   }
